@@ -12,8 +12,9 @@ program_INCLUDE_DIRS :=
 program_LIBRARY_DIRS :=
 program_LIBRARIES := $(wildcard *.a)
 
+CC=gcc
 CXX=g++
-CXXFLAGS += -std=c++11 -Wall -pthread -funsigned-char -fPIC -std=gnu99
+CXXFLAGS += -std=c++11 -objdump -objcopy -Wall -pthread -funsigned-char -fPIC
 CPPFLAGS += $(foreach includedir,$(program_INCLUDE_DIRS),-I$(includedir))
 LDFLAGS += $(foreach librarydir,$(program_LIBRARY_DIRS),-L$(librarydir))
 LDFLAGS += $(foreach library,$(program_LIBRARIES),$(library))
@@ -23,7 +24,7 @@ LDFLAGS += $(foreach library,$(program_LIBRARIES),$(library))
 all: clean $(program_NAME)
 
 $(program_NAME): $(program_OBJS) Flags.h
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(program_OBJS) $(LDFLAGS) -o $(program_NAME)
+	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(program_OBJS)$(LDFLAGS) -o $(program_NAME)
 
 clean:
 	@- $(RM) $(program_NAME)
