@@ -28,7 +28,7 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <string.h>
-#include "libsl_lidar_sdk_linux.a"
+//#include "libsl_lidar_sdk_linux.a"
 #include "sl_lidar.h" 
 #include "sl_lidar_driver.h"
 #ifndef _countof
@@ -93,7 +93,7 @@ void ctrlc(int)
     ctrl_c_pressed = true;
 }
 
-int main(int argc, const char * argv[]) {
+int read(int argc, const char * argv[]) {
 	const char * opt_is_channel = NULL; 
 	const char * opt_channel = NULL;
     const char * opt_channel_param_first = NULL;
