@@ -1,7 +1,6 @@
 
 
-
-
+detected_OS = $(shell uname -s)
 
 program_NAME := main
 program_C_SRCS := $(wildcard *.c)
@@ -13,8 +12,8 @@ program_INCLUDE_DIRS :=
 program_LIBRARY_DIRS :=
 program_LIBRARIES := $(wildcard *.a)
 
-CXX=gcc
-CXXFLAGS += -std=c++11 -Wall -pthread -funsigned-char -fPIC
+CXX=g++
+CXXFLAGS += -std=c++11 -Wall -pthread -funsigned-char -fPIC -std=gnu99
 CPPFLAGS += $(foreach includedir,$(program_INCLUDE_DIRS),-I$(includedir))
 LDFLAGS += $(foreach librarydir,$(program_LIBRARY_DIRS),-L$(librarydir))
 LDFLAGS += $(foreach library,$(program_LIBRARIES),$(library))
