@@ -6,3 +6,4 @@ ser.flushOutput();
 while True:
     out = ser.readline().decode()
     if out!='' : print (out)
+    if out == 'exit': break
