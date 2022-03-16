@@ -1,7 +1,14 @@
-#include<stdio.h>
-
+#include <stdio.h>
+//#include <
 int main ()
 {
-printf("hello world");
+	int argc;
+	char* argv;
+printf("hello world\n");
+
+ rplidarPi(argc, argv);
+ 
+trans();
+
 return 0;
 }
