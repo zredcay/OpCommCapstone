@@ -1,0 +1,35 @@
+[1mdiff --cc Bluetooth.py[m
+[1mindex bbc80b0,ac382ef..0000000[m
+[1m--- a/Bluetooth.py[m
+[1m+++ b/Bluetooth.py[m
+[36m@@@ -1,11 -1,12 +1,25 @@@[m
+  import serial[m
+[32m++<<<<<<< HEAD[m
+[32m +ser = serial.Serial('/dev/rfcomm0', timeout=1, baudrate=115000)[m
+[32m +ser.flushInput();[m
+[32m +ser.flushOutput();[m
+[32m +   [m
+[32m +while True:[m
+[32m +    out = ser.readline().decode()[m
+[32m +    if out!='' : print (out)[m
+[32m +    if out == 'exit': break[m
+[32m +#with open('/dev/ttyS0','w',1) as f:[m
+[31m- #     f.write('hello from python!')[m
+[32m++#     f.write('hello from python!')[m
+[32m++=======[m
+[32m+ import bluetooth[m
+[32m+ #ser = serial.Serial('/dev/ttyS0', timeout=1, baudrate=115000)[m
+[32m+ #ser.flushInput();[m
+[32m+ #ser.flushOutput();[m
+[32m+    [m
+[32m+ #while True:[m
+[32m+ #    out = ser.readline().decode()[m
+[32m+  #   if out!='' : print (out)[m
+[32m+  #   if out == 'exit': break[m
+[32m+ with open('/dev/ttyS0','w',1) as f:[m
+[32m+      f.write('\'hello from python!')[m
+[32m++>>>>>>> 46f979bcb53e3ff8ee293100a7cfcdbbbc2e8927[m
+[1mdiff --cc proj/libsl_lidar_sdk.a[m
+[1mindex 1b63fdb,539ec54..0000000[m
+Binary files differ
+* Unmerged path libsl_lidar_sdk_linux.a
