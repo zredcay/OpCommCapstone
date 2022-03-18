@@ -13,7 +13,7 @@ program_LIBRARY_DIRS :=
 program_LIBRARIES := $(wildcard *.a)
 
 CXX=g++
-CXXFLAGS += -std=c++11 -Wall -pthread -funsigned-char -fPIC -std=gnu99
+CXXFLAGS += -std=c++11 -Wall -pthread -funsigned-char -fPIC -std=gnu99 -mfloat-abi=hard
 CPPFLAGS += $(foreach includedir,$(program_INCLUDE_DIRS),-I$(includedir))
 LDFLAGS += $(foreach librarydir,$(program_LIBRARY_DIRS),-L$(librarydir))
 LDFLAGS += $(foreach library,$(program_LIBRARIES),$(library))
