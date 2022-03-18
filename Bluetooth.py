@@ -1,12 +1,13 @@
-import serial
-import bluetooth
-#ser = serial.Serial('/dev/ttyS0', timeout=1, baudrate=115000)
-#ser.flushInput();
-#ser.flushOutput();
-   
-#while True:
-#    out = ser.readline().decode()
- #   if out!='' : print (out)
- #   if out == 'exit': break
-with open('/dev/ttyS0','w',1) as f:
-     f.write('\'hello from python!')
+#from bluedot import BlueDot
+#bd = BlueDot()
+#bd.wait_for_press()
+#print("You pressed the blue dot!")
+from bluedot.btcomm import BluetoothServer
+from signal import pause
+
+def data_received(data):
+    print(data)
+    s.send(data)
+
+s = BluetoothServer(data_received)
+pause()
