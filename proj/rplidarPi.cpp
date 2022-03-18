@@ -4,12 +4,11 @@
 #include <string.h>
 #include "sl_lidar.h" 
 #include "sl_lidar_driver.h"
-//#include "libsl_lidar_sdk.a"
 
 #include <unistd.h>
 using namespace sl;
 
-int read(int argc, char* argv)
+int rplidarPi(int argc, char* argv)
 {
     const char * opt_is_channel = NULL; 
     const char * opt_channel = NULL;
