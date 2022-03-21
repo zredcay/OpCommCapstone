@@ -23,11 +23,11 @@ LDFLAGS += $(foreach library,$(program_LIBRARIES),$(library))
 
 all: clean $(program_NAME)
 
-$(program_NAME): $(program_OBJS) Flags.h
+$(program_NAME): $(program_OBJS)
 	$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(program_OBJS)$(LDFLAGS) -o $(program_NAME)
 
 clean:
 	@- $(RM) $(program_NAME)
 	@- $(RM) $(program_OBJS)
 	
-distclean: clean clean_submit
+distclean: clean 
