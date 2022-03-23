@@ -4,7 +4,12 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-	int rplidarPi(int test);
+	typedef struct data{
+		int trans;
+		float angle;
+		float dist;
+		};
+	struct data rplidarPi(int test);
  
 #ifdef __cplusplus
 } // end extern "C"

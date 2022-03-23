@@ -6,11 +6,23 @@
 #include <stdbool.h>
 #include "transeivers.h"
 
+int math(float Ax, float Ay, float Az, float Gx, float Gy, float Gz, float Mx, float My, float Mz, int trans, float angle)
+{
+
+
+
+return 0;
+}
+
 
 int main ()
 {
 	int test;
+	float angle;
+	float dist;
+	int transceiver;
 	int result;	
+	struct data ex;
 	State NextState = Discovery;
 	printf("setting event\n");
 	Event NewEvent = Code_Finished_Event;
@@ -22,24 +34,19 @@ int main ()
 		{
 		case Idle:
         	{
-        		printf("case idle state\n");
-            		if(User_Exit_Event == NewEvent)
+        		//printf("case idle state\n");
+            		if(User_Exit_Event == NewEvent) // code completes safely and exits S
             		{
             			
-            			printf("leave code its broken\n");         		
+            			//printf("Code Finished\n");         		
             		}
-            		else if(Should_Not_Get_Here_Event == NewEvent)
+            		else if(Should_Not_Get_Here_Event == NewEvent) // uncaught error or bug in code 
             		{
             			
             			printf("big error stop code now\n");
             			exit(-1);         		
             		}
-            		else if(Code_Finished_Event == NewEvent)
-            		{
-            			printf("code work as expected\n");
-            			exit(0); 
-            		}
-            		else
+            		else // unexpected state and event matching 
             		{
 				printf("event not updated or waiting on user\n");
             			exit(-1);   
@@ -54,19 +61,22 @@ int main ()
 			
 			if(Code_Finished_Event == NewEvent)
 		    	{
-			    	result  = rplidarPi(test);
-			    	printf("return value %i\n", result);
-			    	if(result == 0 )
+			    	ex = rplidarPi(test);// transceiver is the tranciever number
+			    	transceiver = ex.trans;
+			    	 angle = ex.angle;
+			    	 dist = ex.dist;
+			    	printf("return value transceievr %i and angle %f and distance %f\n", transceiver, angle, dist);
+			    	if(transceiver == 0 ) // the transceiver was not found
 			    	{
 			    		NewEvent = Bad_Data_Event;
 			    		NextState = BadDataHandler(NextState);
 			    	}
-			    	else if ( result < 9 && result > 0)
+			    	else if ( transceiver < 9 && transceiver > 0) // in a given transcieer 1 - 8
 			    	{
 			    		NewEvent = Code_Finished_Event;
 			    		NextState = CodeFinishedHandler(NextState);
 			    	}
-			    	else 
+			    	else // transceiver should not give a number higher than 8 
 			    	{
 					NewEvent = Should_Not_Get_Here_Event;
 					NextState = ShouldNotGetHandler(NextState);
@@ -112,11 +122,29 @@ int main ()
         		
             		if(Code_Finished_Event == NewEvent)
             		{
-            			trans();
-            			NewEvent = User_Exit_Event;
-            			printf("in pin enter event\n");
-                		NextState = Idle;
-                		startTime = clock();
+            			result = trans();
+            			//printf("Result = %i\n", result);
+            			if (result == 0) // result is good data
+            			{
+            				NewEvent = Code_Finished_Event;
+            				NextState = CodeFinishedHandler(NextState);
+            			}
+            			else if(result == 1) // result is bad data
+            			{
+            				NewEvent = Bad_Data_Event;
+            				NextState = BadDataHandler(NextState);
+            			}
+            			else if(result == 2) //reulst is end of file
+            			{
+            				NewEvent = User_Exit_Event;
+            				NextState = UserExitHandler(NextState);
+            			}
+            			else // broken return
+            			{
+            				NewEvent = Should_Not_Get_Here_Event;
+            				NextState = ShouldNotGetHandler(NextState);
+            			}
+            			startTime = clock();
             		}
             		else
             		{

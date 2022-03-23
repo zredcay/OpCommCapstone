@@ -28,6 +28,10 @@ State CodeFinishedHandler(State thisState)
 	{
 		return Discovery;
 	}
+	else if(thisState == Maintenance)
+	{
+		return Maintenance;
+	}
 	else 
 	{
 		return Idle;
@@ -56,6 +60,11 @@ State BadDataHandler(State thisState)
 }
 
 State ShouldNotGetHandler(State thisState){
+
+	return Idle;
+}
+
+State UserExitHandler(State thisState){
 
 	return Idle;
 }

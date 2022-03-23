@@ -53,18 +53,21 @@ void ctrlc(int)
 }
 
 
-int rplidarPi(int test)
+struct data rplidarPi(int test)
 {
-    const char * opt_is_channel = NULL; 
-    const char * opt_channel = NULL;
+
     const char * opt_channel_param_first = NULL;
     sl_u32         opt_channel_param_second = 115200;
     sl_result     op_result;
 	int          opt_channel_type = CHANNEL_TYPE_SERIALPORT;
 
-    bool useArgcBaudrate = false;
     int tran = 0;
-    int  smallest = 0;
+    float angle = 0;
+    float  smallest = 0;
+
+    
+    int div = 3;
+    int size = 360;
     ///  Create a communication channel instance
     IChannel* _channel;
     bool connectSuccess = false;
@@ -118,7 +121,7 @@ int rplidarPi(int test)
 
     // fetech result and print it out...
     //Isabelle editing code for readability 
-    float avgDist[36][2];
+    float avgDist[360][2];
     
     
     
@@ -130,11 +133,11 @@ int rplidarPi(int test)
 
         if (SL_IS_OK(op_result)) {
             drv->ascendScanData(nodes, count);
-            for (int pos = 0; pos < (int)count ; pos = pos +30) {
+            for (int pos = 0; pos < (int)count ; pos = pos + div) {
             //my code
             if((nodes[pos].quality >> SL_LIDAR_RESP_MEASUREMENT_QUALITY_SHIFT) > 30){
-            	avgDist[pos/30][0] = (nodes[pos].angle_z_q14 * 90.f) / 16384.f;
-            	avgDist[pos/30][1] = nodes[pos].dist_mm_q2/4.0f;
+            	avgDist[pos/div][0] = (nodes[pos].angle_z_q14 * 90.f) / 16384.f;
+            	avgDist[pos/div][1] = nodes[pos].dist_mm_q2/4.0f;
             }
             //end of my code
                 /*printf("%s theta: %03.2f Dist: %08.2f Q: %d \n", 
@@ -151,14 +154,14 @@ int rplidarPi(int test)
         }
     }
     smallest = avgDist[0][1];
-	for(int i = 0; i < 36; i++){
-		printf("theta: %03.2f Dist: %08.2f \n", avgDist[i][0], avgDist[i][1]);
+	for(int i = 0; i < size; i++){
+		//printf("theta: %03.2f Dist: %08.2f \n", avgDist[i][0], avgDist[i][1]);
 		if(avgDist[i][1] < smallest && avgDist[i][1] != 0){
 			smallest = avgDist[i][1];
-			tran = avgDist[i][0];
+			angle = avgDist[i][0];
 		}
 	}
-	tran = tran/45;
+	tran = (angle/45) + 1;
 	printf("transciever : %i \n", tran);
 
 
@@ -174,5 +177,10 @@ on_finished:
         drv = NULL;
     }
     delete _channel;
-    return tran;
+    struct data ex;
+    ex.trans = tran;
+    ex.angle = angle;
+    ex.dist = smallest;
+    
+    return ex;
 }
