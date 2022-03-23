@@ -15,10 +15,24 @@ lis = adafruit_lis3mdl.LIS3MDL(i2c)
 
 def data_received(data):
     print(data)
-    s.send(lsm.acceleration)
-    s.send(lsm.gyro)
-    s.send(lis.magnetic)
+    
+    accx, accy, accz = lsm.acceleration
+    gyrox, gyroy, gyroz = lsm.gyro
+    magx, magy, magz = lis.magnetic
+
+    s.send('accx: ' + str(accx) + ' ')
+    s.send('accy: ' + str(accy) + ' ')
+    s.send('accz: ' + str(accz) + ' ')
+    s.send('gyrox: ' + str(gyrox) + ' ')
+    s.send('gyroy: ' + str(gyroy) + ' ')
+    s.send('gryoz: ' + str(gyroz) + ' ')
+    s.send('magx: ' + str(magx) + ' ')
+    s.send('magy: ' + str(magy) + ' ')
+    s.send('magz: ' + str(magz) + ' ')
+    s.send('\n')
+    
         
 
 s = BluetoothServer(data_received)
+
 pause()
