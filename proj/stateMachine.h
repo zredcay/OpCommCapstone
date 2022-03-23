@@ -6,7 +6,7 @@ typedef enum
     Alternate_Discovery,
     Maintenance,
     Recovery,
-    Idle
+    Idle,
 }State;
 
 typedef enum
