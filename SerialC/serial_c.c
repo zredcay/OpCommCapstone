@@ -4,7 +4,8 @@
 #include <pthread.h>
 
 #include "header.h"
-const int DATA_SIZE = 512;
+const int DATA_SIZE = 256;  // Only going to be sending chunks of 100 bytes but have buffer size set at 256 just in case
+int COUNT = 0;
 
 // Linux headers
 #include <fcntl.h> // Contains file controls like O_RDWR
@@ -12,32 +13,98 @@ const int DATA_SIZE = 512;
 #include <termios.h> // Contains POSIX terminal control definitions
 #include <unistd.h> // write(), read(), close()
 
+// Wiring Pi Headers
+#include <wiringPi.h>
+
 // *****************************************************************************************************
 // IMPORTANT NOTES:
 // RST Pin must be held at HIGH
-// It appears that if a wire is unplugged while the program is running, the IR sensors get tripped up
+// It appears that if a wire is unplugged while the program is running, the transceiver gets tripped up
 // by reseting the RST pin by unplugging it for 2 sec. seems to fix the problem
+//
+// The TX of the Pi goes to the RX of the Mux
+// The TX of the Mux goes to the RX of the transceiver
 // *****************************************************************************************************
+
+/*
+*********MUX BIT SELECTION********************
+      INH  B/D  A/C
+            0    0   TX1
+            0    1   TX2
+            1    0   TX3
+            1    1   TX4
+*/
+
+struct thread_args{
+    int serial_port;
+    int trans_num;
+};
+
+int transceiver_select[4][2] =
+{
+    {0,0},
+    {0,1},
+    {1,0},
+    {1,1}
+};
 
 // Send thread function, takes argument of the serial port file descriptor(FD)
 void *tx_function(void *vargp)
 {
-    // grab FD passed in
-    int *serial_port = (int *)vargp;
+    wiringPiSetup();      // set up wiring the pins for transceiver selection
+    pinMode(22, OUTPUT);  // RST Pin / GPIO Pin #6 of Pi / Physical Pin 31
+    pinMode(27, OUTPUT);  // INH Pin for 4-7 / GPIO Pin #16 of Pi / Physical Pin 36
+    pinMode(23, OUTPUT);  // INH Pin for 0-3 / GPIO Pin #13 of Pi / Physical Pin 33
 
+    // grab passed in arguments
+    struct thread_args* arguments = (struct args*) vargp;
+
+    int *serial_port = arguments->serial_port;              // grab FD for serial port
+    int trans_num = arguments->trans_num;                   // grab which transceiver to use
+    trans_num = trans_num - 1;                              // Passed in transceiver is from 1-8 but for calculation we use 0-7, subtrtact 1 from whatever is passed in
+    printf("Trans Num: %i\n",trans_num);
+
+    //clear serial port before start
     tcflush(serial_port, TCIOFLUSH);
+
+    // transceiver bit selection
+    if (trans_num <= 3){
+        int input_B = transceiver_select[(trans_num % 7)][0];
+        int input_A = transceiver_select[(trans_num % 7)][1];
+
+        pinMode(25, OUTPUT);  // Pin B / GPIO Pin #26 of Pi / Physical Pin 37
+        pinMode(24, OUTPUT);  // Pin A / GPIO Pin #19 of Pi / Physical Pin 35
+
+        digitalWrite(25, input_B); // B bit selection
+        digitalWrite(24, input_A); // A bit selection
+        digitalWrite(23, 0);       // Allow Mux to operate
+        digitalWrite(27, 1);       // Inhibit other Mux
+    }else{
+        int input_D = transceiver_select[(trans_num - 4)][0];
+        int input_C = transceiver_select[(trans_num - 4)][1];
+
+        pinMode(28, OUTPUT);  // Pin D / GPIO Pin #20 of Pi / Physical Pin 38
+        pinMode(27, OUTPUT);  // Pin C / GPIO Pin #16 of Pi / Physical Pin 36
+
+        digitalWrite(28, input_D); //D bit selection
+        digitalWrite(27, input_C); //c bit selection
+        digitalWrite(27, 0);       //Allow Mux to operate
+        digitalWrite(23, 1);       //Inhibit other Mux
+    }
+
+    char msg[DATA_SIZE];                                            // send message buffer
 
     // Write to serial port
     while(1){
-        char msg[DATA_SIZE];                                              // send message buffer
+        // Reset transceiver
+        digitalWrite(22,0);  // Set RST LOW
+        digitalWrite(22,1);  // Set RST Active HIGH
+
         //memset(msg, 0, DATA_SIZE);
         //memset(msg, '@', DATA_SIZE);
         int sent_bytes_check = scanf("%s",&msg);
-        //printf("SEND: ");
 
-        //printf("sent bytes: %i\n",sent_bytes_check);
-
-        int sent_bytes = write(serial_port, msg, strlen(msg));    // send message
+        int sent_bytes = write(serial_port, msg, strlen(msg));      // send message
         if (sent_bytes < 0){                                        // check for sending error
             printf("Error Sending\n");
             return 0;
@@ -47,29 +114,37 @@ void *tx_function(void *vargp)
         if (result  == 0){
             break;
         }
-
-        memset(msg, 0, DATA_SIZE);
-        //sleep(1);
     }
 }
 
 // Recieve thread function, takes argument of the serial port file descriptor(FD)
 void *rx_function(void *vargp)
 {
-    // grab FD passed in
-    int *serial_port = (int *)vargp;
+    // grab passed in arguments
+    struct thread_args* arguments = (struct args*) vargp;
+
+    int *serial_port = arguments->serial_port;              // grab FD for serial port
+    int trans_num = arguments->trans_num;                   // grab which transceiver to use
+    trans_num = trans_num - 1;
+
+    // transceiver bit selection
+    int input_B = transceiver_select[(trans_num % 7)][0];
+    int input_A = transceiver_select[(trans_num % 7)][1];
+
+    pinMode(25,OUTPUT);  // Pin B0
+    pinMode(24, OUTPUT); //Pin A0
+
+    digitalWrite(25,input_B); //B selection
+    digitalWrite(24,input_A); //A selection
+
+    // Track how many bytes are sent
+    int num_bytes = 0;
+    int n = 0;
+
+    char read_buf [DATA_SIZE];  // Read Buffer
 
     // Read from serial port
     while(1){
-
-        // Allocate memory for read buffer
-        char read_buf [DATA_SIZE];
-
-        // Read each character that comes in to the serial port
-        int i = 0;
-        char c;
-        int n = 0;
-        int num_bytes = 0;
 
         num_bytes = read(serial_port, &read_buf, DATA_SIZE);
 
@@ -81,7 +156,9 @@ void *rx_function(void *vargp)
         if (num_bytes > 0){
             printf("\n");
             printf("Read %i bytes\n",num_bytes);
+            COUNT = COUNT + num_bytes;
             printf("Message Recieved: %s\n", read_buf);
+            printf("Total of %i bytes sent\n",COUNT);
         }
 
         int result = strcmp("END", read_buf);
@@ -89,27 +166,6 @@ void *rx_function(void *vargp)
             printf("\n*** END CHANNEL MESSAGE RECIEVED ***\n");
             break;
         }
-
-        /*do
-        {
-            n = read(serial_port, (void*) &c, 1);
-            if (n > 0){
-                read_buf[i++] = c;
-            }
-        }
-        while(c != '\r' && i < (data_size - 1) && n > 0);
-
-        int result = strcmp("END", read_buf);
-        if (result  == 0){
-            printf("\n*** END CHANNEL MESSAGE RECIEVED ***\n");
-            break;
-        }
-
-        // add a final empty character to the end of the read buffer
-        read_buf[i] = '\0';
-        */
-
-
 
         // n is the number of bytes read. n may be 0 if no bytes were received, and can also be -1 to signal an error.
         if (n < 0) {
@@ -123,12 +179,12 @@ void *rx_function(void *vargp)
             printf("RECEIVED: %s \n",read_buf);
             //printf("SIZE: %i\n",n);
         }
-
-        // flush serial port or else unwanted data comes through
-        //printf("Trying to read");
         memset(read_buf, 0, DATA_SIZE);
-        usleep(1);
+        usleep(10);
         tcflush(serial_port, TCIOFLUSH);
+        digitalWrite(22,0);  // Set RST Low
+        usleep(10);
+        digitalWrite(22,1);  //  Set RST Active High
     }
 }
 
@@ -171,11 +227,11 @@ int main() {
     // tty.c_oflag &= ~ONOEOT; // Prevent removal of C-d chars (0x004) in output (NOT PRESENT ON LINUX)
 
     tty.c_cc[VTIME] = 1;    // Wait for up to 10s (100 deciseconds), returning as soon as any data is received.
-    tty.c_cc[VMIN] = 100;
+    tty.c_cc[VMIN] = 1000;
 
     // Set in/out baud rate to be 9600
-    cfsetispeed(&tty, B9600);
-    cfsetospeed(&tty, B9600);
+    cfsetispeed(&tty, B115200);
+    cfsetospeed(&tty, B115200);
 
     // Save tty settings, also checking for error
     if (tcsetattr(serial_port, TCSANOW, &tty) != 0) {
@@ -183,9 +239,13 @@ int main() {
         return 1;
     }
 
+    struct thread_args *arguments = malloc(sizeof(struct thread_args));
+    arguments->serial_port = serial_port;
+    arguments->trans_num = 1;
+
     // create the send and receive threads, passing in the FD
-    pthread_create(&thread_tx, NULL, tx_function, (void*) serial_port);
-    pthread_create(&thread_rx, NULL, rx_function, (void*) serial_port);
+    pthread_create(&thread_tx, NULL, tx_function, arguments);
+    pthread_create(&thread_rx, NULL, rx_function, arguments);
 
     // wait for the threads to finish
     pthread_join(thread_tx, NULL);

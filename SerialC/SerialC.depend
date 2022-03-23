@@ -1,0 +1,27 @@
+# depslib dependency file v1.0
+1647995077 source:/home/pi/Desktop/SerialC/serial_c.c
+	<stdio.h>
+	<string.h>
+	<pthread.h>
+	"header.h"
+	<fcntl.h>
+	<errno.h>
+	<termios.h>
+	<unistd.h>
+	<wiringPi.h>
+
+1646685157 /home/pi/Desktop/SerialC/header.h
+
+1648052319 source:/home/pi/OpCommCapstone/SerialC/serial_c.c
+	<stdio.h>
+	<string.h>
+	<pthread.h>
+	"header.h"
+	<fcntl.h>
+	<errno.h>
+	<termios.h>
+	<unistd.h>
+	<wiringPi.h>
+
+1648048442 /home/pi/OpCommCapstone/SerialC/header.h
+

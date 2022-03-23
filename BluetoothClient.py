@@ -18,9 +18,18 @@ def data_received(data):
     
 
 c = BluetoothClient("raspberrypi", data_received)
-c.send(lsm.acceleration)
-c.send(lsm.gyro)
-c.send(lis.magnetic)
+accx, accy, accz = lsm.acceleration
+gyrox, gyroy, gyroz = lsm.gyro
+magx, magy, magz = lis.magnetic
+c.send('accx: ' + str(accx) + ' ')
+c.send('accy: ' + str(accy) + ' ')
+c.send('accz: ' + str(accz) + ' ')
+c.send('gyrox: ' + str(gyrox) + ' ')
+c.send('gyroy: ' + str(gyroy) + ' ')
+c.send('gyroz: ' + str(gyroz) + ' ')
+c.send('magx: ' + str(magx) + ' ')
+c.send('magy: ' + str(magy) + ' ')
+c.send('magz: ' + str(magz) + ' ')
 
 #probablt need a timer
 
