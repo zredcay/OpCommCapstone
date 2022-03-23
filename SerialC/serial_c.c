@@ -4,9 +4,8 @@
 #include <pthread.h>
 
 #include "header.h"
-const int DATA_SIZE = 256;
+const int DATA_SIZE = 256;  // Only going to be sending chunks of 100 bytes but have buffer size set at 256 just in case
 int COUNT = 0;
-
 
 // Linux headers
 #include <fcntl.h> // Contains file controls like O_RDWR
@@ -29,7 +28,7 @@ int COUNT = 0;
 
 /*
 *********MUX BIT SELECTION********************
-           B/D  A/C
+      INH  B/D  A/C
             0    0   TX1
             0    1   TX2
             1    0   TX3
@@ -52,20 +51,17 @@ int transceiver_select[4][2] =
 // Send thread function, takes argument of the serial port file descriptor(FD)
 void *tx_function(void *vargp)
 {
-    wiringPiSetup();                                        // set up wiring the pins for transceiver selection
-
-    pinMode(25, OUTPUT);  // Pin B / GPIO Pin #26 of Pi / Physical Pin 37
-    pinMode(24, OUTPUT);  // Pin A / GPIO Pin #19 of Pi / Physical Pin 35
-    pinMode(28, OUTPUT);  // Pin D / GPIO Pin #20 of Pi / Physical Pin 38
-    pinMode(27, OUTPUT);  // Pin C / GPIO Pin #16 of Pi / Physical Pin 36
-    pinMode(23, OUTPUT);  // RST Pin / GPIO Pin #13 of Pi / Physical Pin 33
+    wiringPiSetup();      // set up wiring the pins for transceiver selection
+    pinMode(22, OUTPUT);  // RST Pin / GPIO Pin #6 of Pi / Physical Pin 31
+    pinMode(27, OUTPUT);  // INH Pin for 4-7 / GPIO Pin #16 of Pi / Physical Pin 36
+    pinMode(23, OUTPUT);  // INH Pin for 0-3 / GPIO Pin #13 of Pi / Physical Pin 33
 
     // grab passed in arguments
     struct thread_args* arguments = (struct args*) vargp;
 
     int *serial_port = arguments->serial_port;              // grab FD for serial port
     int trans_num = arguments->trans_num;                   // grab which transceiver to use
-    trans_num = trans_num - 1;
+    trans_num = trans_num - 1;                              // Passed in transceiver is from 1-8 but for calculation we use 0-7, subtrtact 1 from whatever is passed in
     printf("Trans Num: %i\n",trans_num);
 
     //clear serial port before start
@@ -76,14 +72,24 @@ void *tx_function(void *vargp)
         int input_B = transceiver_select[(trans_num % 7)][0];
         int input_A = transceiver_select[(trans_num % 7)][1];
 
-        digitalWrite(25, input_B); //B bit selection
-        digitalWrite(24, input_A); //A bit selection
+        pinMode(25, OUTPUT);  // Pin B / GPIO Pin #26 of Pi / Physical Pin 37
+        pinMode(24, OUTPUT);  // Pin A / GPIO Pin #19 of Pi / Physical Pin 35
+
+        digitalWrite(25, input_B); // B bit selection
+        digitalWrite(24, input_A); // A bit selection
+        digitalWrite(23, 0);       // Allow Mux to operate
+        digitalWrite(27, 1);       // Inhibit other Mux
     }else{
         int input_D = transceiver_select[(trans_num - 4)][0];
         int input_C = transceiver_select[(trans_num - 4)][1];
 
-        digitalWrite(28, input_D); //B bit selection
-        digitalWrite(27, input_C); //A bit selection
+        pinMode(28, OUTPUT);  // Pin D / GPIO Pin #20 of Pi / Physical Pin 38
+        pinMode(27, OUTPUT);  // Pin C / GPIO Pin #16 of Pi / Physical Pin 36
+
+        digitalWrite(28, input_D); //D bit selection
+        digitalWrite(27, input_C); //c bit selection
+        digitalWrite(27, 0);       //Allow Mux to operate
+        digitalWrite(23, 1);       //Inhibit other Mux
     }
 
     char msg[DATA_SIZE];                                            // send message buffer
@@ -91,8 +97,8 @@ void *tx_function(void *vargp)
     // Write to serial port
     while(1){
         // Reset transceiver
-        digitalWrite(23,0);  // Set RST LOW
-        digitalWrite(23,1);  // Set RST Active HIGH
+        digitalWrite(22,0);  // Set RST LOW
+        digitalWrite(22,1);  // Set RST Active HIGH
 
         //memset(msg, 0, DATA_SIZE);
         //memset(msg, '@', DATA_SIZE);
@@ -176,9 +182,9 @@ void *rx_function(void *vargp)
         memset(read_buf, 0, DATA_SIZE);
         usleep(10);
         tcflush(serial_port, TCIOFLUSH);
-        digitalWrite(23,0);  // Set RST Low
+        digitalWrite(22,0);  // Set RST Low
         usleep(10);
-        digitalWrite(23,1);  //  Set RST Active High
+        digitalWrite(22,1);  //  Set RST Active High
     }
 }
 
