@@ -5,6 +5,13 @@
 #include <time.h>
 #include <stdbool.h>
 #include "transeivers.h"
+#include <string.h>
+#include <sys/types.h>
+#include <sys/shm.h>
+#include <sys/ipc.h>
+#include <unistd.h>
+#include <errno.h>
+#include "sharedMemory.h"
 
 int math(float Ax, float Ay, float Az, float Gx, float Gy, float Gz, float Mx, float My, float Mz, int trans, float angle)
 {
@@ -17,6 +24,12 @@ return 0;
 
 int main ()
 {
+
+
+
+	sharedMemory();
+		
+	
 	int test;
 	float angle;
 	float dist;
