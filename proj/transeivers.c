@@ -3,7 +3,6 @@
 #include <string.h>
 #include <pthread.h>
 
-#include "header.h"
 const int DATA_SIZE = 512;
 
 // Linux headers
