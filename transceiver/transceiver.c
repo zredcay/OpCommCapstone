@@ -3,7 +3,7 @@
 #include <string.h>
 #include <pthread.h>
 
-#include "header.h"
+#include "transceiver.h"
 const int DATA_SIZE = 256;  // Only going to be sending chunks of 100 bytes but have buffer size set at 256 just in case
 int COUNT = 0;
 
