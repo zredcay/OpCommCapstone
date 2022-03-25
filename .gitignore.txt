@@ -1,0 +1,3 @@
+serial_c.o
+transceiver/bin/Debug
+transceiver/obj/Debug
