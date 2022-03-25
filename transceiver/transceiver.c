@@ -75,8 +75,8 @@ void *tx_function(void *vargp)
         pinMode(25, OUTPUT);  // Pin B / GPIO Pin #26 of Pi / Physical Pin 37
         pinMode(24, OUTPUT);  // Pin A / GPIO Pin #19 of Pi / Physical Pin 35
 
-        digitalWrite(25, input_B); // B bit selection
-        digitalWrite(24, input_A); // A bit selection
+        digitalWrite(25, 0); // B bit selection
+        digitalWrite(24, 0); // A bit selection
         digitalWrite(23, 0);       // Allow Mux to operate
         digitalWrite(27, 1);       // Inhibit other Mux
     }else{
@@ -94,11 +94,16 @@ void *tx_function(void *vargp)
 
     char msg[DATA_SIZE];                                            // send message buffer
 
+    digitalWrite(22,0);  // Set RST LOW
+    usleep(0.5);
+    digitalWrite(22,1);  // Set RST Active HIGH
+
     // Write to serial port
     while(1){
         // Reset transceiver
-        digitalWrite(22,0);  // Set RST LOW
-        digitalWrite(22,1);  // Set RST Active HIGH
+        //digitalWrite(22,0);  // Set RST LOW
+        //usleep(0.5);
+        //digitalWrite(22,1);  // Set RST Active HIGH
 
         //memset(msg, 0, DATA_SIZE);
         //memset(msg, '@', DATA_SIZE);
@@ -134,8 +139,8 @@ void *rx_function(void *vargp)
     pinMode(25,OUTPUT);  // Pin B0
     pinMode(24, OUTPUT); //Pin A0
 
-    digitalWrite(25,input_B); //B selection
-    digitalWrite(24,input_A); //A selection
+    digitalWrite(25,0); //B selection
+    digitalWrite(24,0); //A selection
 
     // Track how many bytes are sent
     int num_bytes = 0;
@@ -145,7 +150,6 @@ void *rx_function(void *vargp)
 
     // Read from serial port
     while(1){
-
         num_bytes = read(serial_port, &read_buf, DATA_SIZE);
 
         if (num_bytes < 0){
@@ -160,6 +164,8 @@ void *rx_function(void *vargp)
             printf("Message Recieved: %s\n", read_buf);
             printf("Total of %i bytes sent\n",COUNT);
         }
+
+        num_bytes = 0;
 
         int result = strcmp("END", read_buf);
         if (result  == 0){
@@ -180,10 +186,9 @@ void *rx_function(void *vargp)
             //printf("SIZE: %i\n",n);
         }
         memset(read_buf, 0, DATA_SIZE);
-        usleep(10);
+        usleep(0.0005);
         tcflush(serial_port, TCIOFLUSH);
         digitalWrite(22,0);  // Set RST Low
-        usleep(10);
         digitalWrite(22,1);  //  Set RST Active High
     }
 }
