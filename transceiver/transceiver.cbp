@@ -2,7 +2,7 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="SerialC" />
+		<Option title="transceiver" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<Build>
@@ -37,7 +37,7 @@
 		<Linker>
 			<Add option="-lwiringPi" />
 		</Linker>
-		<Unit filename="serial_c.c">
+		<Unit filename="transceiver.c">
 			<Option compilerVar="CC" />
 		</Unit>
 		<Extensions>
