@@ -16,7 +16,6 @@
 				</Compiler>
 				<Linker>
 					<Add option="-lpthread" />
-					<Add option="-lwiringPi" />
 				</Linker>
 			</Target>
 			<Target title="Release">
@@ -35,15 +34,9 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
-		<Linker>
-			<Add option="-lwiringPi" />
-		</Linker>
 		<Unit filename="transceiver.c">
 			<Option compilerVar="CC" />
 		</Unit>
-		<Extensions>
-			<code_completion />
-			<debugger />
-		</Extensions>
+		<Extensions />
 	</Project>
 </CodeBlocks_project_file>

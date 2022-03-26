@@ -15,7 +15,7 @@ int COUNT = 0;
 #include <unistd.h> // write(), read(), close()
 
 // Wiring Pi Headers
-#include <wiringPi.h>
+
 
 // *****************************************************************************************************
 // IMPORTANT NOTES:
@@ -52,10 +52,9 @@ int transceiver_select[4][2] =
 // Send thread function, takes argument of the serial port file descriptor(FD)
 void *tx_function(void *vargp)
 {
-    wiringPiSetup();      // set up wiring the pins for transceiver selection
-    //pinMode(22, OUTPUT);  // RST Pin / GPIO Pin #6 of Pi / Physical Pin 31
-    pinMode(27, OUTPUT);  // INH Pin for 4-7 / GPIO Pin #16 of Pi / Physical Pin 36
-    pinMode(23, OUTPUT);  // INH Pin for 0-3 / GPIO Pin #13 of Pi / Physical Pin 33
+    //wiringPiSetup();      // set up wiring the pins for transceiver selection
+    //pinMode(27, OUTPUT);  // INH Pin for 4-7 / GPIO Pin #16 of Pi / Physical Pin 36
+    //pinMode(23, OUTPUT);  // INH Pin for 0-3 / GPIO Pin #13 of Pi / Physical Pin 33
 
     // grab passed in arguments
     struct thread_args* arguments = (struct args*) vargp;
@@ -68,6 +67,7 @@ void *tx_function(void *vargp)
     //clear serial port before start
     tcflush(serial_port, TCIOFLUSH);
 
+    /*
     // transceiver bit selection
     if (trans_num <= 3){
         int input_B = transceiver_select[(trans_num % 7)][0];
@@ -92,31 +92,41 @@ void *tx_function(void *vargp)
         digitalWrite(27, 0);       //Allow Mux to operate
         digitalWrite(23, 1);       //Inhibit other Mux
     }
+    */
 
     char msg[DATA_SIZE];                                            // send message buffer
 
-    //digitalWrite(22,0);  // Set RST LOW
-    //usleep(1);
-    //digitalWrite(22,1);  // Set RST Active HIGH
+    clock_t start;
+    int elapsed_time = 0;
+    int sent_bytes;
+
 
     // Write to serial port
     while(1){
-        // Reset transceiver
-        //digitalWrite(22,0);  // Set RST LOW
-        //usleep(1);
-        //digitalWrite(22,1);  // Set RST Active HIGH
 
-        RST_trans();
+        //memset(msg, 0, 100);
+        //memset(msg, '$', 100);
+        //int sent_bytes_check = scanf("%s",&msg);
 
-        //memset(msg, 0, DATA_SIZE);
-        //memset(msg, '@', DATA_SIZE);
-        int sent_bytes_check = scanf("%s",&msg);
-
-        int sent_bytes = write(serial_port, msg, strlen(msg));      // send message
+        scanf("%s",&msg);
+        sent_bytes = write(serial_port, msg, strlen(msg));      // send message
         if (sent_bytes < 0){                                        // check for sending error
             printf("Error Sending\n");
             return 0;
         }
+
+
+        elapsed_time = 0;
+
+        /*
+        do{
+            clock_t difference = clock() - start;
+            elapsed_time = difference*1000/CLOCKS_PER_SEC;
+            if (elapsed_time % 10000 == 0){
+                sent_bytes = write(serial_port, msg, strlen(msg));
+            }
+        }while( elapsed_time < 30000);
+        */
 
         int result = strcmp("END", msg);                            // send 'END' to close channel
         if (result  == 0){
@@ -129,7 +139,7 @@ void *tx_function(void *vargp)
 // Recieve thread function, takes argument of the serial port file descriptor(FD)
 void *rx_function(void *vargp)
 {
-     wiringPiSetup();      // set up wiring the pins for transceiver selection
+    //wiringPiSetup();      // set up wiring the pins for transceiver selection
 
     // grab passed in arguments
     struct thread_args* arguments = (struct args*) vargp;
@@ -142,21 +152,19 @@ void *rx_function(void *vargp)
     int input_B = transceiver_select[(trans_num % 7)][0];
     int input_A = transceiver_select[(trans_num % 7)][1];
 
+    /*
     pinMode(25,OUTPUT);  // Pin B0
     pinMode(24, OUTPUT); //Pin A0
 
     digitalWrite(25,0); //B selection
     digitalWrite(24,0); //A selection
+    */
 
     // Track how many bytes are sent
     int num_bytes = 0;
     int n = 0;
 
     char read_buf [DATA_SIZE];  // Read Buffer
-
-    //digitalWrite(22,0);  // Set RST LOW
-    //usleep(1);
-    //digitalWrite(22,1);  // Set RST Active HIGH
 
     // Read from serial port
     while(1){
@@ -208,24 +216,106 @@ void *rx_function(void *vargp)
             //printf("SIZE: %i\n",n);
         }
         memset(read_buf, 0, DATA_SIZE);
-        //digitalWrite(22,0);  // Set RST Low
-        usleep(1);
-        tcflush(serial_port, TCIOFLUSH);
-        //digitalWrite(22,1);  //  Set RST Active High
-        //digitalWrite(22,0);  // Set RST Low
+
         //usleep(1);
-        //digitalWrite(22,1);  //  Set RST Active High
+        tcflush(serial_port, TCIOFLUSH);
+
     }
 }
 
-void RST_trans(){
+int jeff_maintenance_routine(int transceiver, int port)
+{
+    /*
     wiringPiSetup();      // set up wiring the pins for transceiver selection
     pinMode(22, OUTPUT);  // RST Pin / GPIO Pin #6 of Pi / Physical Pin 31
+    pinMode(27, OUTPUT);  // INH Pin for 4-7 / GPIO Pin #16 of Pi / Physical Pin 36
+    pinMode(23, OUTPUT);  // INH Pin for 0-3 / GPIO Pin #13 of Pi / Physical Pin 33
+    */
 
-    digitalWrite(22,0);  // Set RST LOW
-    usleep(0.000000001);
-    digitalWrite(22,1);  // Set RST Active HIGH
-    return;
+    int serial_port = port;              // grab FD for serial port
+    int trans_num = transceiver;                   // grab which transceiver to use
+    trans_num = trans_num - 1;                              // Passed in transceiver is from 1-8 but for calculation we use 0-7, subtrtact 1 from whatever is passed in
+    //printf("Trans Num: %i\n",trans_num);
+    int status = 0;
+
+    //clear serial port before start
+    tcflush(serial_port, TCIOFLUSH);
+
+    /*
+    // transceiver bit selection
+    if (trans_num <= 3){
+        int input_B = transceiver_select[(trans_num % 7)][0];
+        int input_A = transceiver_select[(trans_num % 7)][1];
+
+        pinMode(25, OUTPUT);  // Pin B / GPIO Pin #26 of Pi / Physical Pin 37
+        pinMode(24, OUTPUT);  // Pin A / GPIO Pin #19 of Pi / Physical Pin 35
+
+        digitalWrite(25, input_B); // B bit selection
+        digitalWrite(24, input_A); // A bit selection
+        digitalWrite(23, 0);       // Allow Mux to operate
+        digitalWrite(27, 1);       // Inhibit other Mux
+    }else{
+        int input_D = transceiver_select[(trans_num - 4)][0];
+        int input_C = transceiver_select[(trans_num - 4)][1];
+
+        pinMode(28, OUTPUT);  // Pin D / GPIO Pin #20 of Pi / Physical Pin 38
+        pinMode(27, OUTPUT);  // Pin C / GPIO Pin #16 of Pi / Physical Pin 36
+
+        digitalWrite(28, input_D); //D bit selection
+        digitalWrite(27, input_C); //c bit selection
+        digitalWrite(27, 0);       //Allow Mux to operate
+        digitalWrite(23, 1);       //Inhibit other Mux
+    }
+    */
+
+    int num_bytes = 0;
+    int n = 0;
+
+    char read_buf [DATA_SIZE];  // Read Buffer
+
+    clock_t start = clock();
+    int elapsed_time = 0;
+
+    do{
+        clock_t difference = clock() - start;
+        elapsed_time = difference*1000/CLOCKS_PER_SEC;
+        //printf("Elasped time: %i\n",elapsed_time);
+
+
+
+        if((num_bytes = read(serial_port, &read_buf, DATA_SIZE)) == 0){
+            printf("NOTHING\n");
+        }
+
+
+        if (num_bytes < 0){
+            printf("Error reading: %s", strerror(errno));
+            return 1;
+        }
+
+        if (num_bytes > 0){
+            printf("\n");
+            printf("Read %i bytes\n",num_bytes);
+            COUNT = COUNT + num_bytes;
+            printf("Message Recieved: %s\n", read_buf);
+            printf("Total of %i bytes sent\n",COUNT);
+            printf("SUCCESS\n");
+            status = 1;
+            break;
+        }
+    }while(elapsed_time < 5000);
+
+    memset(read_buf, 0, DATA_SIZE);
+    usleep(1);
+    tcflush(serial_port, TCIOFLUSH);
+
+    int sent_bytes = write(serial_port, read_buf, strlen(read_buf));      // send message
+    if (sent_bytes < 0){                                                  // check for sending error
+        printf("Error Sending\n");
+        return 0;
+    }
+
+    return status;
 }
 
 int main() {
@@ -268,7 +358,7 @@ int main() {
     // tty.c_oflag &= ~ONOEOT; // Prevent removal of C-d chars (0x004) in output (NOT PRESENT ON LINUX)
 
     tty.c_cc[VTIME] = 1;    // Wait for up to 10s (100 deciseconds), returning as soon as any data is received.
-    tty.c_cc[VMIN] = 1000;
+    tty.c_cc[VMIN] = 100;
 
     // Set in/out baud rate to be 9600
     cfsetispeed(&tty, B115200);
@@ -285,12 +375,26 @@ int main() {
     arguments->trans_num = 1;
 
     // create the send and receive threads, passing in the FD
-    pthread_create(&thread_tx, NULL, tx_function, arguments);
-    pthread_create(&thread_rx, NULL, rx_function, arguments);
+    //pthread_create(&thread_tx, NULL, tx_function, arguments);
+    //pthread_create(&thread_rx, NULL, rx_function, arguments);
 
     // wait for the threads to finish
-    pthread_join(thread_tx, NULL);
-    pthread_join(thread_rx, NULL);
+    //pthread_join(thread_tx, NULL);
+    //pthread_join(thread_rx, NULL);
+
+    int i = 0;
+    int status;
+    while(i < 5){
+        status = jeff_maintenance_routine(0,serial_port);
+        i++;
+    }
+    if (status == 0){
+        printf("COMMUNICATION TIMEOUT\n");
+    }else if(status == 1){
+        printf("COMMUNICATION SUCCESS\n");
+    }else if(status == 3){
+        printf("BAD DATA\n");
+    }
 
     printf("\n*** CLOSING COMMUNICATION CHANNEL ***\n");
 

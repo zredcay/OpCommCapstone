@@ -25,7 +25,7 @@
 
 1648048442 /home/pi/OpCommCapstone/SerialC/header.h
 
-1648252072 source:/home/pi/OpCommCapstone/transceiver/transceiver.c
+1648327664 source:/home/pi/OpCommCapstone/transceiver/transceiver.c
 	<stdio.h>
 	<string.h>
 	<pthread.h>
@@ -35,7 +35,6 @@
 	<errno.h>
 	<termios.h>
 	<unistd.h>
-	<wiringPi.h>
 
-1648232775 /home/pi/OpCommCapstone/transceiver/transceiver.h
+1648234659 /home/pi/OpCommCapstone/transceiver/transceiver.h
 
