@@ -16,6 +16,7 @@
 				</Compiler>
 				<Linker>
 					<Add option="-lpthread" />
+					<Add option="-lwiringPi" />
 				</Linker>
 			</Target>
 			<Target title="Release">

@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <pthread.h>
+#include <time.h>
 
 #include "transceiver.h"
 const int DATA_SIZE = 256;  // Only going to be sending chunks of 100 bytes but have buffer size set at 256 just in case
@@ -52,7 +53,7 @@ int transceiver_select[4][2] =
 void *tx_function(void *vargp)
 {
     wiringPiSetup();      // set up wiring the pins for transceiver selection
-    pinMode(22, OUTPUT);  // RST Pin / GPIO Pin #6 of Pi / Physical Pin 31
+    //pinMode(22, OUTPUT);  // RST Pin / GPIO Pin #6 of Pi / Physical Pin 31
     pinMode(27, OUTPUT);  // INH Pin for 4-7 / GPIO Pin #16 of Pi / Physical Pin 36
     pinMode(23, OUTPUT);  // INH Pin for 0-3 / GPIO Pin #13 of Pi / Physical Pin 33
 
@@ -94,16 +95,18 @@ void *tx_function(void *vargp)
 
     char msg[DATA_SIZE];                                            // send message buffer
 
-    digitalWrite(22,0);  // Set RST LOW
-    usleep(0.5);
-    digitalWrite(22,1);  // Set RST Active HIGH
+    //digitalWrite(22,0);  // Set RST LOW
+    //usleep(1);
+    //digitalWrite(22,1);  // Set RST Active HIGH
 
     // Write to serial port
     while(1){
         // Reset transceiver
         //digitalWrite(22,0);  // Set RST LOW
-        //usleep(0.5);
+        //usleep(1);
         //digitalWrite(22,1);  // Set RST Active HIGH
+
+        RST_trans();
 
         //memset(msg, 0, DATA_SIZE);
         //memset(msg, '@', DATA_SIZE);
@@ -119,12 +122,15 @@ void *tx_function(void *vargp)
         if (result  == 0){
             break;
         }
+        memset(msg, 0, DATA_SIZE);
     }
 }
 
 // Recieve thread function, takes argument of the serial port file descriptor(FD)
 void *rx_function(void *vargp)
 {
+     wiringPiSetup();      // set up wiring the pins for transceiver selection
+
     // grab passed in arguments
     struct thread_args* arguments = (struct args*) vargp;
 
@@ -148,8 +154,15 @@ void *rx_function(void *vargp)
 
     char read_buf [DATA_SIZE];  // Read Buffer
 
+    //digitalWrite(22,0);  // Set RST LOW
+    //usleep(1);
+    //digitalWrite(22,1);  // Set RST Active HIGH
+
     // Read from serial port
     while(1){
+
+        printf("Trying to read\n");
+
         num_bytes = read(serial_port, &read_buf, DATA_SIZE);
 
         if (num_bytes < 0){
@@ -165,8 +178,6 @@ void *rx_function(void *vargp)
             printf("Total of %i bytes sent\n",COUNT);
         }
 
-        num_bytes = 0;
-
         int result = strcmp("END", read_buf);
         if (result  == 0){
             printf("\n*** END CHANNEL MESSAGE RECIEVED ***\n");
@@ -179,6 +190,17 @@ void *rx_function(void *vargp)
             return 1;
         }
 
+        /*
+        clock_t start;
+        int elapsed_time = 0;
+
+        do{
+            clock_t difference = clock() - start;
+            elapsed_time = difference*1000/CLOCKS_PER_SEC;
+            printf("Timer test\n");
+        }while( elapsed_time < 3000);
+        */
+
         // Print out the recieved message
         if (n>0){
             printf("\n");
@@ -186,17 +208,31 @@ void *rx_function(void *vargp)
             //printf("SIZE: %i\n",n);
         }
         memset(read_buf, 0, DATA_SIZE);
-        usleep(0.0005);
+        //digitalWrite(22,0);  // Set RST Low
+        usleep(1);
         tcflush(serial_port, TCIOFLUSH);
-        digitalWrite(22,0);  // Set RST Low
-        digitalWrite(22,1);  //  Set RST Active High
+        //digitalWrite(22,1);  //  Set RST Active High
+        //digitalWrite(22,0);  // Set RST Low
+        //usleep(1);
+        //digitalWrite(22,1);  //  Set RST Active High
     }
+}
+
+void RST_trans(){
+    wiringPiSetup();      // set up wiring the pins for transceiver selection
+    pinMode(22, OUTPUT);  // RST Pin / GPIO Pin #6 of Pi / Physical Pin 31
+
+    digitalWrite(22,0);  // Set RST LOW
+    usleep(0.000000001);
+    digitalWrite(22,1);  // Set RST Active HIGH
+    return;
 }
 
 int main() {
     //create threads
     pthread_t thread_tx;
     pthread_t thread_rx;
+    char *msg = "Hello this is a test message";
 
     // open the serial port
     int serial_port = open("/dev/ttyS0", O_RDWR| O_NOCTTY);
