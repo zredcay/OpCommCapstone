@@ -1,3 +1,8 @@
 transceiver.o
 transceiver/bin/Debug
 transceiver/obj/Debug
+src/main.o
+src/transceivers.o
+src/rplidar/rplidarPi.o
+src/sharedMemory/sharedMemory.o
+
