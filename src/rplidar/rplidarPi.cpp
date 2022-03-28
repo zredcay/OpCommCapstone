@@ -52,6 +52,13 @@ void ctrlc(int)
     ctrl_c_pressed = true;
 }
 
+int connectRP(){
+return 0;
+}
+
+int disconnectRP(){
+return 0;
+}
 
 struct data rplidarPi(int test)
 {

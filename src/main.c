@@ -27,40 +27,50 @@ int main ()
 
 
 
-	sharedMemory();
-		
 	
+		
+	char message[100];
+	int n = 0;
 	int test;
 	float angle;
 	float dist;
 	int transceiver;
 	int result;	
 	struct data ex;
-	State NextState = Discovery;
+	State NextState = Intialization;
 	printf("setting event\n");
 	Event NewEvent = Code_Finished_Event;
 	clock_t startTime = clock();
 	while(clock() < (startTime + 3 * CLOCKS_PER_SEC))
 	{
-
 		switch(NextState)
 		{
-		case Idle:
+		case Intialization:
         	{
-        		//printf("case idle state\n");
+        		 connectRP();
+        		//sharedMemory();
+            		NewEvent = Code_Finished_Event;
+			NextState = CodeFinishedHandler(NextState);
+        	}
+        	break;
+		
+		case End:
+        	{
+        		//printf("case end state\n");
             		if(User_Exit_Event == NewEvent) // code completes safely and exits S
             		{
-            			
+            			disconnectRP();
             			//printf("Code Finished\n");         		
             		}
             		else if(Should_Not_Get_Here_Event == NewEvent) // uncaught error or bug in code 
             		{
-            			
+            			disconnectRP();
             			printf("big error stop code now\n");
             			exit(-1);         		
             		}
             		else // unexpected state and event matching 
             		{
+            			disconnectRP();
 				printf("event not updated or waiting on user\n");
             			exit(-1);   
 			}
@@ -79,12 +89,12 @@ int main ()
 			    	 angle = ex.angle;
 			    	 dist = ex.dist;
 			    	printf("return value transceievr %i and angle %f and distance %f\n", transceiver, angle, dist);
-			    	if(transceiver == 0 ) // the transceiver was not found
+			    	if(angle == 0 ) // the transceiver was not found
 			    	{
 			    		NewEvent = Bad_Data_Event;
 			    		NextState = BadDataHandler(NextState);
 			    	}
-			    	else if ( transceiver < 9 && transceiver > 0) // in a given transcieer 1 - 8
+			    	else if ( angle < 360 && angle > 0) // in a given transcieer 1 - 8
 			    	{
 			    		NewEvent = Code_Finished_Event;
 			    		NextState = CodeFinishedHandler(NextState);
@@ -136,7 +146,7 @@ int main ()
             		if(Code_Finished_Event == NewEvent)
             		{
             			result = trans();
-            			//printf("Result = %i\n", result);
+            			printf("Result = %i\n", result);
             			if (result == 0) // result is good data
             			{
             				NewEvent = Code_Finished_Event;

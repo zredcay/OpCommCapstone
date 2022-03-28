@@ -10,6 +10,8 @@ extern "C" {
 		float dist;
 		};
 	struct data rplidarPi(int test);
+	 int connectRP();
+	int disconnectRP();
  
 #ifdef __cplusplus
 } // end extern "C"
