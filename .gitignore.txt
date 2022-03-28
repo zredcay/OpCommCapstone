@@ -5,4 +5,5 @@ src/main.o
 src/transceivers.o
 src/rplidar/rplidarPi.o
 src/sharedMemory/sharedMemory.o
+src/main
 
