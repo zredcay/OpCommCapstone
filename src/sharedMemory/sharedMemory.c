@@ -14,15 +14,16 @@
 
 int sharedMemory()
 {
-     key_t          ShmKEY=123456; ;
+     key_t          ShmKEY=123456; 
      int            ShmID = 0;
      struct Memory  *ShmPTR;
      INT32 arr[4] = {4,3,2,1};
      int err=0;
      int sec_cnt = 0;
 
-     //ShmID = shmget(ShmKEY, sizeof(struct Memory), IPC_CREAT | IPC_EXCL | 0666); // remove flags if key already exisits 
-     ShmID = shmget(ShmKEY, sizeof(struct Memory), 0666); // remove flags if key already exisits
+     ShmID = shmget(ShmKEY, sizeof(struct Memory), IPC_CREAT | IPC_EXCL | 0666); // remove flags if key already exisits 
+     //ShmID = shmget(ShmKEY, sizeof(struct Memory), 0666); // remove flags if key already exisits
+     
      if (ShmID < 0) 
      {
         // for case of error does not return a valid shmid
@@ -40,7 +41,7 @@ int sharedMemory()
  //ShmPTR->status = NOT_READY;
      //ShmPTR->pkt_index = 1024;
      //ShmPTR->data_cnt = 4;
-     ShmPTR->data  = 0;
+     ShmPTR->data  = arr[0];
      //ShmPTR->data[1]  = arr[1];
      //ShmPTR->data[2]  = arr[2];
      //ShmPTR->data[3]  = arr[3];
@@ -48,14 +49,13 @@ int sharedMemory()
             ShmPTR->data);
      //ShmPTR->status = FILLED;
 
-     while (false)
+     for(int i = 1; i < 3; i++)
      {
-     	/* printf("Server has filled %d %d %d %d to shared memory...\n",
-            ShmPTR->data[0], ShmPTR->data[1], 
-            ShmPTR->data[2], ShmPTR->data[3]);
-        printf("\r%d %d %d sleeping ...",sec_cnt,ShmPTR->status,ShmPTR->pkt_index);
+     	 printf("Server has filled %d to shared memory...\n",
+            ShmPTR->data);
+        //printf("\r%d %d %d sleeping ...",sec_cnt,ShmPTR->status,ShmPTR->pkt_index);
         fflush(stdout);
-        sec_cnt += 1;*/
+        //sec_cnt += 1;*
         sleep(10);
      }
 

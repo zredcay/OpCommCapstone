@@ -6,7 +6,8 @@ typedef enum
     Alternate_Discovery,
     Maintenance,
     Recovery,
-    Idle,
+    End,
+    Intialization,
 }State;
 
 typedef enum
@@ -20,7 +21,11 @@ typedef enum
 
 State CodeFinishedHandler(State thisState)
 {
-	if(thisState == Discovery || thisState == Alternate_Discovery)
+	if(thisState == Intialization)
+	{
+		return Discovery;
+	}
+	else if(thisState == Discovery || thisState == Alternate_Discovery)
 	{
 		return Maintenance;
 	}
@@ -34,7 +39,7 @@ State CodeFinishedHandler(State thisState)
 	}
 	else 
 	{
-		return Idle;
+		return End;
 	}
     
 }
@@ -55,18 +60,18 @@ State BadDataHandler(State thisState)
 	}
 	else
 	{
-		return Idle;
+		return End;
 	}
 }
 
 State ShouldNotGetHandler(State thisState){
 
-	return Idle;
+	return End;
 }
 
 State UserExitHandler(State thisState){
 
-	return Idle;
+	return End;
 }
 
 
