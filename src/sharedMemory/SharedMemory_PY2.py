@@ -4,7 +4,7 @@ import sys
 
 
 # create shared memory object
-ipc_key = 123456
+ipc_key = 111111
 
 
 PY_MAJOR_VERSION = sys.version_info[0]

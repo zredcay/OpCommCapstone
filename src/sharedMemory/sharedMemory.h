@@ -1,7 +1,9 @@
 #ifndef _sharedMemory_h_
 #define _sharedMemory_h_
 
-int sharedMemory();
+struct shared createMemory();
+int sharedMemory(int flag, struct shared);
+int closeMemeory(struct shared);
 
 typedef signed int INT32;
 #define  NOT_READY  -1
@@ -10,12 +12,14 @@ typedef signed int INT32;
 
 struct Memory 
 {
-/*     INT32  status;
-     INT32  pkt_index;
-     INT32  data_cnt;
-     */
-     INT32  data;
-};
 
+     INT32  data[72];
+};
+ struct shared
+ {
+     key_t          ShmKEY; 
+     int            ShmID;
+     struct Memory  *ShmPTR;
+ };
 
 #endif

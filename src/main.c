@@ -24,11 +24,7 @@ return 0;
 
 int main ()
 {
-
-
-
-	
-		
+	int flag = 0;
 	char message[100];
 	int n = 0;
 	int test;
@@ -37,6 +33,7 @@ int main ()
 	int transceiver;
 	int result;	
 	struct data ex;
+	struct shared sharMem;
 	State NextState = Intialization;
 	printf("setting event\n");
 	Event NewEvent = Code_Finished_Event;
@@ -47,8 +44,10 @@ int main ()
 		{
 		case Intialization:
         	{
-        		 connectRP();
-        		//sharedMemory();
+        		connectRP();
+        		sharMem = createMemory();
+        		sharedMemory(flag, sharMem);
+        		closeMemeory(sharMem);
             		NewEvent = Code_Finished_Event;
 			NextState = CodeFinishedHandler(NextState);
         	}
