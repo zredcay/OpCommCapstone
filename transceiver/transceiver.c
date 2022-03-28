@@ -5,10 +5,11 @@
 #include <time.h>
 
 #include "transceiver.h"
-const int DATA_SIZE = 256;  // Only going to be sending chunks of 100 bytes but have buffer size set at 256 just in case
+const int DATA_SIZE = 100;  // Only going to be sending chunks of 100 bytes but have buffer size set at 256 just in case
 int COUNT = 0;
 char message[100];
 int n = 0;
+int ID = 1;
 
 // Linux headers
 #include <fcntl.h> // Contains file controls like O_RDWR
@@ -126,6 +127,8 @@ void *tx_function(void *vargp)
             elapsed_time = difference*1000/CLOCKS_PER_SEC;
             if (elapsed_time % 10000 == 0){
                 sent_bytes = write(serial_port, msg, strlen(msg));
+void *rx_function(void *vargp)
+{
             }
         }while( elapsed_time < 30000);
         */
@@ -166,7 +169,7 @@ void *rx_function(void *vargp)
     int num_bytes = 0;
     int n = 0;
 
-    char read_buf [DATA_SIZE];  // Read Buffer
+    char read_buf [100];  // Read Buffer
 
     // Read from serial port
     while(1){
@@ -303,7 +306,7 @@ int jeff_maintenance_routine_read(int transceiver, int port)
             status = 1;
             //break;
         }
-    }while(elapsed_time < 5000);
+    }while(elapsed_time < 2000);
 
     memset(read_buf, 0, DATA_SIZE);
     usleep(1);
@@ -367,7 +370,7 @@ int jeff_maintenance_routine_send(int transceiver, char **data, int port)
     return status;
 }
 
-int source_maintenance_routine_send(int transceiver, char **data, int port)
+int source_maintenance_routine_send(int transceiver, char data[], int port)
 {
     /*
     wiringPiSetup();      // set up wiring the pins for transceiver selection
@@ -377,7 +380,8 @@ int source_maintenance_routine_send(int transceiver, char **data, int port)
     */
 
     int trans_num = transceiver;            // grab which transceiver to use
-    char **msg = data;                      // send message buffer
+    //char msg[DATA_SIZE];                      // send message buffer
+    printf("SENDING OUT: %s\n",data);
     int serial_port = port;                 // grab FD for serial port
     trans_num = trans_num - 1;              // Passed in transceiver is from 1-8 but for calculation we use 0-7, subtrtact 1 from whatever is passed in
     //printf("Trans Num: %i\n",trans_num);
@@ -414,7 +418,9 @@ int source_maintenance_routine_send(int transceiver, char **data, int port)
     */
 
     // Write to serial port
-    int sent_bytes = write(serial_port, msg, strlen(msg));      // send message
+
+    int sent_bytes = write(serial_port, data, strlen(data));      // send message
+    printf("SENT BYTES: %i\n",sent_bytes);
     if (sent_bytes < 0){                                        // check for sending error
         printf("Error Sending\n");
     }else{
@@ -502,7 +508,7 @@ int source_maintenance_routine_read(int transceiver, int port)
             status = 1;
             //break;
         }
-    }while(elapsed_time < 3000);
+    }while(elapsed_time < 2000);
 
     memset(read_buf, 0, DATA_SIZE);
     usleep(1);
@@ -513,9 +519,8 @@ int source_maintenance_routine_read(int transceiver, int port)
 
 int main() {
     //create threads
-    pthread_t thread_tx;
-    pthread_t thread_rx;
-    char *msg = "Hello this is a test message";
+    //pthread_t thread_tx;
+    //pthread_t thread_rx;
 
     // open the serial port
     int serial_port = open("/dev/ttyS0", O_RDWR| O_NOCTTY);
@@ -563,9 +568,9 @@ int main() {
         return 1;
     }
 
-    struct thread_args *arguments = malloc(sizeof(struct thread_args));
-    arguments->serial_port = serial_port;
-    arguments->trans_num = 1;
+    //struct thread_args *arguments = malloc(sizeof(struct thread_args));
+    //arguments->serial_port = serial_port;
+    //arguments->trans_num = 1;
 
     // create the send and receive threads, passing in the FD
     //pthread_create(&thread_tx, NULL, tx_function, arguments);
@@ -577,55 +582,76 @@ int main() {
 
     int status_read, status_send;
     // ******** JEFF TESTING METHODS *********
-    /*
-    status_read = jeff_maintenance_routine_read(0,serial_port);
-    printf("ENTIRE MESSAGE: %s\n",message);
-    if (status_read == 0){
-        printf("COMMUNICATION TIMEOUT\n");
-    }else if(status_read == 1){
-        printf("COMMUNICATION SUCCESS\n");
-    }else if(status_read == 3){
-        printf("BAD DATA\n");
-    }
+    if (ID == 1){
+        while(1){
+            status_read = jeff_maintenance_routine_read(0,serial_port);
+            n = 0;
+            if (status_read == 0){
+                //printf("COMMUNICATION TIMEOUT\n");
+            }else if(status_read == 1){
+                //printf("COMMUNICATION SUCCESS\n");
+                printf("ENTIRE MESSAGE: %s\n",message);
+            }else if(status_read == 3){
+                //printf("BAD DATA\n");
+            }
 
-    status_send = jeff_maintenance_routine_send(0,message,serial_port);
-    if (status_send == 0){
-        printf("ERROR SENDING\n");
-    }else if(status_send == 1){
-        printf("SEND SUCCESSFUL\n");
+            status_send = jeff_maintenance_routine_send(0,message,serial_port);
+            if (status_send == 0){
+                //printf("ERROR SENDING\n");
+            }else if(status_send == 1){
+                //printf("SEND SUCCESSFUL\n");
+            }
+            memset(message,0,100);
+        }
     }
-    */
 
     // ******** SOURCE TESTING METHODS *********
-    clock_t start = clock();
-    int elapsed_time = 0;
+<<<<<<< HEAD
 
-    do{
-        clock_t difference = clock() - start;
-        elapsed_time = difference*1000/CLOCKS_PER_SEC;
+    while(1){
+
+        char data[100];
+        scanf("%s",&data);
+        //char *msg = data;
+        status_send = source_maintenance_routine_send(0,data,serial_port);
+
+        if (status_send == 0){
+            printf("ERROR SENDING\n");
+        }else if(status_send == 1){
+            printf("SEND SUCCESSFUL\n");
+        }
+
+        status_read = source_maintenance_routine_read(0,serial_port);
+        printf("ENTIRE MESSAGE: %s\n",message);
+        printf("RECIEVED BYTES: %i\n",n);
+        n = 0;
+=======
+    if (ID == 0){
+
+        status_send = source_maintenance_routine_send(0,msg,serial_port);
+        printf("SENDING\n");
 
 
-    }while(elapsed_time < 3000);
+        if (status_send == 0){
+            printf("ERROR SENDING\n");
+        }else if(status_send == 1){
+            printf("SEND SUCCESSFUL\n");
+        }
 
-
-    status_send = source_maintenance_routine_send(0,msg,serial_port);
-    printf("SENDING\n");
-
-
-    if (status_send == 0){
-        printf("ERROR SENDING\n");
-    }else if(status_send == 1){
-        printf("SEND SUCCESSFUL\n");
-    }
-
-    status_read = source_maintenance_routine_read(0,serial_port);
-    printf("ENTIRE MESSAGE: %s\n",message);
-    if (status_read == 0){
-        printf("COMMUNICATION TIMEOUT\n");
-    }else if(status_read == 1){
-        printf("COMMUNICATION SUCCESS\n");
-    }else if(status_read == 3){
-        printf("BAD DATA\n");
+        status_read = source_maintenance_routine_read(0,serial_port);
+        printf("ENTIRE MESSAGE: %s\n",message);
+>>>>>>> a0cbe3e3e54501dd47b41710bbadfa28721a6030
+        if (status_read == 0){
+            printf("COMMUNICATION TIMEOUT\n");
+        }else if(status_read == 1){
+            printf("COMMUNICATION SUCCESS\n");
+        }else if(status_read == 3){
+            printf("BAD DATA\n");
+        }
+<<<<<<< HEAD
+        printf("\n");
+=======
+>>>>>>> a0cbe3e3e54501dd47b41710bbadfa28721a6030
     }
 
     printf("\n*** CLOSING COMMUNICATION CHANNEL ***\n");
