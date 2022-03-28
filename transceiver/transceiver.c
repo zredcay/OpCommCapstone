@@ -303,7 +303,7 @@ int jeff_maintenance_routine_read(int transceiver, int port)
             status = 1;
             //break;
         }
-    }while(elapsed_time < 3000);
+    }while(elapsed_time < 5000);
 
     memset(read_buf, 0, DATA_SIZE);
     usleep(1);
@@ -597,7 +597,21 @@ int main() {
     */
 
     // ******** SOURCE TESTING METHODS *********
+    clock_t start = clock();
+    int elapsed_time = 0;
+
+    do{
+        clock_t difference = clock() - start;
+        elapsed_time = difference*1000/CLOCKS_PER_SEC;
+
+
+    }while(elapsed_time < 3000);
+
+
     status_send = source_maintenance_routine_send(0,msg,serial_port);
+    printf("SENDING\n");
+
+
     if (status_send == 0){
         printf("ERROR SENDING\n");
     }else if(status_send == 1){
