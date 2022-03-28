@@ -82,7 +82,7 @@ int sharedMemory(int flag, struct shared ex)
      
      
   	
-     
+     sleep(10);
      pthread_mutex_t  init_lock =  PTHREAD_MUTEX_INITIALIZER;
 
      printf("flag is %i\n", flag);	
