@@ -25,11 +25,20 @@
 
 1648048442 /home/pi/OpCommCapstone/SerialC/header.h
 
-<<<<<<< HEAD
-1648322053 source:/home/pi/OpCommCapstone/transceiver/transceiver.c
-=======
-1648408979 source:/home/pi/OpCommCapstone/transceiver/transceiver.c
->>>>>>> 1108cf5f9d29fad6ceaa2e6765cf8c7353fb4892
+1648048442 D
+
+1648489314 source:/home/pi/OpCommCapstone/transceiver/transceiver.c
+	<stdio.h>
+	<string.h>
+	<pthread.h>
+	<time.h>
+	"transceiver.h"
+	<fcntl.h>
+	<errno.h>
+	<termios.h>
+	<unistd.h>
+
+1648408979 8cf5f9d29fad6ceaa2e6765cf8c7353fb4892
 	<stdio.h>
 	<string.h>
 	<pthread.h>
