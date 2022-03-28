@@ -1,5 +1,7 @@
 from bluedot.btcomm import BluetoothServer  # imports the Bluetooth Server library from bluedot
 from signal import pause  # imports pause function from signal allowing program to idle until a connection is created
+import sys
+sys.path.append('/home/pi/OpCommCapstone/proj/imu')
 import IMU
 
 def data_received(data):  # defines the data_received function which is passed to the BTServer
