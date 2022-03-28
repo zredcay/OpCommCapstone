@@ -8,7 +8,7 @@ program_CXX_SRCS := $(wildcard *.cpp) ./rplidar/rplidarPi.cpp
 program_C_OBJS := ${program_C_SRCS:.c=.o}
 program_CXX_OBJS := ${program_CXX_SRCS:.cpp=.o}
 program_OBJS := $(program_C_OBJS) $(program_CXX_OBJS)
-program_INCLUDE_DIRS := ./rplidar
+program_INCLUDE_DIRS := ./rplidar ../transceiver
 program_LIBRARY_DIRS :=
 program_LIBRARIES := $(wildcard *.a)
 
