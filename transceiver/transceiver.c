@@ -306,7 +306,7 @@ int jeff_maintenance_routine_read(int transceiver, int port)
             status = 1;
             //break;
         }
-    }while(elapsed_time < 2000);
+    }while(elapsed_time < 1000);
 
     memset(read_buf, 0, DATA_SIZE);
     usleep(1);
@@ -603,55 +603,6 @@ int main() {
             }
             memset(message,0,100);
         }
-    }
-
-    // ******** SOURCE TESTING METHODS *********
-<<<<<<< HEAD
-
-    while(1){
-
-        char data[100];
-        scanf("%s",&data);
-        //char *msg = data;
-        status_send = source_maintenance_routine_send(0,data,serial_port);
-
-        if (status_send == 0){
-            printf("ERROR SENDING\n");
-        }else if(status_send == 1){
-            printf("SEND SUCCESSFUL\n");
-        }
-
-        status_read = source_maintenance_routine_read(0,serial_port);
-        printf("ENTIRE MESSAGE: %s\n",message);
-        printf("RECIEVED BYTES: %i\n",n);
-        n = 0;
-=======
-    if (ID == 0){
-
-        status_send = source_maintenance_routine_send(0,msg,serial_port);
-        printf("SENDING\n");
-
-
-        if (status_send == 0){
-            printf("ERROR SENDING\n");
-        }else if(status_send == 1){
-            printf("SEND SUCCESSFUL\n");
-        }
-
-        status_read = source_maintenance_routine_read(0,serial_port);
-        printf("ENTIRE MESSAGE: %s\n",message);
->>>>>>> a0cbe3e3e54501dd47b41710bbadfa28721a6030
-        if (status_read == 0){
-            printf("COMMUNICATION TIMEOUT\n");
-        }else if(status_read == 1){
-            printf("COMMUNICATION SUCCESS\n");
-        }else if(status_read == 3){
-            printf("BAD DATA\n");
-        }
-<<<<<<< HEAD
-        printf("\n");
-=======
->>>>>>> a0cbe3e3e54501dd47b41710bbadfa28721a6030
     }
 
     printf("\n*** CLOSING COMMUNICATION CHANNEL ***\n");

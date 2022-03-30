@@ -27,11 +27,18 @@
 
 1648048442 D
 
-<<<<<<< HEAD
-1648491285 source:/home/pi/OpCommCapstone/transceiver/transceiver.c
-=======
-1648489314 source:/home/pi/OpCommCapstone/transceiver/transceiver.c
->>>>>>> a0cbe3e3e54501dd47b41710bbadfa28721a6030
+1648657413 source:/home/pi/OpCommCapstone/transceiver/transceiver.c
+	<stdio.h>
+	<string.h>
+	<pthread.h>
+	<time.h>
+	"transceiver.h"
+	<fcntl.h>
+	<errno.h>
+	<termios.h>
+	<unistd.h>
+
+1648489314 be3e3e54501dd47b41710bbadfa28721a6030
 	<stdio.h>
 	<string.h>
 	<pthread.h>
@@ -53,5 +60,5 @@
 	<termios.h>
 	<unistd.h>
 
-1648232775 /home/pi/OpCommCapstone/transceiver/transceiver.h
+1648234659 /home/pi/OpCommCapstone/transceiver/transceiver.h
 
