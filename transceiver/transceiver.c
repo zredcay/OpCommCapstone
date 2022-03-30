@@ -9,7 +9,8 @@ const int DATA_SIZE = 100;  // Only going to be sending chunks of 100 bytes but 
 int COUNT = 0;
 char message[100];
 int n = 0;
-int ID = 1;
+int JEFF = 0;
+int SOURCE = 0;
 
 // Linux headers
 #include <fcntl.h> // Contains file controls like O_RDWR
@@ -299,6 +300,7 @@ int jeff_maintenance_routine_read(int transceiver, int port)
             //printf("Read %i bytes\n",num_bytes);
             COUNT = COUNT + num_bytes;
             //printf("Message Recieved: %s\n", read_buf);
+            printf("%s",read_buf);
             message[n] = read_buf[0];
             n++;
             //printf("Total of %i bytes sent\n",COUNT);
@@ -306,7 +308,7 @@ int jeff_maintenance_routine_read(int transceiver, int port)
             status = 1;
             //break;
         }
-    }while(elapsed_time < 1000);
+    }while(elapsed_time < 500);
 
     memset(read_buf, 0, DATA_SIZE);
     usleep(1);
@@ -370,7 +372,7 @@ int jeff_maintenance_routine_send(int transceiver, char **data, int port)
     return status;
 }
 
-int source_maintenance_routine_send(int transceiver, char data[], int port)
+int source_maintenance_routine_send(int transceiver, char *data, int port)
 {
     /*
     wiringPiSetup();      // set up wiring the pins for transceiver selection
@@ -582,7 +584,9 @@ int main() {
 
     int status_read, status_send;
     // ******** JEFF TESTING METHODS *********
-    if (ID == 1){
+    if (JEFF == 1){
+        printf("RUNNING JEFF CODE\n");
+        printf("\n");
         while(1){
             status_read = jeff_maintenance_routine_read(0,serial_port);
             n = 0;
@@ -605,6 +609,40 @@ int main() {
         }
     }
 
+    // ******** SOURCE TESTING METHODS *********
+    if (SOURCE == 1){
+        printf("RUNNING SOURCE CODE\n");
+        printf("\n");
+        while(1){
+
+            char msg[DATA_SIZE];
+            scanf("%s",&msg);
+            char *data_location = msg;
+
+            status_send = source_maintenance_routine_send(0,data_location,serial_port);
+
+            if (status_send == 0){
+                //printf("ERROR SENDING\n");
+            }else if(status_send == 1){
+                printf("SEND SUCCESSFUL\n");
+            }
+
+            status_read = source_maintenance_routine_read(0,serial_port);
+            if (status_read == 0){
+                printf("COMMUNICATION TIMEOUT\n");
+            }else if(status_read == 1){
+                //printf("COMMUNICATION SUCCESS\n");
+                printf("ENTIRE MESSAGE: %s\n",message);
+                int read_bytes = strlen(message);
+                printf("READ BYTES: %i",read_bytes);
+            }else if(status_read == 3){
+                printf("BAD DATA\n");
+            }
+            printf("\n");
+            n = 0;
+            memset(message,0,100);
+        }
+    }
     printf("\n*** CLOSING COMMUNICATION CHANNEL ***\n");
 
     // close the serial ports
