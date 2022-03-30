@@ -1,0 +1,14 @@
+# depslib dependency file v1.0
+1648659534 source:/home/pi/OpCommCapstone/transceiver/transceiver.c
+	<stdio.h>
+	<string.h>
+	<pthread.h>
+	<time.h>
+	"transceiver.h"
+	<fcntl.h>
+	<errno.h>
+	<termios.h>
+	<unistd.h>
+
+1648234659 /home/pi/OpCommCapstone/transceiver/transceiver.h
+

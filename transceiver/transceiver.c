@@ -9,7 +9,7 @@ const int DATA_SIZE = 100;  // Only going to be sending chunks of 100 bytes but 
 int COUNT = 0;
 char message[100];
 int n = 0;
-int JEFF = 0;
+int JEFF = 1;
 int SOURCE = 0;
 
 // Linux headers
@@ -245,7 +245,7 @@ int jeff_maintenance_routine_read(int transceiver, int port)
     int status = 0;
 
     //clear serial port before start
-    tcflush(serial_port, TCIOFLUSH);
+    //tcflush(serial_port, TCIOFLUSH);
 
     /*
     // transceiver bit selection
@@ -311,8 +311,8 @@ int jeff_maintenance_routine_read(int transceiver, int port)
     }while(elapsed_time < 500);
 
     memset(read_buf, 0, DATA_SIZE);
-    usleep(1);
-    tcflush(serial_port, TCIOFLUSH);
+    //usleep(1);
+    //tcflush(serial_port, TCIOFLUSH);
 
     return status;
 }
@@ -594,6 +594,7 @@ int main() {
                 //printf("COMMUNICATION TIMEOUT\n");
             }else if(status_read == 1){
                 //printf("COMMUNICATION SUCCESS\n");
+                printf("\n");
                 printf("ENTIRE MESSAGE: %s\n",message);
             }else if(status_read == 3){
                 //printf("BAD DATA\n");
