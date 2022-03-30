@@ -9,8 +9,10 @@ const int DATA_SIZE = 100;  // Only going to be sending chunks of 100 bytes but 
 int COUNT = 0;
 char message[100];
 int n = 0;
+
 int JEFF = 1;
 int SOURCE = 0;
+
 
 // Linux headers
 #include <fcntl.h> // Contains file controls like O_RDWR
@@ -300,7 +302,7 @@ int jeff_maintenance_routine_read(int transceiver, int port)
             //printf("Read %i bytes\n",num_bytes);
             COUNT = COUNT + num_bytes;
             //printf("Message Recieved: %s\n", read_buf);
-            printf("%s",read_buf);
+            printf("%s\n",read_buf);
             message[n] = read_buf[0];
             n++;
             //printf("Total of %i bytes sent\n",COUNT);
@@ -390,7 +392,7 @@ int source_maintenance_routine_send(int transceiver, char *data, int port)
     int status = 0;
 
     //clear serial port before start
-    tcflush(serial_port, TCIOFLUSH);
+    //tcflush(serial_port, TCIOFLUSH);
 
     /*
     // transceiver bit selection
