@@ -46,6 +46,16 @@ int main ()
         	{
         		connectRP();
         		sharMem = createMemory();
+			
+			clock_t init_bluetooth = clock();
+			int elapsed_time = 0;
+
+			do{
+				clock_t difference = clock() - init_bluetooth;
+				elapsed_time = difference*1000/CLOCKS_PER_SEC;
+			}while(elapsed_time < 30000);
+			
+			
         		sharedMemory(flag, sharMem);
         		closeMemeory(sharMem);
             		NewEvent = Code_Finished_Event;
