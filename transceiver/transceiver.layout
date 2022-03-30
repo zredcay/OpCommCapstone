@@ -2,23 +2,15 @@
 <CodeBlocks_layout_file>
 	<FileVersion major="1" minor="0" />
 	<ActiveTarget name="Debug" />
-	<File name="transceiver.c" open="1" top="1" tabpos="1" split="0" active="1" splitpos="0" zoom_1="3" zoom_2="0">
+	<File name="transceiver.c" open="1" top="1" tabpos="1" split="0" active="1" splitpos="0" zoom_1="0" zoom_2="0">
 		<Cursor>
-<<<<<<< HEAD
-			<Cursor1 position="21559" topLine="384" />
+			<Cursor1 position="21442" topLine="248" />
 		</Cursor>
 		<Folding>
-			<Collapse line="144" />
-			<Collapse line="230" />
-			<Collapse line="317" />
-=======
-			<Cursor1 position="3795" topLine="213" />
-		</Cursor>
-		<Folding>
-			<Collapse line="143" />
-			<Collapse line="371" />
-			<Collapse line="428" />
->>>>>>> a0cbe3e3e54501dd47b41710bbadfa28721a6030
+			<Collapse line="56" />
+			<Collapse line="145" />
+			<Collapse line="231" />
+			<Collapse line="318" />
 		</Folding>
 	</File>
 </CodeBlocks_layout_file>
