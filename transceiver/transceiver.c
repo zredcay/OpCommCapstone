@@ -302,7 +302,7 @@ int jeff_maintenance_routine_read(int transceiver, int port)
             //printf("Read %i bytes\n",num_bytes);
             COUNT = COUNT + num_bytes;
             //printf("Message Recieved: %s\n", read_buf);
-            printf("%s\n",read_buf);
+            //printf("%s\n",read_buf);
             message[n] = read_buf[0];
             n++;
             //printf("Total of %i bytes sent\n",COUNT);
@@ -310,7 +310,7 @@ int jeff_maintenance_routine_read(int transceiver, int port)
             status = 1;
             //break;
         }
-    }while(elapsed_time < 500);
+    }while(elapsed_time < 1000);
 
     memset(read_buf, 0, DATA_SIZE);
     //usleep(1);
@@ -504,7 +504,7 @@ int source_maintenance_routine_read(int transceiver, int port)
             //printf("\n");
             //printf("Read %i bytes\n",num_bytes);
             COUNT = COUNT + num_bytes;
-            //printf("Message Recieved: %s\n", read_buf);
+            printf("Message Recieved: %s\n", read_buf);
             message[n] = read_buf[0];
             n++;
             //printf("Total of %i bytes sent\n",COUNT);
