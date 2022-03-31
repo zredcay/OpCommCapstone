@@ -10,8 +10,8 @@ int COUNT = 0;
 char message[100];
 int n = 0;
 
-int JEFF = 0;
-int SOURCE = 1;
+int JEFF = 1;
+int SOURCE = 0;
 
 
 // Linux headers
@@ -288,9 +288,7 @@ int jeff_maintenance_routine_read(int transceiver, int port)
         elapsed_time = difference*1000/CLOCKS_PER_SEC;
         //printf("Elasped time: %i\n",elapsed_time);
 
-        if((num_bytes = read(serial_port, &read_buf, DATA_SIZE)) == 0){
-            //printf("NOTHING\n");
-        }
+        num_bytes = read(serial_port, &read_buf, 10);
 
         if (num_bytes < 0){
             printf("Error reading: %s", strerror(errno));
@@ -298,21 +296,25 @@ int jeff_maintenance_routine_read(int transceiver, int port)
         }
 
         if (num_bytes > 0){
-            //printf("\n");
-            //printf("Read %i bytes\n",num_bytes);
-            COUNT = COUNT + num_bytes;
-            //printf("Message Recieved: %s\n", read_buf);
-            //printf("%s\n",read_buf);
-            message[n] = read_buf[0];
-            n++;
-            //printf("Total of %i bytes sent\n",COUNT);
-            //printf("SUCCESS\n");
-            status = 1;
-            //break;
+            while(num_bytes > 0){
+                //printf("\n");
+                //printf("Read %i bytes\n",num_bytes);
+                COUNT = COUNT + num_bytes;
+                //printf("Message Recieved: %c\n", read_buf[0]);
+                //printf("%s\n",read_buf);
+                //printf("%i\n",strlen(read_buf));
+                message[n] = read_buf[0];
+                n++;
+                //printf("Total of %i bytes sent\n",COUNT);
+                //printf("SUCCESS\n");
+                num_bytes = read(serial_port, &read_buf, 1);
+                status = 1;
+                //break;
+            }
         }
-    }while(elapsed_time < 1000);
+    }while(elapsed_time < 100);
 
-    memset(read_buf, 0, DATA_SIZE);
+    //memset(read_buf, '\0', DATA_SIZE);
     //usleep(1);
     //tcflush(serial_port, TCIOFLUSH);
 
@@ -612,6 +614,8 @@ int main() {
                 //printf("COMMUNICATION SUCCESS\n");
                 printf("\n");
                 printf("ENTIRE MESSAGE: %s\n",message);
+                printf("COUNT: %i\n",COUNT);
+                COUNT = 0;
             }else if(status_read == 3){
                 //printf("BAD DATA\n");
             }
