@@ -10,8 +10,8 @@ int COUNT = 0;
 char message[100];
 int n = 0;
 
-int JEFF = 1;
-int SOURCE = 0;
+int JEFF = 0;
+int SOURCE = 1;
 
 
 // Linux headers
@@ -374,7 +374,7 @@ int jeff_maintenance_routine_send(int transceiver, char **data, int port)
     return status;
 }
 
-int source_maintenance_routine_send(int transceiver, char *data, int port)
+int source_maintenance_routine_send(int transceiver, char data[], int port)
 {
     /*
     wiringPiSetup();      // set up wiring the pins for transceiver selection
@@ -384,8 +384,18 @@ int source_maintenance_routine_send(int transceiver, char *data, int port)
     */
 
     int trans_num = transceiver;            // grab which transceiver to use
-    //char msg[DATA_SIZE];                      // send message buffer
+    char msg[DATA_SIZE];                      // send message buffer
     printf("SENDING OUT: %s\n",data);
+    printf("SIZE OF DATA: %i\n",strlen(data));
+
+    // print HEX data
+    /*
+    while(*msg){
+        printf("%02x-",(unsigned int) *msg++);
+    }
+    printf("\n");
+    */
+
     int serial_port = port;                 // grab FD for serial port
     trans_num = trans_num - 1;              // Passed in transceiver is from 1-8 but for calculation we use 0-7, subtrtact 1 from whatever is passed in
     //printf("Trans Num: %i\n",trans_num);
@@ -423,6 +433,8 @@ int source_maintenance_routine_send(int transceiver, char *data, int port)
 
     // Write to serial port
 
+
+
     int sent_bytes = write(serial_port, data, strlen(data));      // send message
     printf("SENT BYTES: %i\n",sent_bytes);
     if (sent_bytes < 0){                                        // check for sending error
@@ -430,6 +442,8 @@ int source_maintenance_routine_send(int transceiver, char *data, int port)
     }else{
         status = 1;
     }
+
+
 
     return status;
 }
@@ -619,10 +633,10 @@ int main() {
         while(1){
 
             char msg[DATA_SIZE];
-            scanf("%s",&msg);
-            char *data_location = msg;
+            int scanned_bytes=scanf("%s",&msg);
+            printf("SCANF BYTES: %i\n",scanned_bytes);
 
-            status_send = source_maintenance_routine_send(0,data_location,serial_port);
+            status_send = source_maintenance_routine_send(0,msg,serial_port);
 
             if (status_send == 0){
                 //printf("ERROR SENDING\n");
@@ -637,7 +651,7 @@ int main() {
                 //printf("COMMUNICATION SUCCESS\n");
                 printf("ENTIRE MESSAGE: %s\n",message);
                 int read_bytes = strlen(message);
-                printf("READ BYTES: %i",read_bytes);
+                printf("READ BYTES: %i\n",read_bytes);
             }else if(status_read == 3){
                 printf("BAD DATA\n");
             }
