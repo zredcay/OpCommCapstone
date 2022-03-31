@@ -288,7 +288,7 @@ int jeff_maintenance_routine_read(int transceiver, int port)
         elapsed_time = difference*1000/CLOCKS_PER_SEC;
         //printf("Elasped time: %i\n",elapsed_time);
 
-        num_bytes = read(serial_port, &read_buf, 10);
+        num_bytes = read(serial_port, &read_buf, 8);
 
         if (num_bytes < 0){
             printf("Error reading: %s", strerror(errno));
@@ -602,17 +602,44 @@ int main() {
     if (JEFF == 1){
         printf("RUNNING JEFF CODE\n");
         printf("\n");
-        while(1){
+
+        // set the file name of the text file that will be read and sent
+        char *filename = "rec_data.txt";
+
+        // struct for determining the size of a file
+        struct stat st;
+
+        //set file pointer and open file for writing
+        FILE *fp;
+        fp = fopen(filename, "w");
+
+        if (fp == NULL){
+            printf("Error: Could not open file\n");
+            return 1;
+        }
+
+        int end_file = 0;
+
+        while(end_file == 0){
             status_read = jeff_maintenance_routine_read(0,serial_port);
             n = 0;
             if (status_read == 0){
                 //printf("COMMUNICATION TIMEOUT\n");
             }else if(status_read == 1){
                 //printf("COMMUNICATION SUCCESS\n");
-                printf("\n");
-                printf("ENTIRE MESSAGE: %s\n",message);
-                printf("COUNT: %i\n",COUNT);
-                COUNT = 0;
+                //printf("\n");
+                //printf("ENTIRE MESSAGE: %s\n",message);
+                fputs(message, fp);
+                int c = 0;
+                while(c <= 7){
+                    if (message[c] == '^'){
+                        //printf("END OF FILE\n");
+                        end_file = 1;
+                    }
+                    c++;
+                }
+                //printf("COUNT: %i\n",COUNT);
+                //COUNT = 0;
             }else if(status_read == 3){
                 //printf("BAD DATA\n");
             }
@@ -623,8 +650,9 @@ int main() {
             }else if(status_send == 1){
                 //printf("SEND SUCCESSFUL\n");
             }
-            memset(message,0,100);
+            memset(message,0,8);
         }
+        close(fp);
     }
 
     // ******** SOURCE TESTING METHODS *********
@@ -715,6 +743,7 @@ int main() {
             //n = 0;
             //memset(message,0,100);
         }
+        fclose(fp);
     }
     printf("%s\n",message);
     printf("\n*** CLOSING COMMUNICATION CHANNEL ***\n");
