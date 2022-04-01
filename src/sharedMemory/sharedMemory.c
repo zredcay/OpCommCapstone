@@ -10,6 +10,9 @@
 #include <errno.h>
 #include "sharedMemory.h"
 #include <pthread.h>
+#include <semaphore.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 struct shared createMemory()
 {
@@ -19,6 +22,7 @@ struct shared createMemory()
      INT32 arr[72];
      int err=0;
      struct shared ex;
+     
      
      for (INT32 i = 0; i < 72; i++) {
     	arr[i] = rand()%10;
@@ -53,6 +57,34 @@ struct shared createMemory()
 		
 }
 
+sem_t* createNamedSem()
+{
+
+     char* SEM_NAME = "opcapstone";
+     sem_t* mutex;
+  	
+
+    
+    if((mutex = sem_open(SEM_NAME, O_CREAT, 0600, 1)) == SEM_FAILED) {
+    	perror("sem_open");
+    	sem_unlink(SEM_NAME);
+    	exit(EXIT_FAILURE);
+    }
+
+	return mutex;
+
+}
+
+int closeNamedSem(sem_t* mutex)
+{
+
+    char* SEM_NAME = "opcapstone";
+    sem_close(mutex);
+    sem_unlink(SEM_NAME);
+    return 0;
+
+}
+
 int closeMemeory(struct shared ex)
 { 
      key_t ShmKEY = ex.ShmKEY;
@@ -70,7 +102,7 @@ int closeMemeory(struct shared ex)
 
 }
 
-int sharedMemory(int flag, struct shared ex)
+int sharedMemory(int flag, struct shared ex, sem_t* mutex)
 {
      key_t ShmKEY = ex.ShmKEY;
      int ShmID = ex.ShmID;
@@ -79,12 +111,10 @@ int sharedMemory(int flag, struct shared ex)
      int err=0;
      int offset = 0;
      int max = 36;
-     
-     
-  	
-     sleep(10);
-     pthread_mutex_t  init_lock =  PTHREAD_MUTEX_INITIALIZER;
-
+ 
+    
+     sem_wait(mutex);////**************8waiting till semaphore is open to read from **************
+	
      printf("flag is %i\n", flag);	
 	
      if(flag == 1)
@@ -93,17 +123,16 @@ int sharedMemory(int flag, struct shared ex)
      		max = 72;
      }
      
-     pthread_mutex_lock(&(init_lock));    
+     
      for(int i = offset; i < max; i++)
      {
      	  arr[i] = ShmPTR->data[i];
      	  printf("Server has filled %d to shared memory...\n", arr[i]);
-     	   
-     	    
-     	  
      }
 
      memset(ShmPTR->data, NULL, 36);
+     
+     sem_post(mutex); // *********closing access to sempahore**********
   
   for(int i = offset; i < max; i++)
      {
@@ -113,7 +142,7 @@ int sharedMemory(int flag, struct shared ex)
      	    
      	  
      }
-    pthread_mutex_unlock(&(init_lock));
+  
 	return 0;
  }
 

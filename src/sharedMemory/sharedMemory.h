@@ -1,8 +1,13 @@
 #ifndef _sharedMemory_h_
 #define _sharedMemory_h_
 
+#include <semaphore.h>
+
+
 struct shared createMemory();
-int sharedMemory(int flag, struct shared);
+sem_t* createNamedSem();
+int sharedMemory(int flag, struct shared, sem_t* mutex);
+int closeNamedSem(sem_t* mutex);
 int closeMemeory(struct shared);
 
 typedef signed int INT32;

@@ -12,6 +12,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include "sharedMemory.h"
+#include <semaphore.h>
 
 int math(float Ax, float Ay, float Az, float Gx, float Gy, float Gz, float Mx, float My, float Mz, int trans, float angle)
 {
@@ -34,6 +35,7 @@ int main ()
 	int result;	
 	struct data ex;
 	struct shared sharMem;
+	sem_t* mutex;
 	State NextState = Intialization;
 	printf("setting event\n");
 	Event NewEvent = Code_Finished_Event;
@@ -46,6 +48,8 @@ int main ()
         	{
         		connectRP();
         		sharMem = createMemory();
+        		
+        		mutex = createNamedSem();
 			
 			clock_t init_bluetooth = clock();
 			int elapsed_time = 0;
@@ -56,7 +60,8 @@ int main ()
 			}while(elapsed_time < 30000);
 			
 			
-        		sharedMemory(flag, sharMem);
+        		sharedMemory(flag, sharMem, mutex);
+        		closeNamedSem(mutex);
         		closeMemeory(sharMem);
             		NewEvent = Code_Finished_Event;
 			NextState = CodeFinishedHandler(NextState);
