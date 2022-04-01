@@ -7,11 +7,11 @@
 #include "transceiver.h"
 const int DATA_SIZE = 8;  // Only going to be sending chunks of 100 bytes but have buffer size set at 256 just in case
 int COUNT = 0;
-char message[1024];
+char rec_msg[1024];
 int n = 0;
 
-int JEFF = 1;
-int SOURCE = 0;
+int JEFF = 0;
+int SOURCE = 1;
 
 
 // Linux headers
@@ -303,7 +303,7 @@ int jeff_maintenance_routine_read(int transceiver, int port)
                 //printf("Message Recieved: %c\n", read_buf[0]);
                 //printf("%s\n",read_buf);
                 //printf("%i\n",strlen(read_buf));
-                message[n] = read_buf[0];
+                rec_msg[n] = read_buf[0];
                 n++;
                 //printf("Total of %i bytes sent\n",COUNT);
                 //printf("SUCCESS\n");
@@ -517,7 +517,7 @@ int source_maintenance_routine_read(int transceiver, int port)
             //printf("Read %i bytes\n",num_bytes);
             COUNT = COUNT + num_bytes;
             //printf("Message Recieved: %s\n", read_buf);
-            message[n] = read_buf[0];
+            rec_msg[n] = read_buf[0];
             n++;
             //printf("Total of %i bytes sent\n",COUNT);
             //printf("SUCCESS\n");
@@ -619,6 +619,7 @@ int main() {
         }
 
         int end_file = 0;
+        int checksum;
 
         while(end_file == 0){
             status_read = jeff_maintenance_routine_read(0,serial_port);
@@ -628,29 +629,38 @@ int main() {
             }else if(status_read == 1){
                 //printf("COMMUNICATION SUCCESS\n");
                 //printf("\n");
-                //printf("ENTIRE MESSAGE: %s\n",message);
-                fputs(message, fp);
-                int c = 0;
-                while(c <= 7){
-                    if (message[c] == '^'){
-                        //printf("END OF FILE\n");
-                        end_file = 1;
-                    }
-                    c++;
+                //printf("ENTIRE MESSAGE: %s\n",rec_msg);
+
+                // checksum
+                for(int k = 0; k <= 6; k++){
+                    checksum = (int) rec_msg[k];
                 }
-                //printf("COUNT: %i\n",COUNT);
-                //COUNT = 0;
-            }else if(status_read == 3){
-                //printf("BAD DATA\n");
+                checksum = ((checksum % 10) + (checksum / 10)) % 10;
+
+                if(checksum + '0' == rec_msg[7]){
+                    rec_msg[7] = '\0';
+                    fputs(rec_msg, fp);
+                    int c = 0;
+                    while(c <= 6){
+                        if (rec_msg[c] == '^'){
+                            //printf("END OF FILE\n");
+                            end_file = 1;
+                        }
+                        c++;
+                    }
+                    rec_msg[0] = "0";
+                }else{
+                    rec_msg[0] = "1";
+                }
             }
 
-            status_send = jeff_maintenance_routine_send(0,message,serial_port);
+            status_send = jeff_maintenance_routine_send(0,rec_msg,serial_port);
             if (status_send == 0){
-                //printf("ERROR SENDING\n");
+                printf("ERROR SENDING\n");
             }else if(status_send == 1){
                 //printf("SEND SUCCESSFUL\n");
             }
-            memset(message,0,8);
+            memset(rec_msg,0,8);
         }
         close(fp);
     }
@@ -690,10 +700,10 @@ int main() {
         int num_packet;
         char msg[8];
 
-        if (size % 8 == 0){
-            num_packet = size / 8 - 1;
+        if (size % 7 == 0){
+            num_packet = size / 7 - 1;
         }else{
-            num_packet = size / 8;
+            num_packet = size / 7;
         }
 
         //printf("NUM OF PACKETS: %i\n",num_packet);
@@ -702,12 +712,26 @@ int main() {
         int j = 0;
         char *packet;
         while(c <= num_packet){
-            for (i = (c*8); i <= ((c * 8) + 7); i++){
+            for (i = (c*7); i <= ((c * 7) + 6); i++){
                 msg[j] = fgetc(fp);
                 j++;
             }
             //printf("SENDING MSG: %s\n",msg);
             j = 0;
+
+            // checksum
+            int checksum;
+            for(int k = 0; k <= 6; k++){
+                checksum = (int) msg[k];
+            }
+            checksum = ((checksum % 10) + (checksum / 10)) % 10;
+
+            printf("CHECKSUM: %i\n",checksum);
+
+            msg[7] = checksum + '0';
+
+            printf("%s\n",msg);
+
             status_send = source_maintenance_routine_send(0,msg,serial_port);
             //printf("SENT BYTES: %i\n",sent_bytes);
 
@@ -731,13 +755,14 @@ int main() {
             status_read = source_maintenance_routine_read(0,serial_port);
             if (status_read == 0){
                 printf("COMMUNICATION TIMEOUT\n");
-            }else if(status_read == 1){
+            }else if(rec_msg[0] == "0"){
                 //printf("COMMUNICATION SUCCESS\n");
-                //printf("ENTIRE MESSAGE: %s\n",message);
-                //int read_bytes = strlen(message);
+                //printf("ENTIRE MESSAGE: %s\n",rec_msg);
+                //int read_bytes = strlen(rec_msg);
                 //printf("READ BYTES: %i\n",read_bytes);
-            }else if(status_read == 3){
-                printf("BAD DATA\n");
+            }else if(rec_msg[0] == "1"){
+                printf("Error: Bad Data\n");
+                fseek(fp,-7,SEEK_CUR);
             }
             //printf("\n");
             //n = 0;
@@ -745,7 +770,7 @@ int main() {
         }
         fclose(fp);
     }
-    printf("%s\n",message);
+    printf("%s\n",rec_msg);
     printf("\n*** CLOSING COMMUNICATION CHANNEL ***\n");
 
     // close the serial ports
