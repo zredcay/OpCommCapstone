@@ -5,13 +5,13 @@
 #include <time.h>
 
 #include "transceiver.h"
-const int DATA_SIZE = 8;  // Only going to be sending chunks of 100 bytes but have buffer size set at 256 just in case
+const int DATA_SIZE = 64;  // Only going to be sending chunks of 100 bytes but have buffer size set at 256 just in case
 int COUNT = 0;
 char rec_msg[1024];
 int n = 0;
 
-int JEFF = 0;
-int SOURCE = 1;
+int JEFF = 1;
+int SOURCE = 0;
 
 
 // Linux headers
@@ -288,7 +288,7 @@ int jeff_maintenance_routine_read(int transceiver, int port)
         elapsed_time = difference*1000/CLOCKS_PER_SEC;
         //printf("Elasped time: %i\n",elapsed_time);
 
-        num_bytes = read(serial_port, &read_buf, 8);
+        num_bytes = read(serial_port, &read_buf, 64);
 
         if (num_bytes < 0){
             printf("Error reading: %s", strerror(errno));
@@ -312,11 +312,16 @@ int jeff_maintenance_routine_read(int transceiver, int port)
                 //break;
             }
         }
-    }while(elapsed_time < 100);
+    }while(elapsed_time < 1000);
 
     //memset(read_buf, '\0', DATA_SIZE);
-    //usleep(1);
-    //tcflush(serial_port, TCIOFLUSH);
+
+    /*
+    if (n % 8 == 0){
+        usleep(1);
+        tcflush(serial_port, TCIOFLUSH);
+    }
+    */
 
     return status;
 }
@@ -619,7 +624,7 @@ int main() {
         }
 
         int end_file = 0;
-        int checksum;
+        int checksum = 0;
 
         while(end_file == 0){
             status_read = jeff_maintenance_routine_read(0,serial_port);
@@ -629,13 +634,14 @@ int main() {
             }else if(status_read == 1){
                 //printf("COMMUNICATION SUCCESS\n");
                 //printf("\n");
-                //printf("ENTIRE MESSAGE: %s\n",rec_msg);
+                printf("ENTIRE MESSAGE: %s\n",rec_msg);
 
                 // checksum
+                int checksum = 0;
                 for(int k = 0; k <= 6; k++){
-                    checksum = (int) rec_msg[k];
+                    checksum += (int) rec_msg[k];
                 }
-                checksum = ((checksum % 10) + (checksum / 10)) % 10;
+                checksum = (((checksum % 100) / 10) + ((checksum % 100) % 10)) % 10;
 
                 if(checksum + '0' == rec_msg[7]){
                     rec_msg[7] = '\0';
@@ -644,13 +650,14 @@ int main() {
                     while(c <= 6){
                         if (rec_msg[c] == '^'){
                             //printf("END OF FILE\n");
-                            end_file = 1;
+                            //end_file = 1;
                         }
                         c++;
                     }
-                    rec_msg[0] = "0";
+                    memset(rec_msg,'\0',8);
+                    rec_msg[0] = '0';
                 }else{
-                    rec_msg[0] = "1";
+                    rec_msg[0] = '1';
                 }
             }
 
