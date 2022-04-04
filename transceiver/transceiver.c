@@ -622,7 +622,7 @@ int main() {
         }else{
             num_packet = size / 7;
         }
-        //printf("NUM OF PACKETS: %i\n",num_packet);
+        printf("NUM OF PACKETS: %i\n",num_packet);
 
         // counters used for sending packets
         int c = 0;
@@ -630,6 +630,9 @@ int main() {
         int j = 0;
 
         while(c < num_packet){
+            if (c % 500 == 0){
+                printf("PACKETS SENT: %i\n",c);
+            }
             for (i = (c*7); i <= ((c * 7) + 6); i++){
                 msg[j] = fgetc(fp);
                 j++;
@@ -659,25 +662,28 @@ int main() {
 
             // wait for JEFF response
             status_read = source_maintenance_routine_read(0,serial_port);
+            n = 0;
             if (status_read == 0){
                 printf("COMMUNICATION TIMEOUT\n");
                 fseek(fp,-7,SEEK_CUR);
             }else if(rec_msg[0] == '0'){
                 c++;
-                printf("COMMUNICATION SUCCESS\n");
+                //printf("COMMUNICATION SUCCESS\n");
                 //printf("ENTIRE MESSAGE: %s\n",rec_msg);
                 //int read_bytes = strlen(rec_msg);
                 //printf("READ BYTES: %i\n",read_bytes);
+                //memset(rec_msg,'\0',8);
             }else if(rec_msg[0] == '1'){
                 printf("Error: Bad Data\n");
                 fseek(fp,-7,SEEK_CUR);
             }
+            //memset(rec_msg,'\0',8);
         }
 
         // close file
         fclose(fp);
     }
-    printf("%s\n",rec_msg);
+    //printf("%s\n",rec_msg);
     printf("\n*** CLOSING COMMUNICATION CHANNEL ***\n");
 
     // close the serial ports
