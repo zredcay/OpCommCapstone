@@ -21,6 +21,7 @@ int SOURCE = 0;
 #include <unistd.h> // write(), read(), close()
 
 // Wiring Pi Headers
+#include <wiringPi.h>
 
 
 // *****************************************************************************************************
@@ -233,30 +234,19 @@ void *rx_function(void *vargp)
 
 int jeff_maintenance_routine_read(int transceiver, int port)
 {
-    /*
-    wiringPiSetup();      // set up wiring the pins for transceiver selection
-    pinMode(22, OUTPUT);  // RST Pin / GPIO Pin #6 of Pi / Physical Pin 31
-    pinMode(27, OUTPUT);  // INH Pin for 4-7 / GPIO Pin #16 of Pi / Physical Pin 36
-    pinMode(23, OUTPUT);  // INH Pin for 0-3 / GPIO Pin #13 of Pi / Physical Pin 33
-    */
 
     int trans_num = transceiver;                   // grab which transceiver to use
     int serial_port = port;                        // grab FD for serial port
-    trans_num = trans_num - 1;                     // Passed in transceiver is from 1-8 but for calculation we use 0-7, subtrtact 1 from whatever is passed in
     //printf("Trans Num: %i\n",trans_num);
     int status = 0;
 
     //clear serial port before start
     //tcflush(serial_port, TCIOFLUSH);
 
-    /*
     // transceiver bit selection
     if (trans_num <= 3){
         int input_B = transceiver_select[(trans_num % 7)][0];
         int input_A = transceiver_select[(trans_num % 7)][1];
-
-        pinMode(25, OUTPUT);  // Pin B / GPIO Pin #26 of Pi / Physical Pin 37
-        pinMode(24, OUTPUT);  // Pin A / GPIO Pin #19 of Pi / Physical Pin 35
 
         digitalWrite(25, input_B); // B bit selection
         digitalWrite(24, input_A); // A bit selection
@@ -266,15 +256,11 @@ int jeff_maintenance_routine_read(int transceiver, int port)
         int input_D = transceiver_select[(trans_num - 4)][0];
         int input_C = transceiver_select[(trans_num - 4)][1];
 
-        pinMode(28, OUTPUT);  // Pin D / GPIO Pin #20 of Pi / Physical Pin 38
-        pinMode(27, OUTPUT);  // Pin C / GPIO Pin #16 of Pi / Physical Pin 36
-
         digitalWrite(28, input_D); //D bit selection
         digitalWrite(27, input_C); //c bit selection
         digitalWrite(27, 0);       //Allow Mux to operate
         digitalWrite(23, 1);       //Inhibit other Mux
     }
-    */
 
     int num_bytes = 0;
 
@@ -288,7 +274,7 @@ int jeff_maintenance_routine_read(int transceiver, int port)
         elapsed_time = difference*1000/CLOCKS_PER_SEC;
         //printf("Elasped time: %i\n",elapsed_time);
 
-        num_bytes = read(serial_port, &read_buf, 64);
+        num_bytes = read(serial_port, &read_buf, 8);
 
         if (num_bytes < 0){
             printf("Error reading: %s", strerror(errno));
@@ -312,7 +298,7 @@ int jeff_maintenance_routine_read(int transceiver, int port)
                 //break;
             }
         }
-    }while(elapsed_time < 1000);
+    }while(elapsed_time < 100);
 
     //memset(read_buf, '\0', DATA_SIZE);
 
@@ -328,30 +314,19 @@ int jeff_maintenance_routine_read(int transceiver, int port)
 
 int jeff_maintenance_routine_send(int transceiver, char **data, int port)
 {
-    /*
-    wiringPiSetup();      // set up wiring the pins for transceiver selection
-    pinMode(22, OUTPUT);  // RST Pin / GPIO Pin #6 of Pi / Physical Pin 31
-    pinMode(27, OUTPUT);  // INH Pin for 4-7 / GPIO Pin #16 of Pi / Physical Pin 36
-    pinMode(23, OUTPUT);  // INH Pin for 0-3 / GPIO Pin #13 of Pi / Physical Pin 33
-    */
 
     int trans_num = transceiver;         // grab which transceiver to use
     char **msg = data;                   // send message buffer
     int serial_port = port;              // grab FD for serial port
-    trans_num = trans_num - 1;           // Passed in transceiver is from 1-8 but for calculation we use 0-7, subtrtact 1 from whatever is passed in
     int status = 0;
 
     //clear serial port before start
     tcflush(serial_port, TCIOFLUSH);
 
-    /*
     // transceiver bit selection
     if (trans_num <= 3){
         int input_B = transceiver_select[(trans_num % 7)][0];
         int input_A = transceiver_select[(trans_num % 7)][1];
-
-        pinMode(25, OUTPUT);  // Pin B / GPIO Pin #26 of Pi / Physical Pin 37
-        pinMode(24, OUTPUT);  // Pin A / GPIO Pin #19 of Pi / Physical Pin 35
 
         digitalWrite(25, input_B); // B bit selection
         digitalWrite(24, input_A); // A bit selection
@@ -361,15 +336,11 @@ int jeff_maintenance_routine_send(int transceiver, char **data, int port)
         int input_D = transceiver_select[(trans_num - 4)][0];
         int input_C = transceiver_select[(trans_num - 4)][1];
 
-        pinMode(28, OUTPUT);  // Pin D / GPIO Pin #20 of Pi / Physical Pin 38
-        pinMode(27, OUTPUT);  // Pin C / GPIO Pin #16 of Pi / Physical Pin 36
-
         digitalWrite(28, input_D); //D bit selection
         digitalWrite(27, input_C); //c bit selection
         digitalWrite(27, 0);       //Allow Mux to operate
         digitalWrite(23, 1);       //Inhibit other Mux
     }
-    */
 
     int sent_bytes = write(serial_port, msg, strlen(msg));      // send message
     if (sent_bytes < 0){                                        // check for sending error
@@ -544,6 +515,14 @@ int main() {
     //pthread_t thread_tx;
     //pthread_t thread_rx;
 
+    wiringPiSetup();      // set up wiring the pins for transceiver selection
+    pinMode(27, OUTPUT);  // INH Pin for 4-7 / GPIO Pin #16 of Pi / Physical Pin 36
+    pinMode(23, OUTPUT);  // INH Pin for 0-3 / GPIO Pin #13 of Pi / Physical Pin 33
+    pinMode(25, OUTPUT);  // Pin B / GPIO Pin #26 of Pi / Physical Pin 37
+    pinMode(24, OUTPUT);  // Pin A / GPIO Pin #19 of Pi / Physical Pin 35
+    pinMode(28, OUTPUT);  // Pin D / GPIO Pin #20 of Pi / Physical Pin 38
+    pinMode(27, OUTPUT);  // Pin C / GPIO Pin #16 of Pi / Physical Pin 36
+
     // open the serial port
     int serial_port = open("/dev/ttyS0", O_RDWR| O_NOCTTY);
     int val = fcntl(serial_port, F_GETFL, 0);
@@ -627,14 +606,14 @@ int main() {
         int checksum = 0;
 
         while(end_file == 0){
-            status_read = jeff_maintenance_routine_read(0,serial_port);
+            status_read = jeff_maintenance_routine_read(4,serial_port);
             n = 0;
             if (status_read == 0){
                 //printf("COMMUNICATION TIMEOUT\n");
             }else if(status_read == 1){
                 //printf("COMMUNICATION SUCCESS\n");
                 //printf("\n");
-                printf("ENTIRE MESSAGE: %s\n",rec_msg);
+                //printf("ENTIRE MESSAGE: %s\n",rec_msg);
 
                 // checksum
                 int checksum = 0;
@@ -650,7 +629,7 @@ int main() {
                     while(c <= 6){
                         if (rec_msg[c] == '^'){
                             //printf("END OF FILE\n");
-                            //end_file = 1;
+                            end_file = 1;
                         }
                         c++;
                     }
@@ -661,7 +640,7 @@ int main() {
                 }
             }
 
-            status_send = jeff_maintenance_routine_send(0,rec_msg,serial_port);
+            status_send = jeff_maintenance_routine_send(4,rec_msg,serial_port);
             if (status_send == 0){
                 printf("ERROR SENDING\n");
             }else if(status_send == 1){
