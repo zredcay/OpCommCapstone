@@ -16,7 +16,7 @@
 
 int math(float Ax, float Ay, float Az, float Gx, float Gy, float Gz, float Mx, float My, float Mz, int trans, float angle)
 {
-
+	
 
 
 return 0;
@@ -29,13 +29,22 @@ int main ()
 	char message[100];
 	int n = 0;
 	int test;
+	float Ax, float Ay, float Az, float Gx, float Gy, float Gz, float Mx, float My, float Mz;
 	float angle;
 	float dist;
 	int transceiver;
 	int result;	
+	
 	struct data ex;
 	struct shared sharMem;
+	struct Memory arr;
+	
+	
 	sem_t* mutex;
+	
+	
+	
+	
 	State NextState = Intialization;
 	printf("setting event\n");
 	Event NewEvent = Code_Finished_Event;
@@ -46,10 +55,8 @@ int main ()
 		{
 		case Intialization:
         	{
-        		connectRP();
-        		sharMem = createMemory();
-        		
-        		mutex = createNamedSem();
+        		sharMem = createMemory(); // creates shared memory
+        		mutex = createNamedSem(); // creates named semaphore
 			
 			clock_t init_bluetooth = clock();
 			int elapsed_time = 0;
@@ -60,9 +67,17 @@ int main ()
 			}while(elapsed_time < 30000);
 			
 			
-        		sharedMemory(flag, sharMem, mutex);
-        		closeNamedSem(mutex);
-        		closeMemeory(sharMem);
+        		arr = sharedMemory(flag, sharMem, mutex); // also maintenance code
+        		closeNamedSem(mutex); // goes in end tpo close named semphore
+        		closeMemeory(sharMem); // goes in end to close shared memory
+        		////************this is maintenance code **************
+        		for(int i = 0; i < 36; i++)
+     				{
+     	  				printf("Server has filled %i to shared memory...\n", arr.data[i]);  
+     	  				//use this to convert to the data  
+     				}
+     			//transceiver = math(Ax, Ay, Az, Gx, Gy, Gz, Mx, My, Mz, transceiver, angle);
+     			//************end of maintenance code**********
             		NewEvent = Code_Finished_Event;
 			NextState = CodeFinishedHandler(NextState);
         	}
@@ -70,21 +85,21 @@ int main ()
 		
 		case End:
         	{
+        		// Closes named semaphore and shared memory before exiting code
+        		//closeNamedSem(mutex);
+        		//closeMemeory(sharMem);
         		//printf("case end state\n");
             		if(User_Exit_Event == NewEvent) // code completes safely and exits S
             		{
-            			disconnectRP();
             			//printf("Code Finished\n");         		
             		}
             		else if(Should_Not_Get_Here_Event == NewEvent) // uncaught error or bug in code 
             		{
-            			disconnectRP();
             			printf("big error stop code now\n");
             			exit(-1);         		
             		}
             		else // unexpected state and event matching 
             		{
-            			disconnectRP();
 				printf("event not updated or waiting on user\n");
             			exit(-1);   
 			}
@@ -113,7 +128,7 @@ int main ()
 			    		NewEvent = Code_Finished_Event;
 			    		NextState = CodeFinishedHandler(NextState);
 			    	}
-			    	else // transceiver should not give a number higher than 8 
+			    	else // angle should not give a number higher than 360
 			    	{
 					NewEvent = Should_Not_Get_Here_Event;
 					NextState = ShouldNotGetHandler(NextState);
@@ -159,7 +174,7 @@ int main ()
         		
             		if(Code_Finished_Event == NewEvent)
             		{
-            			result = trans();
+            			result = trans(); //result if the data was sent and recived correctly
             			printf("Result = %i\n", result);
             			if (result == 0) // result is good data
             			{
@@ -195,7 +210,7 @@ int main ()
         	
         	case Recovery:
         	{
-        		
+        		//try tans +1 and trans -1 in new recovery code 
             		if(Bad_Data_Event == NewEvent)
             		{
             			if(true)
