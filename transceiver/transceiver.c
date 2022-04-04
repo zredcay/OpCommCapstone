@@ -10,8 +10,8 @@ char rec_msg[1024];        // Buffer for reading entire message packet to be ret
 int n = 0;                 // counter used for populating rec_msg
 
 // Flags for setting which robot you are using for testing
-int JEFF = 0;
-int SOURCE = 1;
+int JEFF = 1;
+int SOURCE = 0;
 
 
 // Linux headers
