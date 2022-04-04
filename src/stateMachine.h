@@ -1,4 +1,14 @@
+#ifndef _stateMachine_h_
+#define _stateMachine_h_
 
+
+typedef struct mainData{
+	int trans;
+	float angle;
+	float dist;
+	float Vx;
+	float Vy
+};
 
 typedef enum 
 {
@@ -74,7 +84,7 @@ State UserExitHandler(State thisState){
 	return End;
 }
 
-
+#endif
 
 
 
