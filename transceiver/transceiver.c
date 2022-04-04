@@ -234,8 +234,7 @@ int jeff_maintenance_routine_read(int transceiver, int port)
 
     int trans_num = transceiver;                   // grab which transceiver to use
     int serial_port = port;                        // grab FD for serial port
-    //printf("Trans Num: %i\n",trans_num);
-    int status = 0;
+    int status = 0;                                // status variable for determining if data was sent correctly
 
     //clear serial port before start
     //tcflush(serial_port, TCIOFLUSH);
@@ -269,7 +268,6 @@ int jeff_maintenance_routine_read(int transceiver, int port)
     do{
         clock_t difference = clock() - start;
         elapsed_time = difference*1000/CLOCKS_PER_SEC;
-        //printf("Elasped time: %i\n",elapsed_time);
 
         num_bytes = read(serial_port, &read_buf, 8);
 
@@ -280,41 +278,25 @@ int jeff_maintenance_routine_read(int transceiver, int port)
 
         if (num_bytes > 0){
             while(num_bytes > 0){
-                //printf("\n");
-                //printf("Read %i bytes\n",num_bytes);
-                //printf("Message Recieved: %c\n", read_buf[0]);
-                //printf("%s\n",read_buf);
-                //printf("%i\n",strlen(read_buf));
                 rec_msg[n] = read_buf[0];
                 n++;
-                //printf("Total of %i bytes sent\n",COUNT);
                 //printf("SUCCESS\n");
                 num_bytes = read(serial_port, &read_buf, 1);
                 status = 1;
-                //break;
             }
         }
     }while(elapsed_time < 100);
-
-    //memset(read_buf, '\0', DATA_SIZE);
-
-    /*
-    if (n % 8 == 0){
-        usleep(1);
-        tcflush(serial_port, TCIOFLUSH);
-    }
-    */
+    // timer runs for 0.1 s
 
     return status;
 }
 
-int jeff_maintenance_routine_send(int transceiver, char **data, int port)
+int jeff_maintenance_routine_send(int transceiver, char data[], int port)
 {
 
     int trans_num = transceiver;         // grab which transceiver to use
-    char **msg = data;                   // send message buffer
     int serial_port = port;              // grab FD for serial port
-    int status = 0;
+    int status = 0;                      // status variable for determining if data was sent correctly
 
     //clear serial port before start
     tcflush(serial_port, TCIOFLUSH);
@@ -338,8 +320,10 @@ int jeff_maintenance_routine_send(int transceiver, char **data, int port)
         digitalWrite(23, 1);       //Inhibit other Mux
     }
 
-    int sent_bytes = write(serial_port, msg, strlen(msg));      // send message
-    if (sent_bytes < 0){                                        // check for sending error
+    int sent_bytes = write(serial_port, data, 8);      // send message
+
+    // check for sending error
+    if (sent_bytes < 0){
         printf("Error Sending\n");
     }else{
         status = 1;
