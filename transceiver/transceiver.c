@@ -10,8 +10,8 @@ char rec_msg[1024];        // Buffer for reading entire message packet to be ret
 int n = 0;                 // counter used for populating rec_msg
 
 // Flags for setting which robot you are using for testing
-int JEFF = 1;
-int SOURCE = 0;
+int JEFF = 0;
+int SOURCE = 1;
 
 
 // Linux headers
@@ -229,8 +229,8 @@ int jeff_maintenance_routine_read(int transceiver, int port)
 
     // transceiver bit selection
     if (trans_num <= 3){
-        int input_B = transceiver_select[(trans_num % 7)][0];
-        int input_A = transceiver_select[(trans_num % 7)][1];
+        int input_B = transceiver_select[(trans_num)][0];
+        int input_A = transceiver_select[(trans_num)][1];
 
         digitalWrite(24, input_B); // B bit selection
         digitalWrite(25, input_A); // A bit selection
@@ -292,8 +292,8 @@ int jeff_maintenance_routine_send(int transceiver, char data[], int port)
 
     // transceiver bit selection
     if (trans_num <= 3){
-        int input_B = transceiver_select[(trans_num % 7)][0];
-        int input_A = transceiver_select[(trans_num % 7)][1];
+        int input_B = transceiver_select[(trans_num)][0];
+        int input_A = transceiver_select[(trans_num)][1];
 
         digitalWrite(24, input_B); // B bit selection
         digitalWrite(25, input_A); // A bit selection
@@ -331,11 +331,11 @@ int source_maintenance_routine_send(int transceiver, char data[], int port)
 
     // transceiver bit selection
     if (trans_num <= 3){
-        int input_B = transceiver_select[(trans_num % 7)][0];
-        int input_A = transceiver_select[(trans_num % 7)][1];
+        int input_B = transceiver_select[(trans_num)][0];
+        int input_A = transceiver_select[(trans_num)][1];
 
-        digitalWrite(25, input_B); // B bit selection
-        digitalWrite(24, input_A); // A bit selection
+        digitalWrite(24, input_B); // B bit selection
+        digitalWrite(25, input_A); // A bit selection
         digitalWrite(23, 0);       // Allow Mux to operate
         digitalWrite(27, 1);       // Inhibit other Mux
     }else{
@@ -343,7 +343,7 @@ int source_maintenance_routine_send(int transceiver, char data[], int port)
         int input_C = transceiver_select[(trans_num - 4)][1];
 
         digitalWrite(28, input_D); //D bit selection
-        digitalWrite(27, input_C); //c bit selection
+        digitalWrite(29, input_C); //c bit selection
         digitalWrite(27, 0);       //Allow Mux to operate
         digitalWrite(23, 1);       //Inhibit other Mux
     }
@@ -372,11 +372,11 @@ int source_maintenance_routine_read(int transceiver, int port)
 
     // transceiver bit selection
     if (trans_num <= 3){
-        int input_B = transceiver_select[(trans_num % 7)][0];
-        int input_A = transceiver_select[(trans_num % 7)][1];
+        int input_B = transceiver_select[(trans_num)][0];
+        int input_A = transceiver_select[(trans_num)][1];
 
-        digitalWrite(25, input_B); // B bit selection
-        digitalWrite(24, input_A); // A bit selection
+        digitalWrite(24, input_B); // B bit selection
+        digitalWrite(25, input_A); // A bit selection
         digitalWrite(23, 0);       // Allow Mux to operate
         digitalWrite(27, 1);       // Inhibit other Mux
     }else{
@@ -384,7 +384,7 @@ int source_maintenance_routine_read(int transceiver, int port)
         int input_C = transceiver_select[(trans_num - 4)][1];
 
         digitalWrite(28, input_D); //D bit selection
-        digitalWrite(27, input_C); //c bit selection
+        digitalWrite(29, input_C); //c bit selection
         digitalWrite(27, 0);       //Allow Mux to operate
         digitalWrite(23, 1);       //Inhibit other Mux
     }
@@ -646,10 +646,10 @@ int main() {
             msg[7] = checksum + '0';
 
             // used for testing sending messages
-            scanf("%s",&msg);
+            //scanf("%s",&msg);
 
             // send msg to JEFF
-            status_send = source_maintenance_routine_send(0,msg,serial_port);
+            status_send = source_maintenance_routine_send(source_trans,msg,serial_port);
 
             // check if msg was sent correctly
             if (status_send == 0){
@@ -659,14 +659,14 @@ int main() {
             }
 
             // wait for JEFF response
-            status_read = source_maintenance_routine_read(0,serial_port);
+            status_read = source_maintenance_routine_read(source_trans,serial_port);
             n = 0;
             if (status_read == 0){
                 printf("COMMUNICATION TIMEOUT\n");
                 fseek(fp,-7,SEEK_CUR);
             }else if(rec_msg[0] == '0'){
                 c++;
-                //printf("COMMUNICATION SUCCESS\n");
+                printf("COMMUNICATION SUCCESS\n");
                 //printf("ENTIRE MESSAGE: %s\n",rec_msg);
                 //int read_bytes = strlen(rec_msg);
                 //printf("READ BYTES: %i\n",read_bytes);
