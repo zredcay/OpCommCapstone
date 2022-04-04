@@ -10,8 +10,8 @@ int COUNT = 0;
 char rec_msg[1024];
 int n = 0;
 
-int JEFF = 1;
-int SOURCE = 0;
+int JEFF = 0;
+int SOURCE = 1;
 
 
 // Linux headers
@@ -21,7 +21,7 @@ int SOURCE = 0;
 #include <unistd.h> // write(), read(), close()
 
 // Wiring Pi Headers
-
+#include <wiringPi.h>
 
 // *****************************************************************************************************
 // IMPORTANT NOTES:
@@ -383,14 +383,9 @@ int jeff_maintenance_routine_send(int transceiver, char **data, int port)
 
 int source_maintenance_routine_send(int transceiver, char data[], int port)
 {
-    /*
-    wiringPiSetup();      // set up wiring the pins for transceiver selection
-    pinMode(22, OUTPUT);  // RST Pin / GPIO Pin #6 of Pi / Physical Pin 31
-    pinMode(27, OUTPUT);  // INH Pin for 4-7 / GPIO Pin #16 of Pi / Physical Pin 36
-    pinMode(23, OUTPUT);  // INH Pin for 0-3 / GPIO Pin #13 of Pi / Physical Pin 33
-    */
 
     int trans_num = transceiver;            // grab which transceiver to use
+
     //printf("SENDING OUT: %s\n",data);
     //printf("SIZE OF DATA: %i\n",strlen(data));
 
@@ -403,39 +398,33 @@ int source_maintenance_routine_send(int transceiver, char data[], int port)
     */
 
     int serial_port = port;                 // grab FD for serial port
-    trans_num = trans_num - 1;              // Passed in transceiver is from 1-8 but for calculation we use 0-7, subtrtact 1 from whatever is passed in
+    //trans_num = trans_num - 1;              // Passed in transceiver is from 1-8 but for calculation we use 0-7, subtrtact 1 from whatever is passed in
     //printf("Trans Num: %i\n",trans_num);
     int status = 0;
 
     //clear serial port before start
     //tcflush(serial_port, TCIOFLUSH);
 
-    /*
+    printf("TRANS #: %i\n",trans_num);
+
     // transceiver bit selection
     if (trans_num <= 3){
         int input_B = transceiver_select[(trans_num % 7)][0];
         int input_A = transceiver_select[(trans_num % 7)][1];
 
-        pinMode(25, OUTPUT);  // Pin B / GPIO Pin #26 of Pi / Physical Pin 37
-        pinMode(24, OUTPUT);  // Pin A / GPIO Pin #19 of Pi / Physical Pin 35
-
-        digitalWrite(25, input_B); // B bit selection
-        digitalWrite(24, input_A); // A bit selection
-        digitalWrite(23, 0);       // Allow Mux to operate
-        digitalWrite(27, 1);       // Inhibit other Mux
+        digitalWrite(25, LOW); // B bit selection
+        digitalWrite(24, LOW); // A bit selection
+        digitalWrite(23, LOW);       // Allow Mux to operate
+        digitalWrite(27, HIGH);       // Inhibit other Mux
     }else{
         int input_D = transceiver_select[(trans_num - 4)][0];
         int input_C = transceiver_select[(trans_num - 4)][1];
-
-        pinMode(28, OUTPUT);  // Pin D / GPIO Pin #20 of Pi / Physical Pin 38
-        pinMode(27, OUTPUT);  // Pin C / GPIO Pin #16 of Pi / Physical Pin 36
 
         digitalWrite(28, input_D); //D bit selection
         digitalWrite(27, input_C); //c bit selection
         digitalWrite(27, 0);       //Allow Mux to operate
         digitalWrite(23, 1);       //Inhibit other Mux
     }
-    */
 
     // Write to serial port
 
@@ -453,30 +442,20 @@ int source_maintenance_routine_send(int transceiver, char data[], int port)
 
 int source_maintenance_routine_read(int transceiver, int port)
 {
-    /*
-    wiringPiSetup();      // set up wiring the pins for transceiver selection
-    pinMode(22, OUTPUT);  // RST Pin / GPIO Pin #6 of Pi / Physical Pin 31
-    pinMode(27, OUTPUT);  // INH Pin for 4-7 / GPIO Pin #16 of Pi / Physical Pin 36
-    pinMode(23, OUTPUT);  // INH Pin for 0-3 / GPIO Pin #13 of Pi / Physical Pin 33
-    */
 
     int trans_num = transceiver;                   // grab which transceiver to use
     int serial_port = port;                        // grab FD for serial port
-    trans_num = trans_num - 1;                     // Passed in transceiver is from 1-8 but for calculation we use 0-7, subtrtact 1 from whatever is passed in
+
     //printf("Trans Num: %i\n",trans_num);
     int status = 0;
 
     //clear serial port before start
     tcflush(serial_port, TCIOFLUSH);
 
-    /*
     // transceiver bit selection
     if (trans_num <= 3){
         int input_B = transceiver_select[(trans_num % 7)][0];
         int input_A = transceiver_select[(trans_num % 7)][1];
-
-        pinMode(25, OUTPUT);  // Pin B / GPIO Pin #26 of Pi / Physical Pin 37
-        pinMode(24, OUTPUT);  // Pin A / GPIO Pin #19 of Pi / Physical Pin 35
 
         digitalWrite(25, input_B); // B bit selection
         digitalWrite(24, input_A); // A bit selection
@@ -486,15 +465,11 @@ int source_maintenance_routine_read(int transceiver, int port)
         int input_D = transceiver_select[(trans_num - 4)][0];
         int input_C = transceiver_select[(trans_num - 4)][1];
 
-        pinMode(28, OUTPUT);  // Pin D / GPIO Pin #20 of Pi / Physical Pin 38
-        pinMode(27, OUTPUT);  // Pin C / GPIO Pin #16 of Pi / Physical Pin 36
-
         digitalWrite(28, input_D); //D bit selection
         digitalWrite(27, input_C); //c bit selection
         digitalWrite(27, 0);       //Allow Mux to operate
         digitalWrite(23, 1);       //Inhibit other Mux
     }
-    */
 
     int num_bytes = 0;
 
@@ -529,7 +504,7 @@ int source_maintenance_routine_read(int transceiver, int port)
             status = 1;
             //break;
         }
-    }while(elapsed_time < 500);
+    }while(elapsed_time < 100);
 
 
     memset(read_buf, 0, DATA_SIZE);
@@ -543,6 +518,15 @@ int main() {
     //create threads
     //pthread_t thread_tx;
     //pthread_t thread_rx;
+
+    wiringPiSetup();
+
+    pinMode(27, OUTPUT);  // INH Pin for 4-7 / GPIO Pin #16 of Pi / Physical Pin 36
+    pinMode(23, OUTPUT);  // INH Pin for 0-3 / GPIO Pin #13 of Pi / Physical Pin 33
+    pinMode(25, OUTPUT);  // Pin B / GPIO Pin #26 of Pi / Physical Pin 37
+    pinMode(24, OUTPUT);  // Pin A / GPIO Pin #19 of Pi / Physical Pin 35
+    pinMode(28, OUTPUT);  // Pin D / GPIO Pin #20 of Pi / Physical Pin 38
+    pinMode(27, OUTPUT);  // Pin C / GPIO Pin #16 of Pi / Physical Pin 36
 
     // open the serial port
     int serial_port = open("/dev/ttyS0", O_RDWR| O_NOCTTY);
@@ -713,12 +697,12 @@ int main() {
             num_packet = size / 7;
         }
 
-        //printf("NUM OF PACKETS: %i\n",num_packet);
+        printf("NUM OF PACKETS: %i\n",num_packet);
         int c = 0;
         int i = 0;
         int j = 0;
         char *packet;
-        while(c <= num_packet){
+        while(c < num_packet){
             for (i = (c*7); i <= ((c * 7) + 6); i++){
                 msg[j] = fgetc(fp);
                 j++;
