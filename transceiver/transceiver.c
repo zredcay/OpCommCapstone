@@ -124,18 +124,6 @@ void *tx_function(void *vargp)
 
         elapsed_time = 0;
 
-        /*
-        do{
-            clock_t difference = clock() - start;
-            elapsed_time = difference*1000/CLOCKS_PER_SEC;
-            if (elapsed_time % 10000 == 0){
-                sent_bytes = write(serial_port, msg, strlen(msg));
-void *rx_function(void *vargp)
-{
-            }
-        }while( elapsed_time < 30000);
-        */
-
         int result = strcmp("END", msg);                            // send 'END' to close channel
         if (result  == 0){
             break;
@@ -650,6 +638,9 @@ int main() {
             // store checksum value in msg buffer
             msg[7] = checksum + '0';
 
+            // used for testing sending messages
+            scanf("%s",&msg);
+
             // send msg to JEFF
             status_send = source_maintenance_routine_send(0,msg,serial_port);
 
@@ -672,12 +663,10 @@ int main() {
                 //printf("ENTIRE MESSAGE: %s\n",rec_msg);
                 //int read_bytes = strlen(rec_msg);
                 //printf("READ BYTES: %i\n",read_bytes);
-                //memset(rec_msg,'\0',8);
             }else if(rec_msg[0] == '1'){
                 printf("Error: Bad Data\n");
                 fseek(fp,-7,SEEK_CUR);
             }
-            //memset(rec_msg,'\0',8);
         }
 
         // close file
