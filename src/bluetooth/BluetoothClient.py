@@ -30,6 +30,6 @@ while True:
     # via the client connection send the following, the variable need to be cast as strings to encode correctly, needs to be one send command otherwise it will double send data
     c.send(data)   
     
-    time.sleep(5.0)
+    time.sleep(20)
 
 pause()
