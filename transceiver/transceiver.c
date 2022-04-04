@@ -349,7 +349,7 @@ int source_maintenance_routine_send(int transceiver, char data[], int port)
     }
 
     // Write to serial port
-    int sent_bytes = write(serial_port, data, 8);               // send message
+    int sent_bytes = write(serial_port, data, DATA_SIZE);               // send message
 
     if (sent_bytes < 0){                                        // check for sending error
         printf("Error Sending\n");
@@ -646,7 +646,7 @@ int main() {
             msg[7] = checksum + '0';
 
             // used for testing sending messages
-            //scanf("%s",&msg);
+            scanf("%s",&msg);
 
             // send msg to JEFF
             status_send = source_maintenance_routine_send(source_trans,msg,serial_port);
