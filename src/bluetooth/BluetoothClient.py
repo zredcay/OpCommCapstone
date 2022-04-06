@@ -22,7 +22,7 @@ while True:
     magx, magy, magz = IMU.getMagnetic()  # break the magentic tuple into its respective pieces
 
     # assign data to data variable
-    data = str(accx) + ', ' + str(accy) + ', ' + str(accz) + ', ' + str(gyrox) + ', ' + str(gyroy) + ', ' + str(gyroz) + ', ' + str(magx) + ', ' + str(magy) + ', ' + str(magz)
+    data = str(accx) + ' ' + str(accy) + ' ' + str(accz) + ' ' + str(gyrox) + ' ' + str(gyroy) + ' ' + str(gyroz) + ' ' + str(magx) + ' ' + str(magy) + ' ' + str(magz)
 
     # write jeff's data to shm
     shm.shmwrite(data, 1)
@@ -30,6 +30,6 @@ while True:
     # via the client connection send the following, the variable need to be cast as strings to encode correctly, needs to be one send command otherwise it will double send data
     c.send(data)   
     
-    time.sleep(20)
+    time.sleep(1)
 
 pause()
