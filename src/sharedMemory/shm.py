@@ -32,15 +32,15 @@ def shmwrite(data, flag):
     try:
         # create sem object using the name created in main.c
         sem = posix_ipc.Semaphore(sem_name, 0, 0o600, 1)
-        
+
         # acquire access to the semaphore with a timeout of 1 s
         sem.acquire(1)
         # if flag is 0 switch to source segment
         if flag == 0:
-        # convert string to bytes
-        bytes_data = data.encode('utf-8')
-        # write to memory
-        memory.write(bytes_data, offset = 0)
+            # convert string to bytes
+            bytes_data = data.encode('utf-8')
+            # write to memory
+            memory.write(bytes_data, offset = 0)
             
 
         # if flag is 1 switch to jeff segment

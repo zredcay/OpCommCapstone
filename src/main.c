@@ -134,10 +134,10 @@ int main ()
 	
 	
 	
-	for(int i = 0; i < 4; i++){
+	/*for(int i = 0; i < 4; i++){
 	 data = math(Ax, Ay, Az, Mx, My, Mz, mainTimer, data);
 	 }
-	 exit(-1);
+	 exit(-1);*/
 	
 	
 	State NextState = Intialization;
