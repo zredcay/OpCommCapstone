@@ -17,7 +17,7 @@ def data_received(data):  # defines the data_received function which is passed t
     magx, magy, magz = IMU.getMagnetic()  # break the magnetic tuple into its respective parts
     
     # assign data to val variable
-    val = str(accx) + ', ' + str(accy) + ', ' + str(accz) + ', ' + str(gyrox) + ', ' + str(gyroy) + ', ' + str(gyroz) + ', ' + str(magx) + ', ' + str(magy) + ', ' + str(magz)
+    val = str(accx) + ' ' + str(accy) + ' ' + str(accz) + ' ' + str(gyrox) + ' ' + str(gyroy) + ' ' + str(gyroz) + ' ' + str(magx) + ' ' + str(magy) + ' ' + str(magz)
     
     # write source's data to shm
     shm.shmwrite(val,0)
