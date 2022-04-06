@@ -18,7 +18,7 @@
 int convertTransceiver(int trans)
 {
 	int newtrans;
-	
+
 	if( trans == 0)
 	{
 		newtrans = 1;
@@ -62,20 +62,20 @@ struct mainData math(float Ax, float Ay, float Az, float Mx, float My, float Mz,
 	printf(" angle %f distance %f transciever %d Velocity %f %f\n", data.angle, data.dist, data.trans, data.Vx, data.Vy);
 	float PI  = 3.14159265;
 	 float val = PI / 180.0;
-	
+
 	float Vfx = data.Vx + (Ax * timer);
 	float Vfy = data.Vy + (Ay * timer);
-	float Xo = data.dist*cos(data.angle*val); 
+	float Xo = data.dist*cos(data.angle*val);
 	float Yo = data.dist*sin(data.angle*val);
 	float Xf = Xo + .5*(Vfx + data.Vx)*timer;
 	float Yf = Yo + .5*(Vfy + data.Vy)*timer;
-	
+
 	printf("Vfx %f Vfy %f Xo %f Yo %f Xf %f Yf %f \n", Vfx, Vfy, Xo, Yo, Xf, Yf);
-	
-	
+
+
 	data.angle = (atan(Yf/Xf))/val;
 	if(Xf < 0 )
-	{ 
+	{
 		data.angle = data.angle + 180;
 	}
 	if(Yf < 0 && Xf > 0)
@@ -83,17 +83,17 @@ struct mainData math(float Ax, float Ay, float Az, float Mx, float My, float Mz,
 		data.angle = data.angle + 360;
 	}
 	data.dist = sqrt((Xf * Xf) + (Yf * Yf));
-	
+
 	data.trans = convertTransceiver(data.angle/45);
-	
+
 	data.Vx = Vfx;
 	data.Vy = Vfy;
-	
-	
-	
+
+
+
 	printf(" angle %f distance %f transciever %d Velocity %f %f\n",  data.angle, data.dist, data.trans, data.Vx, data.Vy);
-	
-	
+
+
 return data;
 }
 
@@ -105,41 +105,41 @@ int main ()
 	int n = 0;
 	int test;
 	float Ax = .2;
-	float Ay = .1; 
+	float Ay = .1;
 	float Az; float Gx; float Gy; float Gz; float Mx; float My; float Mz;
 	float angle = 100;
-	float dist = .3; 
+	float dist = .3;
 	int transceiver = 0;
-	int result;	
+	int result;
 	float mainTimer = .5;
 	float Vx = 0;
 	float Vy = 0;
-	
+
 	struct data ex;
 	struct shared sharMem;
 	struct Memory arr;
 	struct mainData data;
-	
-	
+
+
 	sem_t* mutex;
-	
+
 	data.angle = 120;
-	
+
 	data.dist = .2;
-	
+
 	data.trans = 3;
-	
+
 	data.Vx = -.2;
 	data.Vy = -.1;
-	
-	
-	
+
+    /*
+
 	for(int i = 0; i < 4; i++){
 	 data = math(Ax, Ay, Az, Mx, My, Mz, mainTimer, data);
 	 }
 	 exit(-1);
-	
-	
+    */
+
 	State NextState = Intialization;
 	printf("setting event\n");
 	Event NewEvent = Code_Finished_Event;
@@ -152,7 +152,7 @@ int main ()
         	{
         		sharMem = createMemory(); // creates shared memory
         		mutex = createNamedSem(); // creates named semaphore
-			
+
 			clock_t init_bluetooth = clock();
 			int elapsed_time = 0;
 
@@ -160,16 +160,16 @@ int main ()
 				clock_t difference = clock() - init_bluetooth;
 				elapsed_time = difference*1000/CLOCKS_PER_SEC;
 			}while(elapsed_time < 30000);
-			
-			
+
+
         		arr = sharedMemory(flag, sharMem, mutex); // also maintenance code
         		closeNamedSem(mutex); // goes in end tpo close named semphore
         		closeMemeory(sharMem); // goes in end to close shared memory
         		////************this is maintenance code **************
         		for(int i = 0; i < 36; i++)
      				{
-     	  				printf("Server has filled %i to shared memory...\n", arr.data[i]);  
-     	  				//use this to convert to the data  
+     	  				printf("Server has filled %i to shared memory...\n", arr.data[i]);
+     	  				//use this to convert to the data
      				}
      			//transceiver = math(Ax, Ay, Az, Gx, Gy, Gz, Mx, My, Mz, transceiver, angle);
      			//ata = math(Ax, Ay, Az, Mx, My, Mz, transceiver, dist, angle, mainTimer, Vx, Vy);
@@ -178,7 +178,7 @@ int main ()
 			NextState = CodeFinishedHandler(NextState);
         	}
         	break;
-		
+
 		case End:
         	{
         		// Closes named semaphore and shared memory before exiting code
@@ -187,26 +187,26 @@ int main ()
         		//printf("case end state\n");
             		if(User_Exit_Event == NewEvent) // code completes safely and exits S
             		{
-            			//printf("Code Finished\n");         		
+            			//printf("Code Finished\n");
             		}
-            		else if(Should_Not_Get_Here_Event == NewEvent) // uncaught error or bug in code 
+            		else if(Should_Not_Get_Here_Event == NewEvent) // uncaught error or bug in code
             		{
             			printf("big error stop code now\n");
-            			exit(-1);         		
+            			exit(-1);
             		}
-            		else // unexpected state and event matching 
+            		else // unexpected state and event matching
             		{
 				printf("event not updated or waiting on user\n");
-            			exit(-1);   
+            			exit(-1);
 			}
-            		
+
         	}
         	break;
-        	
-		
+
+
 		case Discovery:
 		{
-			
+
 			if(Code_Finished_Event == NewEvent)
 		    	{
 			    	ex = rplidarPi(test);// transceiver is the tranciever number
@@ -230,44 +230,44 @@ int main ()
 					NextState = ShouldNotGetHandler(NextState);
 			    	}
 			    	startTime = clock();
-				
+
 			    }
-			
-			    
+
+
 		}
 		break;
-		
+
 		case Alternate_Discovery:
         	{
         		printf("in alternatre discovery\n");
-        		
+
             		if(Bad_Data_Event == NewEvent)
             		{
             			if(true)
             			{
             				NewEvent = Code_Finished_Event;
             				NextState = CodeFinishedHandler(NextState);
-            			
+
             			}
-            			else 
+            			else
             			{
             				NewEvent = Bad_Data_Event;
             				NextState = BadDataHandler(NextState);
             			}
                 		startTime = clock();
             		}
-            		else 
+            		else
             		{
             			NewEvent = Should_Not_Get_Here_Event;
             			NextState = ShouldNotGetHandler(NextState);
             		}
-            		
+
         	}
         	break;
-        	
+
         	case Maintenance:
         	{
-        		
+
             		if(Code_Finished_Event == NewEvent)
             		{
             			result = trans(); //result if the data was sent and recived correctly
@@ -299,23 +299,23 @@ int main ()
 				NewEvent = Should_Not_Get_Here_Event;
 				startTime = clock();
 			}
-            		
+
         	}
         	break;
-        	
-        	
+
+
         	case Recovery:
         	{
-        		//try tans +1 and trans -1 in new recovery code 
+        		//try tans +1 and trans -1 in new recovery code
             		if(Bad_Data_Event == NewEvent)
             		{
             			if(true)
             			{
             				NewEvent = Code_Finished_Event;
             				NextState = CodeFinishedHandler(NextState);
-            			
+
             			}
-            			else 
+            			else
             			{
             				NewEvent = Bad_Data_Event;
             				NextState = BadDataHandler(NextState);
@@ -324,21 +324,21 @@ int main ()
             		}
             		if(Loss_of_LOS_Event == NewEvent)
             		{
-            			
+
             			if(true)
             			{
             				NewEvent = Code_Finished_Event;
             				NextState = CodeFinishedHandler(NextState);
-            			
+
             			}
-            			else 
+            			else
             			{
             				NewEvent = Bad_Data_Event;
             				NextState = BadDataHandler(NextState);
             			}
                 		startTime = clock();
             		}
-            		
+
         	}
         	break;
         	}

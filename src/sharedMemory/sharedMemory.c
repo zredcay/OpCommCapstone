@@ -16,23 +16,17 @@
 
 struct shared createMemory()
 {
-     key_t          ShmKEY = 111111; 
+     key_t          ShmKEY = 111111;
      int            ShmID = 0;
      struct Memory  *ShmPTR;
      INT32 arr[72];
      int err=0;
      struct shared ex;
-     
-     
-     for (INT32 i = 0; i < 72; i++) {
-    	arr[i] = rand()%10;
-    	printf("array %i is %i\n",i,arr[i]);
-     }			
-     
-     ShmID = shmget(ShmKEY, sizeof(struct Memory), IPC_CREAT | IPC_EXCL | 0666); // remove flags if key already exisits 
+
+     ShmID = shmget(ShmKEY, sizeof(struct Memory), IPC_CREAT | IPC_EXCL | 0666); // remove flags if key already exisits
      //ShmID = shmget(ShmKEY, sizeof(struct Memory), 0666); // remove flags if key already exisits
-     
-     if (ShmID < 0) 
+
+     if (ShmID < 0)
      {
         // for case of error does not return a valid shmid
         err = errno;
@@ -55,7 +49,7 @@ struct shared createMemory()
      ex.ShmID = ShmID;
      ex.ShmPTR = ShmPTR;
      return ex;
-		
+
 }
 
 sem_t* createNamedSem()
@@ -63,9 +57,9 @@ sem_t* createNamedSem()
 
      char* SEM_NAME = "opcapstone";
      sem_t* mutex;
-  	
 
-    
+
+
     if((mutex = sem_open(SEM_NAME, O_CREAT, 0600, 1)) == SEM_FAILED) {
     	perror("sem_open");
     	sem_unlink(SEM_NAME);
@@ -87,12 +81,12 @@ int closeNamedSem(sem_t* mutex)
 }
 
 int closeMemeory(struct shared ex)
-{ 
+{
      key_t ShmKEY = ex.ShmKEY;
      int ShmID = ex.ShmID;
-     struct Memory *ShmPTR = ex.ShmPTR; 
-     
-     
+     struct Memory *ShmPTR = ex.ShmPTR;
+
+
      shmdt((void *) ShmPTR);
      printf("Server has detached its shared memory...\n");
      shmctl(ShmID, IPC_RMID, NULL);
@@ -107,24 +101,24 @@ struct Memory sharedMemory(int flag, struct shared ex, sem_t* mutex)
 {
      key_t ShmKEY = ex.ShmKEY;
      int ShmID = ex.ShmID;
-     struct Memory *ShmPTR = ex.ShmPTR; 
+     struct Memory *ShmPTR = ex.ShmPTR;
      struct Memory arr;
      int err=0;
      int offset = 0;
      int max = 36;
- 
-    
+
+
      sem_wait(mutex);////**************8waiting till semaphore is open to read from **************
-	
-     printf("flag is %i\n", flag);	
-	
+
+     printf("flag is %i\n", flag);
+
      if(flag == 1)
      {
      		offset = 36;
      		max = 72;
      }
-     
-     
+
+
      for(int i = offset; i < max; i++)
      {
      	  arr.data[i] = ShmPTR->data[i];
@@ -132,15 +126,15 @@ struct Memory sharedMemory(int flag, struct shared ex, sem_t* mutex)
      }
 
      memset(ShmPTR->data, NULL, 36);
-     
+
      sem_post(mutex); // *********closing access to sempahore**********
-  
-  /*for(int i = offset; i < max; i++)
+
+  for(int i = offset; i < max; i++)
      {
-     	  
-     	  printf("Server has filled %d to shared memory...\n", arr[i]);    
-     	  
-     }*/
+
+     	  printf("Server has filled %d to shared memory...\n",arr.data[i]);
+
+     }
 	return arr;
  }
 
