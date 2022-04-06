@@ -166,9 +166,9 @@ int main ()
         		closeNamedSem(mutex); // goes in end tpo close named semphore
         		closeMemeory(sharMem); // goes in end to close shared memory
         		////************this is maintenance code **************
-        		for(int i = 0; i < 36; i++)
+        		for(int i = 0; i < 256; i++)
      				{
-     	  				printf("Server has filled %i to shared memory...\n", arr.data[i]);
+     	  				printf("Server has filled %c to shared memory...\n", arr.data[i]);
      	  				//use this to convert to the data
      				}
      			//transceiver = math(Ax, Ay, Az, Gx, Gy, Gz, Mx, My, Mz, transceiver, angle);

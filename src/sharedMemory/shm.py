@@ -48,6 +48,6 @@ def shmwrite(data, flag):
             # convert string to bytes
             bytes_data = data.encode('utf-8')
             # write to memory
-            memory.write(bytes_data, offset = 36)
+            memory.write(bytes_data, offset = 128)
     finally:
         sem.release()
