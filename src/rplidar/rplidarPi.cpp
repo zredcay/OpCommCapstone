@@ -168,7 +168,7 @@ struct data rplidarPi(int test)
 			angle = avgDist[i][0];
 		}
 	}
-	tran = (angle/45) + 1;
+	tran = (angle/45);
 	printf("transciever : %i \n", tran);
 
 

@@ -46,10 +46,11 @@ struct shared createMemory()
           printf("*** shmat error (server) ***\n");
           exit(1);
      }
-     for (INT32 i = 0; i < 72; i++) {
+     ///****************Fills memory with numbers for debugging*************
+     /*for (INT32 i = 0; i < 72; i++) {
       	ShmPTR->data[i] = arr[i];
       	printf("array %i is %i\n",i,ShmPTR->data[i]);
-     }
+     }*/
      ex.ShmKEY = ShmKEY;
      ex.ShmID = ShmID;
      ex.ShmPTR = ShmPTR;
@@ -102,12 +103,12 @@ int closeMemeory(struct shared ex)
 
 }
 
-int sharedMemory(int flag, struct shared ex, sem_t* mutex)
+struct Memory sharedMemory(int flag, struct shared ex, sem_t* mutex)
 {
      key_t ShmKEY = ex.ShmKEY;
      int ShmID = ex.ShmID;
      struct Memory *ShmPTR = ex.ShmPTR; 
-     INT32 arr[72];
+     struct Memory arr;
      int err=0;
      int offset = 0;
      int max = 36;
@@ -126,23 +127,20 @@ int sharedMemory(int flag, struct shared ex, sem_t* mutex)
      
      for(int i = offset; i < max; i++)
      {
-     	  arr[i] = ShmPTR->data[i];
-     	  printf("Server has filled %d to shared memory...\n", arr[i]);
+     	  arr.data[i] = ShmPTR->data[i];
+     	  printf("Server has filled %d to shared memory...\n", arr.data[i]);
      }
 
      memset(ShmPTR->data, NULL, 36);
      
      sem_post(mutex); // *********closing access to sempahore**********
   
-  for(int i = offset; i < max; i++)
+  /*for(int i = offset; i < max; i++)
      {
      	  
-     	  printf("Server has filled %d to shared memory...\n", arr[i]);
-     	   
-     	    
+     	  printf("Server has filled %d to shared memory...\n", arr[i]);    
      	  
-     }
-  
-	return 0;
+     }*/
+	return arr;
  }
 
