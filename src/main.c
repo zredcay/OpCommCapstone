@@ -55,8 +55,8 @@ int convertTransceiver(int trans)
 
 	return newtrans;
 }
-struct mainData math(float Ax, float Ay, float Az, float Mx, float My, float Mz, float timer, struct mainData ex)
-{
+struct mainData transciever_select(float Ax, float Ay, float Az, float Mx, float My, float Mz, float timer, struct mainData ex)
+{ // uses imu and discovery data to calculate the new transicever 
 
 	struct mainData data = ex;
 	printf(" angle %f distance %f transciever %d Velocity %f %f\n", data.angle, data.dist, data.trans, data.Vx, data.Vy);
@@ -133,12 +133,12 @@ int main ()
 	data.Vy = -.1;
 	
 	
-	
+	/*
 	for(int i = 0; i < 4; i++){
-	 data = math(Ax, Ay, Az, Mx, My, Mz, mainTimer, data);
+	 data = transciever_select(Ax, Ay, Az, Mx, My, Mz, mainTimer, data);
 	 }
 	 exit(-1);
-	
+	*/
 	
 	State NextState = Intialization;
 	printf("setting event\n");
@@ -166,13 +166,13 @@ int main ()
         		closeNamedSem(mutex); // goes in end tpo close named semphore
         		closeMemeory(sharMem); // goes in end to close shared memory
         		////************this is maintenance code **************
-        		for(int i = 0; i < 36; i++)
+        		for(int i = 0; i < 72; i++)
      				{
-     	  				printf("Server has filled %i to shared memory...\n", arr.data[i]);  
+     	  				printf("Serve4r has filled %c to shared memory...\n", arr.data[i]);  
      	  				//use this to convert to the data  
      				}
-     			//transceiver = math(Ax, Ay, Az, Gx, Gy, Gz, Mx, My, Mz, transceiver, angle);
-     			//ata = math(Ax, Ay, Az, Mx, My, Mz, transceiver, dist, angle, mainTimer, Vx, Vy);
+     			
+     			
      			//************end of maintenance code**********
             		NewEvent = Code_Finished_Event;
 			NextState = CodeFinishedHandler(NextState);

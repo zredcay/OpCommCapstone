@@ -19,15 +19,11 @@ struct shared createMemory()
      key_t          ShmKEY = 111111; 
      int            ShmID = 0;
      struct Memory  *ShmPTR;
-     INT32 arr[72];
+     char arr[72];
      int err=0;
      struct shared ex;
      
-     
-     for (INT32 i = 0; i < 72; i++) {
-    	arr[i] = rand()%10;
-    	printf("array %i is %i\n",i,arr[i]);
-     }			
+     		
      
      ShmID = shmget(ShmKEY, sizeof(struct Memory), IPC_CREAT | IPC_EXCL | 0666); // remove flags if key already exisits 
      //ShmID = shmget(ShmKEY, sizeof(struct Memory), 0666); // remove flags if key already exisits
@@ -47,10 +43,10 @@ struct shared createMemory()
           exit(1);
      }
      ///****************Fills memory with numbers for debugging*************
-     /*for (INT32 i = 0; i < 72; i++) {
-      	ShmPTR->data[i] = arr[i];
-      	printf("array %i is %i\n",i,ShmPTR->data[i]);
-     }*/
+     for (INT32 i = 0; i < 72; i++) {
+      	ShmPTR->data[i] = '0';
+      	printf("array %i is %c\n",i,ShmPTR->data[i]);
+     }
      ex.ShmKEY = ShmKEY;
      ex.ShmID = ShmID;
      ex.ShmPTR = ShmPTR;
@@ -111,7 +107,7 @@ struct Memory sharedMemory(int flag, struct shared ex, sem_t* mutex)
      struct Memory arr;
      int err=0;
      int offset = 0;
-     int max = 36;
+     int max = 72;
  
     
      sem_wait(mutex);////**************8waiting till semaphore is open to read from **************
@@ -128,19 +124,20 @@ struct Memory sharedMemory(int flag, struct shared ex, sem_t* mutex)
      for(int i = offset; i < max; i++)
      {
      	  arr.data[i] = ShmPTR->data[i];
-     	  printf("Server has filled %d to shared memory...\n", arr.data[i]);
+     	  printf("Server has filled %c to shared memory...\n", arr.data[i]);
      }
 
      memset(ShmPTR->data, NULL, 36);
      
      sem_post(mutex); // *********closing access to sempahore**********
   
-  /*for(int i = offset; i < max; i++)
+  	for(int i = offset; i < max; i++)
      {
      	  
-     	  printf("Server has filled %d to shared memory...\n", arr[i]);    
+     	  printf("Server has filled %c to shared memory...\n", arr.data[i]);    
      	  
-     }*/
+     }
+   
 	return arr;
  }
 
