@@ -17,7 +17,7 @@ typedef enum
     Maintenance,
     Recovery,
     End,
-    Intialization,
+    Intialization
 }State;
 
 typedef enum
@@ -26,7 +26,8 @@ typedef enum
     Bad_Data_Event,
     Loss_of_LOS_Event,
     User_Exit_Event,
-    Should_Not_Get_Here_Event
+    Should_Not_Get_Here_Event,
+    Timeout_Event
 } Event;
 
 State CodeFinishedHandler(State thisState)
@@ -62,7 +63,7 @@ State BadDataHandler(State thisState)
 	}
 	else if(thisState == Maintenance)
 	{
-		return Recovery;
+		return Maintenance;
 	}
 	else  if(thisState == Recovery)
 	{
@@ -82,6 +83,11 @@ State ShouldNotGetHandler(State thisState){
 State UserExitHandler(State thisState){
 
 	return End;
+}
+
+State TimeoutEventHandler(State thisState){
+
+    return Recovery;
 }
 
 #endif

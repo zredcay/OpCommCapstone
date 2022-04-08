@@ -60,7 +60,7 @@ int disconnectRP(){
 return 0;
 }
 
-struct data rplidarPi(int test)
+struct lidarData rplidarPi()
 {
 
     const char * opt_channel_param_first = NULL;
@@ -184,10 +184,10 @@ on_finished:
         drv = NULL;
     }
     delete _channel;
-    struct data ex;
-    ex.trans = tran;
-    ex.angle = angle;
-    ex.dist = smallest;
+    struct lidarData returnValue;
+    returnValue.trans = tran;
+    returnValue.angle = angle;
+    returnValue.dist = smallest;
     
-    return ex;
+    return returnValue;
 }

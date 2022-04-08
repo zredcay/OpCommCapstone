@@ -5,9 +5,7 @@
 #include <time.h>
 
 #include "transceiver.h"
-const int DATA_SIZE = 64;  // Only going to be sending chunks of 100 bytes but have buffer size set at 256 just in case
-char rec_msg[1024];        // Buffer for reading entire message packet to be returned to state machine
-int n = 0;                 // counter used for populating rec_msg
+
 
 // Flags for setting which robot you are using for testing
 int JEFF = 1;
@@ -41,19 +39,6 @@ int SOURCE = 0;
             1    0   TX2
             1    1   TX3
 */
-
-struct thread_args{
-    int serial_port;
-    int trans_num;
-};
-
-int transceiver_select[4][2] =
-{
-    {0,0},
-    {0,1},
-    {1,0},
-    {1,1}
-};
 
 // Send thread function, takes argument of the serial port file descriptor(FD)
 void *tx_function(void *vargp)
@@ -267,8 +252,8 @@ int jeff_maintenance_routine_read(int transceiver, int port)
 
         if (num_bytes > 0){
             while(num_bytes > 0){
-                rec_msg[n] = read_buf[0];
-                n++;
+                rec_msg[readCounter] = read_buf[0];
+                readCounter++;
                 //printf("SUCCESS\n");
                 num_bytes = read(serial_port, &read_buf, 1);
                 status = 1;
@@ -413,8 +398,8 @@ int source_maintenance_routine_read(int transceiver, int port)
         // if there was data read
         if (num_bytes > 0){
             //printf("Message Recieved: %s\n", read_buf);
-            rec_msg[n] = read_buf[0];                       // store the data in the rec_msg buffer
-            n++;                                            // increment counter to next buffer position
+            rec_msg[readCounter] = read_buf[0];                       // store the data in the rec_msg buffer
+            readCounter++;                                            // increment counter to next buffer position
             status = 1;                                     // data has been read successfully
         }
     }while(elapsed_time < 100);
@@ -520,7 +505,7 @@ int main() {
             // try to read a message from SOURCE
             status_read = jeff_maintenance_routine_read(jeff_trans,serial_port);
 
-            n = 0;
+            readCounter = 0;
             if (status_read == 0){
                 //printf("COMMUNICATION TIMEOUT\n");
             }else if(status_read == 1){
@@ -620,15 +605,14 @@ int main() {
         printf("NUM OF PACKETS: %i\n",num_packet);
 
         // counters used for sending packets
-        int c = 0;
         int i = 0;
         int j = 0;
 
-        while(c < num_packet){
-            if (c % 500 == 0){
-                printf("PACKETS SENT: %i\n",c);
+        while(writeCounter < num_packet){
+            if (writeCounter % 500 == 0){
+                printf("PACKETS SENT: %i\n",writeCounter);
             }
-            for (i = (c*7); i <= ((c * 7) + 6); i++){
+            for (i = (writeCounter*7); i <= ((writeCounter * 7) + 6); i++){
                 msg[j] = fgetc(fp);
                 j++;
             }
@@ -660,12 +644,12 @@ int main() {
 
             // wait for JEFF response
             status_read = source_maintenance_routine_read(source_trans,serial_port);
-            n = 0;
+            readCounter = 0;
             if (status_read == 0){
                 printf("COMMUNICATION TIMEOUT\n");
                 fseek(fp,-7,SEEK_CUR);
             }else if(rec_msg[0] == '0'){
-                c++;
+                writeCounter++;
                 printf("COMMUNICATION SUCCESS\n");
                 //printf("ENTIRE MESSAGE: %s\n",rec_msg);
                 //int read_bytes = strlen(rec_msg);

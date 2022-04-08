@@ -4,12 +4,12 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-	typedef struct data{
+	typedef struct lidarData{
 		int trans;
 		float angle;
 		float dist;
 		};
-	struct data rplidarPi(int test);
+	struct lidarData rplidarPi();
 	 int connectRP();
 	int disconnectRP();
  
