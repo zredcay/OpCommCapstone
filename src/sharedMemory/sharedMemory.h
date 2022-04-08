@@ -16,13 +16,14 @@ typedef signed int INT32;
 #define  FILLED     0
 #define  TAKEN      1
 
-struct Memory 
+struct Memory
 {
      char  data[72];
+
 };
  struct shared
  {
-     key_t          ShmKEY; 
+     key_t          ShmKEY;
      int            ShmID;
      struct Memory  *ShmPTR;
  };
