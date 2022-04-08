@@ -2,8 +2,7 @@ import numpy as np
 import sysv_ipc
 import posix_ipc
 import sys
-from ctypes import c_float
-
+import struct
 def shmwrite(data, flag):
     # old way of doing things
     # create key for shm
@@ -16,18 +15,18 @@ def shmwrite(data, flag):
     memory = sysv_ipc.SharedMemory(ipc_key, flags = 0)
     
     # split string into separate values
-    #ax, ay, az, gx, gy, gz, mx, my, mz = data.split()
+    ax, ay, az, gx, gy, gz, mx, my, mz = data.split()
     
     # convert from string to c float
-    #ax = c_float(float(ax))
-    #ay = c_float(float(ay))
-    #az = c_float(float(az))
-    #gx = c_float(float(gx))
-    #gy = c_float(float(gy))
-    #gz = c_float(float(gz))
-    #mx = c_float(float(mx))
-    #my = c_float(float(my))
-    #mz = c_float(float(mz))
+    ax = float(ax)
+    ay = float(ay)
+    az = float(az)
+    gx = float(gx)
+    gy = float(gy)
+    gz = float(gz)
+    mx = float(mx)
+    my = float(my)
+    mz = float(mz)
         
     try:
         # create sem object using the name created in main.c
@@ -38,7 +37,7 @@ def shmwrite(data, flag):
         # if flag is 0 switch to source segment
         if flag == 0:
             # convert string to bytes
-            bytes_data = data.encode('utf-8')
+            bytes_data = struct.pack('d', ax, ay, az, gx, gy, gz, mx, gy, gz)
             # write to memory
             memory.write(bytes_data, offset = 0)
             
@@ -46,8 +45,8 @@ def shmwrite(data, flag):
         # if flag is 1 switch to jeff segment
         elif flag == 1:
             # convert string to bytes
-            bytes_data = data.encode('utf-8')
+            bytes_data = struct.pack('d', ax, ay, az, gx, gy, gz, mx, gy, gz)
             # write to memory
-            memory.write(bytes_data, offset = 128)
+            memory.write(bytes_data, offset = 72)
     finally:
         sem.release()
