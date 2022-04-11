@@ -14,8 +14,7 @@ struct thread_args{
 };
 const int DATA_SIZE = 64;  // Only going to be sending chunks of 100 bytes but have buffer size set at 256 just in case
 char rec_msg[8];  // Buffer for reading entire message packet to be returned to state machine
-int source_trans = 0;
-int jeff_trans = 4;
+
 int readCounter; // counter used for populating rec_msg
 FILE *fp;
 int transceiver_select[4][2] =

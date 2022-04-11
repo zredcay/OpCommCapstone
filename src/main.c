@@ -66,7 +66,7 @@ int convertTransceiver(int trans)
 
 	return newtrans;
 }
-struct mainData transciever_select(float Ax, float Ay, float Az, float Mx, float My, float Mz, float timer, struct mainData ex)
+struct mainData trans_select(float Ax, float Ay, float Az, float Mx, float My, float Mz, float timer, struct mainData ex)
 { // uses imu and discovery data to calculate the new transicever 
 
 	struct mainData data = ex;
@@ -197,32 +197,26 @@ int main () {
     data.Vx = -.2;
     data.Vy = -.1;
 
-
+/* // testing whole bluetooth thing
     sharMem = createMemory(); // creates shared memory
     mutex = createNamedSem(); // creates named semaphore
+    sleep(5);
     arr = sharedMemory(flag, sharMem, mutex); //recieves the float value from imu
     closeNamedSem(mutex);
     closeMemeory(sharMem);
-
-    for (int i = 0; i < 72; i++) {
-        printf("Serve4r has filled %c to shared memory...\n", arr.data[i]);
-        //use this to convert to the data
-
-    }
-    /*
+    
     lidar = rplidarPi();// transceiver is the tranciever number
     transceiver = lidar.trans;
     angle = lidar.angle;
     dist = lidar.dist;
     printf("return value transceievr %i and angle %f and distance %f\n", transceiver, angle, dist);
-    */
-    /*
+   
 	for(int i = 0; i < 4; i++){
 	 data = transciever_select(Ax, Ay, Az, Mx, My, Mz, mainTimer, data);
 	 }
 
-	*/
     exit(-1);
+    */
     State NextState = Intialization;
     printf("setting event\n");
     Event NewEvent = Code_Finished_Event;
@@ -230,7 +224,7 @@ int main () {
     while (clock() < (startTime + 3 * CLOCKS_PER_SEC)) {
         switch (NextState) {
             case Intialization: {
-
+                /*
                 // WiringPi set up of all used pins for multiplexer communication
                 wiringPiSetup();
                 pinMode(27, OUTPUT);  // INH Pin for 4-7 / GPIO Pin #16 of Pi / Physical Pin 36
@@ -239,8 +233,8 @@ int main () {
                 pinMode(24, OUTPUT);  // Pin B / GPIO Pin #19 of Pi / Physical Pin 35
                 pinMode(29, OUTPUT);  // Pin C / GPIO Pin #21 of Pi / Physical Pin 40
                 pinMode(28, OUTPUT);  // Pin D / GPIO Pin #20 of Pi / Physical Pin 38
-
-                //*****************88transcoever code start************************88
+                */
+                //*****************transcoever code start************************88
                 serial_port = open("/dev/ttyS0", O_RDWR | O_NOCTTY);
                 int val = fcntl(serial_port, F_GETFL, 0);
 
@@ -461,7 +455,7 @@ int main () {
                     printf("RUNNING SOURCE CODE\n");
                     printf("\n");
 
-                    char msg[DATA_SIZE];        // buffer for sending data
+                    char msg[8];        // buffer for sending data
 
                     // counters used for sending packets
 

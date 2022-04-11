@@ -39,7 +39,7 @@ int SOURCE = 0;
             1    0   TX2
             1    1   TX3
 */
-
+/******************8
 // Send thread function, takes argument of the serial port file descriptor(FD)
 void *tx_function(void *vargp)
 {
@@ -84,7 +84,7 @@ void *tx_function(void *vargp)
         digitalWrite(23, 1);       //Inhibit other Mux
     }
     */
-
+/**
     char msg[DATA_SIZE];                                            // send message buffer
 
     clock_t start;
@@ -116,7 +116,7 @@ void *tx_function(void *vargp)
         memset(msg, 0, DATA_SIZE);
     }
 }
-
+/***************************
 // Recieve thread function, takes argument of the serial port file descriptor(FD)
 void *rx_function(void *vargp)
 {
@@ -140,7 +140,7 @@ void *rx_function(void *vargp)
     digitalWrite(25,0); //B selection
     digitalWrite(24,0); //A selection
     */
-
+/**
     // Track how many bytes are sent
     int num_bytes = 0;
     int n = 0;
@@ -187,21 +187,21 @@ void *rx_function(void *vargp)
             printf("Timer test\n");
         }while( elapsed_time < 3000);
         */
-
+/**
         // Print out the recieved message
         if (n>0){
             printf("\n");
             printf("RECEIVED: %s \n",read_buf);
             //printf("SIZE: %i\n",n);
         }
-        memset(read_buf, 0, DATA_SIZE);
+        memset(read_buf, 0, 8);
 
         //usleep(1);
         tcflush(serial_port, TCIOFLUSH);
 
     }
 }
-
+/**
 int jeff_maintenance_routine_read(int transceiver, int port)
 {
 
@@ -413,7 +413,7 @@ int source_maintenance_routine_read(int transceiver, int port)
     // return status of read function call
     return status;
 }
-
+/*
 int main() {
 
     // WiringPi set up of all used pins for multiplexer communication
@@ -671,3 +671,4 @@ int main() {
 
     return 0; // success
 }
+*/

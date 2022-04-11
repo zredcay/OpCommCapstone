@@ -5,13 +5,13 @@ import shm
 
 def testConversion():
 
-    data = str(4.333) + '/0' + str(5.678)
-    
+    data = str(2.22) + ' ' + str(1.111) + ' ' + str(3.33333) + ' ' + str(4.44444) + ' ' + str(5.55555) + ' ' + str(6.6666) + ' ' + str(7.77777) + ' ' + str(8.888888) + ' ' + str(9.99999)
+
     print(data)
     
     shm.shmwrite(data, 1)
      # assign data to val variable
-    val = str(1.234) + '/0 ' + str(9.845) 
+    val =str(2.22) + ' ' + str(1.111) + ' ' + str(3.33333) + ' ' + str(4.44444) + ' ' + str(5.55555) + ' ' + str(6.6666) + ' ' + str(7.77777) + ' ' + str(8.888888) + ' ' + str(9.99999)
     
     # write source's data to shm
     shm.shmwrite(val,0)

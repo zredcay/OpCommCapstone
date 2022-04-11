@@ -18,7 +18,7 @@ typedef signed int INT32;
 
 struct Memory
 {
-     char  data[72];
+     float data[18];
 
 };
  struct shared
