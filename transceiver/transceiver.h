@@ -12,18 +12,12 @@ struct thread_args{
     int serial_port;
     int trans_num;
 };
-const int DATA_SIZE = 64;  // Only going to be sending chunks of 100 bytes but have buffer size set at 256 just in case
+
 char rec_msg[8];  // Buffer for reading entire message packet to be returned to state machine
 
 int readCounter; // counter used for populating rec_msg
 FILE *fp;
-int transceiver_select[4][2] =
-        {
-                {0,0},
-                {0,1},
-                {1,0},
-                {1,1}
-        };
+
 char *filename;
 int num_packet;             // variable for # of packets being sent
 int writeCounter;

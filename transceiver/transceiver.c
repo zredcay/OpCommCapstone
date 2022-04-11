@@ -10,8 +10,14 @@
 // Flags for setting which robot you are using for testing
 int JEFF = 1;
 int SOURCE = 0;
-
-
+const int DATA_SIZE = 64;  // Only going to be sending chunks of 100 bytes but have buffer size set at 256 just in case
+int transceiver_select[4][2] =
+        {
+                {0,0},
+                {0,1},
+                {1,0},
+                {1,1}
+        };
 // Linux headers
 #include <fcntl.h> // Contains file controls like O_RDWR
 #include <errno.h> // Error integer and strerror() function
@@ -39,7 +45,7 @@ int SOURCE = 0;
             1    0   TX2
             1    1   TX3
 */
-/******************8
+
 // Send thread function, takes argument of the serial port file descriptor(FD)
 void *tx_function(void *vargp)
 {
@@ -84,7 +90,7 @@ void *tx_function(void *vargp)
         digitalWrite(23, 1);       //Inhibit other Mux
     }
     */
-/**
+
     char msg[DATA_SIZE];                                            // send message buffer
 
     clock_t start;
@@ -116,7 +122,7 @@ void *tx_function(void *vargp)
         memset(msg, 0, DATA_SIZE);
     }
 }
-/***************************
+
 // Recieve thread function, takes argument of the serial port file descriptor(FD)
 void *rx_function(void *vargp)
 {
@@ -140,7 +146,7 @@ void *rx_function(void *vargp)
     digitalWrite(25,0); //B selection
     digitalWrite(24,0); //A selection
     */
-/**
+
     // Track how many bytes are sent
     int num_bytes = 0;
     int n = 0;
@@ -187,7 +193,7 @@ void *rx_function(void *vargp)
             printf("Timer test\n");
         }while( elapsed_time < 3000);
         */
-/**
+
         // Print out the recieved message
         if (n>0){
             printf("\n");
@@ -201,7 +207,7 @@ void *rx_function(void *vargp)
 
     }
 }
-/**
+
 int jeff_maintenance_routine_read(int transceiver, int port)
 {
 
