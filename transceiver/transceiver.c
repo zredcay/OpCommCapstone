@@ -408,7 +408,7 @@ int source_maintenance_routine_read(int transceiver, int port)
             readCounter++;                                            // increment counter to next buffer position
             status = 1;                                     // data has been read successfully
         }
-    }while(elapsed_time < 100);
+    }while(elapsed_time < 200);
     // timer runs for 0.1 sec
 
     // clear the read_buf used in this function and clear the serial port

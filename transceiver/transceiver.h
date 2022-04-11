@@ -18,7 +18,7 @@ char rec_msg[8];  // Buffer for reading entire message packet to be returned to 
 int readCounter; // counter used for populating rec_msg
 FILE *fp;
 
-char *filename;
+//char *filename;
 int num_packet;             // variable for # of packets being sent
 int writeCounter;
 

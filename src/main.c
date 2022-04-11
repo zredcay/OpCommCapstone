@@ -67,7 +67,7 @@ int convertTransceiver(int trans)
 	return newtrans;
 }
 struct mainData trans_select(float Ax, float Ay, float Az, float Mx, float My, float Mz, float timer, struct mainData ex)
-{ // uses imu and discovery data to calculate the new transicever 
+{ // uses imu and discovery data to calculate the new transicever
 
 	struct mainData data = ex;
 	printf(" angle %f distance %f transciever %d Velocity %f %f\n", data.angle, data.dist, data.trans, data.Vx, data.Vy);
@@ -113,7 +113,7 @@ int openFile(int flag)
     if (flag == 1) {
 
         // set the file name of the text file that will be read and sent
-        *filename = "rec_data.txt";
+        char *filename = "rec_data.txt";
 
         // struct for determining the size of a file
         struct stat st;
@@ -130,19 +130,21 @@ int openFile(int flag)
     if (flag == 0) {
 
         // set the file name of the text file that will be read and sent
-        *filename = "file_to_be_sent.txt";
+        printf("open serial port\n");
+        char *filename = "file_to_be_sent.txt";
 
         // struct for determining the size of a file
+        printf("open serial port\n");
         struct stat st;
 
         num_packet = 0;
         writeCounter = 0; // write counter keeps track of how many packets are sent
 
+        printf("open file\n");
         //set file pointer and open file for reading
-        FILE *fp;
         fp = fopen(filename, "r");
 
-        if (fp == NULL) {
+        if (fp < 0) {
             printf("Error: Could not open file\n");
             return 1;
         }
@@ -204,13 +206,13 @@ int main () {
     arr = sharedMemory(flag, sharMem, mutex); //recieves the float value from imu
     closeNamedSem(mutex);
     closeMemeory(sharMem);
-    
+
     lidar = rplidarPi();// transceiver is the tranciever number
     transceiver = lidar.trans;
     angle = lidar.angle;
     dist = lidar.dist;
     printf("return value transceievr %i and angle %f and distance %f\n", transceiver, angle, dist);
-   
+
 	for(int i = 0; i < 4; i++){
 	 data = transciever_select(Ax, Ay, Az, Mx, My, Mz, mainTimer, data);
 	 }
@@ -224,7 +226,7 @@ int main () {
     while (clock() < (startTime + 3 * CLOCKS_PER_SEC)) {
         switch (NextState) {
             case Intialization: {
-                /*
+
                 // WiringPi set up of all used pins for multiplexer communication
                 wiringPiSetup();
                 pinMode(27, OUTPUT);  // INH Pin for 4-7 / GPIO Pin #16 of Pi / Physical Pin 36
@@ -233,13 +235,14 @@ int main () {
                 pinMode(24, OUTPUT);  // Pin B / GPIO Pin #19 of Pi / Physical Pin 35
                 pinMode(29, OUTPUT);  // Pin C / GPIO Pin #21 of Pi / Physical Pin 40
                 pinMode(28, OUTPUT);  // Pin D / GPIO Pin #20 of Pi / Physical Pin 38
-                */
+                printf("done with wiringPi\n");
                 //*****************transcoever code start************************88
                 serial_port = open("/dev/ttyS0", O_RDWR | O_NOCTTY);
                 int val = fcntl(serial_port, F_GETFL, 0);
 
                 // struct for setting up serial port
                 struct termios tty;
+
 
                 // Read in existing settings, and handle any error
                 if (tcgetattr(serial_port, &tty) != 0) {
@@ -260,8 +263,7 @@ int main () {
                 tty.c_lflag &= ~ECHONL; // Disable new-line echo
                 tty.c_lflag &= ~ISIG; // Disable interpretation of INTR, QUIT and SUSP
                 tty.c_iflag &= ~(IXON | IXOFF | IXANY); // Turn off s/w flow ctrl
-                tty.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR |
-                                 ICRNL); // Disable any special handling of received bytes
+                tty.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL); // Disable any special handling of received bytes
 
                 tty.c_oflag &= ~OPOST; // Prevent special interpretation of output bytes (e.g. newline chars)
                 tty.c_oflag &= ~ONLCR; // Prevent conversion of newline to carriage return/line feed
@@ -280,19 +282,22 @@ int main () {
                     printf("Error %i from tcsetattr: %s\n", errno, strerror(errno));
                     return 1;
                 }
+                printf("open serial port\n");
                 openFile(flag);
+                printf("done initlizing\n");
                 //*******************tranceover code done
-                sharMem = createMemory(); // creates shared memory
-                mutex = createNamedSem(); // creates named semaphore
+                //sharMem = createMemory(); // creates shared memory
+                //mutex = createNamedSem(); // creates named semaphore
 
                 //*************** time for connection ****************88
-                clock_t init_bluetooth = clock();
+               /* clock_t init_bluetooth = clock();
                 int elapsed_time = 0;
 
                 do {
                     clock_t difference = clock() - init_bluetooth;
                     elapsed_time = difference * 1000 / CLOCKS_PER_SEC;
                 } while (elapsed_time < 30000);
+                */
 
                 NewEvent = Code_Finished_Event;
                 NextState = CodeFinishedHandler(NextState);
@@ -325,10 +330,10 @@ int main () {
             case Discovery: {
 
                 if (Code_Finished_Event == NewEvent) {
-                    lidar = rplidarPi();// transceiver is the tranciever number
-                    transceiver = lidar.trans;
-                    angle = lidar.angle;
-                    dist = lidar.dist;
+                    //lidar = rplidarPi();// transceiver is the tranciever number
+                    transceiver = 0; // lidar.trans;
+                    angle = 100; //lidar.angle;
+                    dist = 100; //lidar.dist;
                     printf("return value transceievr %i and angle %f and distance %f\n", transceiver, angle, dist);
                     if (angle == 0) // the transceiver was not found
                     {
@@ -484,7 +489,7 @@ int main () {
                         msg[7] = checksum + '0';
 
                         // used for testing sending messages
-                        scanf("%s", &msg);
+                        //scanf("%s", &msg);
 
                         // send msg to JEFF
                         status = source_maintenance_routine_send(transceiver, msg, serial_port);
@@ -514,6 +519,7 @@ int main () {
                             fseek(fp, -7, SEEK_CUR);
                             status = 2;
                         }
+                        printf("Write Counter: %i\n",writeCounter);
                     }
                 }
 
