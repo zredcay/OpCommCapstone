@@ -169,7 +169,7 @@ int openFile(int flag)
 
 int main () {
     int flag = 0;
-    char message[100];
+    char prev_msg[8] = "00000000";
     float Ax = .2;
     float Ay = .1;
     float Az;
@@ -414,8 +414,14 @@ int main () {
                                 // set checksum value in rec_msg buffer to null
                                 rec_msg[7] = '\0';
 
-                                // store rest of message in the file
-                                fputs(rec_msg, fp);
+                                int result;
+
+                                if ((result = strcmp(rec_msg)) != 0){
+                                    for (int k = 0; k <= 6; k++){
+                                        prev_msg[k] = rec_msg[k];
+                                    }
+                                    fputs(rec_msg, fp);
+                                }
 
                                 // check to see if the end of the file has been reached
                                 int c = 0;
@@ -467,10 +473,13 @@ int main () {
                     int i = 0;
                     int j = 0;
 
-                    while (writeCounter < num_packet) {
+                    while (writeCounter <= num_packet) {
+                    /*
                         if (writeCounter % 500 == 0) {
                             printf("PACKETS SENT: %i\n", writeCounter);
                         }
+                    */
+
                         for (i = (writeCounter * 7); i <= ((writeCounter * 7) + 6); i++) {
                             msg[j] = fgetc(fp);
                             j++;
@@ -510,7 +519,7 @@ int main () {
                         } else if (rec_msg[0] == '0') {
                             writeCounter++;
                             printf("COMMUNICATION SUCCESS\n");
-                            //printf("ENTIRE MESSAGE: %s\n",rec_msg);
+                            printf("ENTIRE MESSAGE: %s\n",rec_msg);
                             //int read_bytes = strlen(rec_msg);
                             //printf("READ BYTES: %i\n",read_bytes);
                             status = 1;
@@ -518,8 +527,13 @@ int main () {
                             printf("Error: Bad Data\n");
                             fseek(fp, -7, SEEK_CUR);
                             status = 2;
+                        }else{
+                            printf("ENTIRE MESSAGE: %s\n",rec_msg);
+                            printf("STATUS %i\n",status);
+                            fseek(fp, -7, SEEK_CUR);
                         }
                         printf("Write Counter: %i\n",writeCounter);
+                        printf("FILE POINTER %i\n",ftell(fp));
                     }
                 }
 
