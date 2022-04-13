@@ -416,7 +416,7 @@ int main () {
 
                                 int result;
 
-                                if ((result = strcmp(rec_msg)) != 0){
+                                if ((result = strcmp(rec_msg, prev_msg)) != 0){
                                     for (int k = 0; k <= 6; k++){
                                         prev_msg[k] = rec_msg[k];
                                     }
