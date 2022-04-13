@@ -22,9 +22,9 @@ struct shared createMemory()
      float arr[18];
      int err=0;
      struct shared ex;
-     
-     		
-     
+
+
+
      ShmID = shmget(ShmKEY, sizeof(struct Memory), IPC_CREAT | IPC_EXCL | 0666); // remove flags if key already exisits
      //ShmID = shmget(ShmKEY, sizeof(struct Memory), 0666); // remove flags if key already exisits
 
@@ -43,6 +43,7 @@ struct shared createMemory()
           exit(1);
      }
      ///****************Fills memory with numbers for debugging*************
+
      for (INT32 i = 0; i < 36; i++) {
       	ShmPTR->data[i] = 0;
       	printf("array %i is %f\n",i,ShmPTR->data[i]);
@@ -130,6 +131,7 @@ struct Memory sharedMemory(int flag, struct shared ex, sem_t* mutex)
 
      sem_post(mutex); // *********closing access to sempahore**********
 
+	return arr;
 
  }
 
