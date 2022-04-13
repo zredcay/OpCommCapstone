@@ -19,21 +19,14 @@ struct shared createMemory()
      key_t          ShmKEY = 111111;
      int            ShmID = 0;
      struct Memory  *ShmPTR;
-<<<<<<< HEAD
      char arr[72];
      int err=0;
      struct shared ex;
-     
-     		
-     
-     ShmID = shmget(ShmKEY, sizeof(struct Memory), IPC_CREAT | IPC_EXCL | 0666); // remove flags if key already exisits 
-=======
-     char arr[256];
-     int err=0;
-     struct shared ex;
+
+
 
      ShmID = shmget(ShmKEY, sizeof(struct Memory), IPC_CREAT | IPC_EXCL | 0666); // remove flags if key already exisits
->>>>>>> 51cae8997cf160e5aac257206326cc2de20a2c53
+
      //ShmID = shmget(ShmKEY, sizeof(struct Memory), 0666); // remove flags if key already exisits
 
      if (ShmID < 0)
@@ -53,11 +46,8 @@ struct shared createMemory()
      ///****************Fills memory with numbers for debugging*************
      for (INT32 i = 0; i < 72; i++) {
       	ShmPTR->data[i] = '0';
-<<<<<<< HEAD
       	printf("array %i is %c\n",i,ShmPTR->data[i]);
-=======
-      	printf("array %i is %i\n",i,ShmPTR->data[i]);
->>>>>>> 51cae8997cf160e5aac257206326cc2de20a2c53
+
      }
      ex.ShmKEY = ShmKEY;
      ex.ShmID = ShmID;
@@ -141,16 +131,6 @@ struct Memory sharedMemory(int flag, struct shared ex, sem_t* mutex)
      memset(ShmPTR->data, NULL, 36);
 
      sem_post(mutex); // *********closing access to sempahore**********
-<<<<<<< HEAD
-  
-  	for(int i = offset; i < max; i++)
-     {
-     	  
-     	  printf("Server has filled %c to shared memory...\n", arr.data[i]);    
-     	  
-     }
-   
-=======
 
   for(int i = offset; i < max; i++)
      {
@@ -158,7 +138,6 @@ struct Memory sharedMemory(int flag, struct shared ex, sem_t* mutex)
      	  printf("Server has filled %c to shared memory...\n",arr.data[i]);
 
      }
->>>>>>> 51cae8997cf160e5aac257206326cc2de20a2c53
 	return arr;
  }
 

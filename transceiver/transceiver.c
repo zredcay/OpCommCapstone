@@ -6,7 +6,8 @@
 
 #include "transceiver.h"
 const int DATA_SIZE = 64;  // Only going to be sending chunks of 100 bytes but have buffer size set at 256 just in case
-char rec_msg[1024];        // Buffer for reading entire message packet to be returned to state machine
+char rec_msg[8];        // Buffer for reading entire message packet to be returned to state machine
+char prev_msg[8] = "00000000";
 int n = 0;                 // counter used for populating rec_msg
 
 // Flags for setting which robot you are using for testing
@@ -526,7 +527,7 @@ int main() {
             }else if(status_read == 1){
                 //printf("COMMUNICATION SUCCESS\n");
 
-                printf("MESSAGE: %s\n",rec_msg);
+                //printf("MESSAGE: %s\n",rec_msg);
 
                 // checksum calculation
                 int checksum = 0;
@@ -541,8 +542,18 @@ int main() {
                     // set checksum value in rec_msg buffer to null
                     rec_msg[7] = '\0';
 
-                    // store rest of message in the file
-                    fputs(rec_msg, fp);
+                    int result;
+
+                    if ((result = strcmp(rec_msg,prev_msg)) != 0){
+                        //printf("PREV MSG: %s\n",prev_msg);
+                        //printf("REC MSG: %s\n",rec_msg);
+                        //printf("RESULT: %i\n",result);
+                        for(int k = 0; k <= 6; k++){
+                            prev_msg[k] = rec_msg[k];
+                        }
+                        // store rest of message in the file
+                        fputs(rec_msg, fp);
+                    }
 
                     // check to see if the end of the file has been reached
                     int c = 0;
