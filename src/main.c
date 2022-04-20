@@ -202,6 +202,9 @@ int main () {
     data.Vx = -.2;
     data.Vy = -.1;
 
+
+    int end_file = 0;   // status used to check if the end of file marker has been reached
+
 /* // testing whole bluetooth thing
     sharMem = createMemory(); // creates shared memory
     mutex = createNamedSem(); // creates named semaphore
@@ -387,7 +390,6 @@ int main () {
                     printf("RUNNING JEFF CODE\n");
                     printf("\n");
 
-                    int end_file = 0;   // status used to check if the end of file marker has been reached
                     int checksum = 0;   // checksum variable
 
                     // accept data packets until the end of file marker is reached
