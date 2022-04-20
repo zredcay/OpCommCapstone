@@ -6,6 +6,8 @@
 #include "sl_lidar_driver.h"
 #include "rplidarPi.h"
 #include <unistd.h>
+#include <iostream>
+#include <math.h>
 
 #ifndef _countof
 #define _countof(_Array) (int)(sizeof(_Array) / sizeof(_Array[0]))
@@ -129,7 +131,7 @@ struct lidarData rplidarPi()
     // fetech result and print it out...
     //Isabelle editing code for readability 
     float avgDist[360][2];
-    
+    smallest = 10000;
     
     
     for(int runtime = 1; runtime < 7; runtime++) {
@@ -147,28 +149,47 @@ struct lidarData rplidarPi()
             	avgDist[pos/div][1] = nodes[pos].dist_mm_q2/4.0f;
             }
             //end of my code
-                /*printf("%s theta: %03.2f Dist: %08.2f Q: %d \n", 
+            
+            /*
+                printf("%s theta: %03.2f Dist: %08.2f Q: %d \n", 
                     (nodes[pos].flag & SL_LIDAR_RESP_HQ_FLAG_SYNCBIT) ?"S ":"  ", 
                     (nodes[pos].angle_z_q14 * 90.f) / 16384.f,
                     nodes[pos].dist_mm_q2/4.0f,
                     nodes[pos].quality >> SL_LIDAR_RESP_MEASUREMENT_QUALITY_SHIFT);
-                    */
+            */
+                    
+                if ((nodes[pos].dist_mm_q2/4.0f) < smallest && nodes[pos].dist_mm_q2/4.0f > 0 && (nodes[pos].quality >> SL_LIDAR_RESP_MEASUREMENT_QUALITY_SHIFT) > 30){
+                    smallest = nodes[pos].dist_mm_q2/4.0f;
+                    angle = nodes[pos].angle_z_q14 * 90.f / 16384.f;
+                }
+                    
             }
+            
         }
 
         if (ctrl_c_pressed){ 
             break;
         }
     }
+    /*
     smallest = avgDist[0][1];
 	for(int i = 0; i < size; i++){
-		//printf("theta: %03.2f Dist: %08.2f \n", avgDist[i][0], avgDist[i][1]);
-		if(avgDist[i][1] < smallest && avgDist[i][1] != 0){
+		printf("theta: %03.2f Dist: %08.2f \n", avgDist[i][0], avgDist[i][1]);
+		if(avgDist[i][1] < smallest && avgDist[i][1] > 0){
 			smallest = avgDist[i][1];
 			angle = avgDist[i][0];
 		}
+    
 	}
-	tran = (angle/45);
+    */
+   angle = angle - 180 - 22.5;
+    if (angle < 0)
+    {
+        angle = angle + 360;
+    }
+    printf("theta: %03.2f Dist: %08.2f \n", angle, smallest);
+	tran = (int)round(angle/45);
+    //angle = angle + 22.5;
 	printf("transciever : %i \n", tran);
 
 

@@ -32,35 +32,35 @@ int convertTransceiver(int trans)
 
 	if( trans == 0)
 	{
-		newtrans = 1;
+		newtrans = 4;
 	}
 	else if (trans == 1)
 	{
-		newtrans = 0;
+		newtrans = 5;
 	}
 	else if (trans == 2)
 	{
-		newtrans = 7;
+		newtrans = 6;
 	}
 	else if (trans == 3)
 	{
-		newtrans = 6;
+		newtrans = 7;
 	}
 	else if (trans == 4)
 	{
-		newtrans = 5;
+		newtrans = 0;
 	}
 	else if (trans == 5)
 	{
-		newtrans = 4;
+		newtrans = 1;
 	}
 	else if (trans == 6)
 	{
-		newtrans = 3;
+		newtrans = 2;
 	}
 	else if (trans == 7)
 	{
-		newtrans = 2;
+		newtrans = 3;
 	}
 
 
@@ -221,7 +221,7 @@ int main () {
 	 }
 
     exit(-1);
-    */
+ */
     State NextState = Intialization;
     printf("setting event\n");
     Event NewEvent = Code_Finished_Event;
@@ -333,10 +333,10 @@ int main () {
             case Discovery: {
 
                 if (Code_Finished_Event == NewEvent) {
-                    // lidar = rplidarPi();// transceiver is the tranciever number
-                    transceiver = 0; // lidar.trans;
-                    angle = 100; //lidar.angle;
-                    dist = 100; //lidar.dist;
+                    lidar = rplidarPi();// transceiver is the tranciever number
+                    transceiver = lidar.trans;
+                    angle = lidar.angle;
+                    dist = lidar.dist;
                     printf("return value transceievr %i and angle %f and distance %f\n", transceiver, angle, dist);
                     if (angle == 0) // the transceiver was not found
                     {
@@ -391,7 +391,7 @@ int main () {
                     int checksum = 0;   // checksum variable
 
                     // accept data packets until the end of file marker is reached
-                    while (end_file == 0) { // ******turn into timer*****
+                    if (end_file == 0) { // ******turn into timer*****
 
                         // try to read a message from SOURCE
                         status = jeff_maintenance_routine_read(transceiver, serial_port);
@@ -543,7 +543,12 @@ int main () {
                 if (Code_Finished_Event == Code_Finished_Event) {
 
                     printf("status = %i\n", status);
-                    if (status == 0) // status is timeout got to recovery
+                    if( end_file == 1)
+                    {
+                    NewEvent = User_Exit_Event;
+                    NextState = UserExitHandler(NextState);
+                    }
+                    else if (status == 0) // status is timeout got to recovery
                     {
                         NewEvent = Timeout_Event;
                         NextState = TimeoutEventHandler(NextState);
