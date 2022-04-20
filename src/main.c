@@ -186,6 +186,9 @@ int main () {
     float Vx = 0;
     float Vy = 0;
 
+    int transceiverLeft;
+    int transceiverRight;
+
     struct lidarData lidar;
     struct shared sharMem;
     struct Memory arr;
@@ -330,7 +333,7 @@ int main () {
             case Discovery: {
 
                 if (Code_Finished_Event == NewEvent) {
-                    //lidar = rplidarPi();// transceiver is the tranciever number
+                    // lidar = rplidarPi();// transceiver is the tranciever number
                     transceiver = 0; // lidar.trans;
                     angle = 100; //lidar.angle;
                     dist = 100; //lidar.dist;
@@ -584,6 +587,29 @@ int main () {
 
                 case Recovery: {
                     //try tans +1 and trans -1 in new recovery code
+                    transceiverLeft = transceiver + 1;
+                    transceiverRight = transceiver - 1;
+                    if(transceiverLeft > 7)
+                    {
+                        transceiverLeft = 0;
+                    }
+                     if(transceiverRight < 0)
+                    {
+                        transceiverRight = 7;
+                    }
+
+                    if(flag = 0)
+                    {
+                    printf("RUNNING SOURCE CODE\n");
+                    printf("\n");
+                    }
+                    if(flag = 1)
+                    {
+                    printf("RUNNING JEFF CODE\n");
+                    printf("\n");
+                    }
+
+
                     if (Bad_Data_Event == NewEvent) {
                         if (true) {
                             NewEvent = Code_Finished_Event;
@@ -595,7 +621,7 @@ int main () {
                         }
                         startTime = clock();
                     }
-                    if (Loss_of_LOS_Event == NewEvent) {
+                    if (Timeout_Event == NewEvent) {
 
                         if (true) {
                             NewEvent = Code_Finished_Event;
