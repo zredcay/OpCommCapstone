@@ -32,40 +32,40 @@ int convertTransceiver(int trans)
 
 	if( trans == 0)
 	{
-		newtrans = 4;
+		newtrans = 1;
 	}
 	else if (trans == 1)
 	{
-		newtrans = 5;
+		newtrans = 0;
 	}
 	else if (trans == 2)
 	{
-		newtrans = 6;
+		newtrans = 7;
 	}
 	else if (trans == 3)
 	{
-		newtrans = 7;
+		newtrans = 6;
 	}
 	else if (trans == 4)
 	{
-		newtrans = 0;
+		newtrans = 5;
 	}
 	else if (trans == 5)
 	{
-		newtrans = 1;
+		newtrans = 4;
 	}
 	else if (trans == 6)
 	{
-		newtrans = 2;
+		newtrans = 3;
 	}
 	else if (trans == 7)
 	{
-		newtrans = 3;
+		newtrans = 2;
 	}
-
 
 	return newtrans;
 }
+
 struct mainData trans_select(float Ax, float Ay, float Az, float Mx, float My, float Mz, float timer, struct mainData ex)
 { // uses imu and discovery data to calculate the new transicever
 
@@ -169,7 +169,7 @@ int openFile(int flag)
 
 int main () {
     int flag = 0;
-    char prev_msg[8] = "00000000";
+    char prev_msg[7] = "0000000";
     float Ax = .2;
     float Ay = .1;
     float Az;
