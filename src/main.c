@@ -70,7 +70,7 @@ struct mainData trans_select(float Ax, float Ay, float Az, float Mx, float My, f
 { // uses imu and discovery data to calculate the new transicever
 
 	struct mainData data = ex;
-	printf(" angle %f distance %f transciever %d Velocity %f %f\n", data.angle, data.dist, data.trans, data.Vx, data.Vy);
+	printf(" angle %f distance %f transceiver %d Velocity %f %f\n", data.angle, data.dist, data.trans, data.Vx, data.Vy);
 	float PI  = 3.14159265;
 	 float val = PI / 180.0;
 
@@ -102,10 +102,10 @@ struct mainData trans_select(float Ax, float Ay, float Az, float Mx, float My, f
 
 
 
-	printf(" angle %f distance %f transciever %d Velocity %f %f\n",  data.angle, data.dist, data.trans, data.Vx, data.Vy);
+	printf(" angle %f distance %f transceiver %d Velocity %f %f\n",  data.angle, data.dist, data.trans, data.Vx, data.Vy);
 
 
-return data;
+    return data;
 }
 
 int openFile(int flag)
@@ -209,11 +209,19 @@ int main () {
 
     int end_file = 0;   // status used to check if the end of file marker has been reached
 
-/* // testing whole bluetooth thing
+    // testing whole bluetooth thing
     sharMem = createMemory(); // creates shared memory
     mutex = createNamedSem(); // creates named semaphore
-    sleep(5);
+    clock_t start = clock();
+    int elapsed_time = 0;
+
+    do{
+        clock_t difference = clock() - start;
+        elapsed_time = difference*1000/CLOCKS_PER_SEC;
+    }while(elapsed_time < 10000);
+    // timer runs for 0.1 s
     arr = sharedMemory(flag, sharMem, mutex); //recieves the float value from imu
+
     closeNamedSem(mutex);
     closeMemeory(sharMem);
 
@@ -224,11 +232,11 @@ int main () {
     printf("return value transceievr %i and angle %f and distance %f\n", transceiver, angle, dist);
 
 	for(int i = 0; i < 4; i++){
-	 data = transciever_select(Ax, Ay, Az, Mx, My, Mz, mainTimer, data);
-	 }
+        data = trans_select(Ax, Ay, Az, Mx, My, Mz, mainTimer, data);
+    }
 
     exit(-1);
- */
+
     State NextState = Intialization;
     printf("setting event\n");
     Event NewEvent = Code_Finished_Event;
@@ -301,19 +309,6 @@ int main () {
                 openFile(flag);
                 printf("Initlization Complete\n");
                 printf("\n");
-                //*******************tranceover code done
-                //sharMem = createMemory(); // creates shared memory
-                //mutex = createNamedSem(); // creates named semaphore
-
-                //*************** time for connection ****************88
-               /* clock_t init_bluetooth = clock();
-                int elapsed_time = 0;
-
-                do {
-                    clock_t difference = clock() - init_bluetooth;
-                    elapsed_time = difference * 1000 / CLOCKS_PER_SEC;
-                } while (elapsed_time < 30000);
-                */
 
                 NewEvent = Code_Finished_Event;
                 NextState = CodeFinishedHandler(NextState);
