@@ -3,7 +3,9 @@
 # SPDX-License-Identifier: MIT
 import time
 import board
-from adafruit_lsm6ds.lsm6dsox import LSM6DSOX
+import sys
+sys.path.append('/usr/local/lib/python3.7/dist-packages/adafruit_lsm6ds')
+from adafruit_lsm6ds import LSM6DSOX
 import adafruit_lis3mdl
 
 
