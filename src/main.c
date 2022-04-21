@@ -248,11 +248,16 @@ int main () {
                 printf("WiringPi Setup Complete\n");
                 //*****************transcoever code start************************88
                 serial_port = open("/dev/ttyS0", O_RDWR | O_NOCTTY);
+
+                if (serial_port < 0) {
+                    printf("Error %i from serial open: %s\n", errno, strerror(errno));
+                    return 1;
+                }
+
                 int val = fcntl(serial_port, F_GETFL, 0);
 
                 // struct for setting up serial port
                 struct termios tty;
-
 
                 // Read in existing settings, and handle any error
                 if (tcgetattr(serial_port, &tty) != 0) {
@@ -341,10 +346,10 @@ int main () {
             case Discovery: {
 
                 if (Code_Finished_Event == NewEvent) {
-                    lidar = rplidarPi();                    // transceiver is the tranciever number
-                    transceiver = lidar.trans;
-                    angle = lidar.angle;
-                    dist = lidar.dist;
+                    //lidar = rplidarPi();                    // transceiver is the tranciever number
+                    //transceiver = lidar.trans;
+                    //angle = lidar.angle;
+                    //dist = lidar.dist;
                     printf("return value transceievr %i and angle %f and distance %f\n", transceiver, angle, dist);
                     if (angle == 0) // the transceiver was not found
                     {
@@ -389,6 +394,7 @@ int main () {
                 break;
 
             case Maintenance: {
+                int transceiver = 6;
                 int status;
                 //Jeff
                 if (flag == 1) {
