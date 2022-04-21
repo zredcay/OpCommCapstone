@@ -165,7 +165,7 @@ int openFile(int flag)
 
 
 int main () {
-    int flag = 0;
+    int flag = 1;
 
     if(flag == 0){
         printf("RUNNING SOURCE\n");
@@ -346,10 +346,10 @@ int main () {
             case Discovery: {
 
                 if (Code_Finished_Event == NewEvent) {
-                    //lidar = rplidarPi();                    // transceiver is the tranciever number
-                    //transceiver = lidar.trans;
-                    //angle = lidar.angle;
-                    //dist = lidar.dist;
+                    lidar = rplidarPi();                    // transceiver is the tranciever number
+                    transceiver = lidar.trans;
+                    angle = lidar.angle;
+                    dist = lidar.dist;
                     printf("return value transceievr %i and angle %f and distance %f\n", transceiver, angle, dist);
                     if (angle == 0) // the transceiver was not found
                     {
@@ -394,7 +394,6 @@ int main () {
                 break;
 
             case Maintenance: {
-                int transceiver = 6;
                 int status;
                 //Jeff
                 if (flag == 1) {
