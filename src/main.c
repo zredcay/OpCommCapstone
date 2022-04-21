@@ -130,17 +130,14 @@ int openFile(int flag)
     if (flag == 0) {
 
         // set the file name of the text file that will be read and sent
-        printf("open serial port\n");
         char *filename = "file_to_be_sent.txt";
 
         // struct for determining the size of a file
-        printf("open serial port\n");
         struct stat st;
 
         num_packet = 0;
         writeCounter = 0; // write counter keeps track of how many packets are sent
 
-        printf("open file\n");
         //set file pointer and open file for reading
         fp = fopen(filename, "r");
 
@@ -169,6 +166,13 @@ int openFile(int flag)
 
 int main () {
     int flag = 0;
+
+    if(flag == 0){
+        printf("RUNNING SOURCE\n");
+    }else{
+        printf("RUNNING JEFF\n");
+    }
+
     char prev_msg[7] = "0000000";
     float Ax = .2;
     float Ay = .1;
@@ -241,7 +245,7 @@ int main () {
                 pinMode(24, OUTPUT);  // Pin B / GPIO Pin #19 of Pi / Physical Pin 35
                 pinMode(29, OUTPUT);  // Pin C / GPIO Pin #21 of Pi / Physical Pin 40
                 pinMode(28, OUTPUT);  // Pin D / GPIO Pin #20 of Pi / Physical Pin 38
-                printf("done with wiringPi\n");
+                printf("WiringPi Setup Complete\n");
                 //*****************transcoever code start************************88
                 serial_port = open("/dev/ttyS0", O_RDWR | O_NOCTTY);
                 int val = fcntl(serial_port, F_GETFL, 0);
@@ -288,9 +292,10 @@ int main () {
                     printf("Error %i from tcsetattr: %s\n", errno, strerror(errno));
                     return 1;
                 }
-                printf("open serial port\n");
+                printf("Opening File\n");
                 openFile(flag);
-                printf("done initlizing\n");
+                printf("Initlization Complete\n");
+                printf("\n");
                 //*******************tranceover code done
                 //sharMem = createMemory(); // creates shared memory
                 //mutex = createNamedSem(); // creates named semaphore
@@ -336,7 +341,7 @@ int main () {
             case Discovery: {
 
                 if (Code_Finished_Event == NewEvent) {
-                    lidar = rplidarPi();// transceiver is the tranciever number
+                    lidar = rplidarPi();                    // transceiver is the tranciever number
                     transceiver = lidar.trans;
                     angle = lidar.angle;
                     dist = lidar.dist;
@@ -387,8 +392,6 @@ int main () {
                 int status;
                 //Jeff
                 if (flag == 1) {
-                    printf("RUNNING JEFF CODE\n");
-                    printf("\n");
 
                     int checksum = 0;   // checksum variable
 
@@ -404,7 +407,7 @@ int main () {
                         } else if (status == 1) {
                             //printf("COMMUNICATION SUCCESS\n");
 
-                            printf("MESSAGE: %s\n", rec_msg);
+                            //printf("MESSAGE: %s\n", rec_msg);
 
                             // checksum calculation
                             int checksum = 0;
@@ -468,22 +471,14 @@ int main () {
                 }
                 //Source
                 if (flag == 0) {
-                    printf("RUNNING SOURCE CODE\n");
-                    printf("\n");
 
                     char msg[8];        // buffer for sending data
 
                     // counters used for sending packets
-
                     int i = 0;
                     int j = 0;
 
                     while (writeCounter <= num_packet) {
-                    /*
-                        if (writeCounter % 500 == 0) {
-                            printf("PACKETS SENT: %i\n", writeCounter);
-                        }
-                    */
 
                         for (i = (writeCounter * 7); i <= ((writeCounter * 7) + 6); i++) {
                             msg[j] = fgetc(fp);
@@ -524,7 +519,7 @@ int main () {
                         } else if (rec_msg[0] == '0') {
                             writeCounter++;
                             printf("COMMUNICATION SUCCESS\n");
-                            printf("ENTIRE MESSAGE: %s\n",rec_msg);
+                            //printf("ENTIRE MESSAGE: %s\n",rec_msg);
                             //int read_bytes = strlen(rec_msg);
                             //printf("READ BYTES: %i\n",read_bytes);
                             status = 1;
@@ -533,18 +528,19 @@ int main () {
                             fseek(fp, -7, SEEK_CUR);
                             status = 2;
                         }else{
-                            printf("ENTIRE MESSAGE: %s\n",rec_msg);
-                            printf("STATUS %i\n",status);
+                            //printf("ENTIRE MESSAGE: %s\n",rec_msg);
+                            //printf("STATUS %i\n",status);
                             fseek(fp, -7, SEEK_CUR);
                         }
-                        printf("Write Counter: %i\n",writeCounter);
-                        printf("FILE POINTER %i\n",ftell(fp));
+                        //printf("Write Counter: %i\n",writeCounter);
+                        //printf("FILE POINTER %i\n",ftell(fp));
+                        //printf("WRITE COUNTER: %i\n",writeCounter++);
                     }
                 }
 
                 if (Code_Finished_Event == Code_Finished_Event) {
 
-                    printf("status = %i\n", status);
+                    //printf("status = %i\n", status);
                     if( end_file == 1)
                     {
                     NewEvent = User_Exit_Event;
