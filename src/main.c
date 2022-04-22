@@ -313,6 +313,7 @@ int main () {
                 openFile(flag);
                 printf("Initlization Complete\n");
                 printf("\n");
+                num_packet = 0;
 
                 NewEvent = Code_Finished_Event;
                 NextState = CodeFinishedHandler(NextState);
@@ -391,7 +392,7 @@ int main () {
             case Maintenance: {
                 int status;
                 transceiver = 2;      // used for testing, hardcode transceiver number you want to use
-                printf("RUNNING MAINTENANCE\n");
+                //printf("RUNNING MAINTENANCE\n");
                 //Jeff
                 if (flag == 1) {
 
@@ -405,11 +406,11 @@ int main () {
 
                         readCounter = 0;
                         if (status == 0) {
-                            printf("MAINTENANCE COMMUNICATION TIMEOUT\n");
+                            //printf("MAINTENANCE COMMUNICATION TIMEOUT\n");
                         } else if (status == 1) {
-                            printf("MAINTENANCE COMMUNICATION SUCCESS\n");
+                            //printf("MAINTENANCE COMMUNICATION SUCCESS\n");
 
-                            printf("MESSAGE: %s\n", rec_msg);
+                            //printf("MESSAGE: %s\n", rec_msg);
 
                             // checksum calculation
                             int checksum = 0;
@@ -449,17 +450,23 @@ int main () {
 
                                 // if the checksums match, send a 0
                                 rec_msg[0] = '0';
+
+                                if(num_packet % 20 == 0){
+                                    printf("RECEIVED %i PACKETS AND HAVE WRITTEN THEM TO THE FILE\n");
+                                }
+                                num_packet++;
                             } else {
                                 // else send a 1
                                 rec_msg[0] = '1';
                                 status = 2;
                             }
+
                             // send a response to SOURCE with if the data was rec correctly
                             status = jeff_maintenance_routine_send(transceiver, rec_msg, serial_port);
                             if (status == 0) {
                                 //printf("ERROR SENDING\n");
                             } else if (status == 1) {
-                                printf("MAINTENANCE SEND SUCCESSFUL\n");
+                                //printf("MAINTENANCE SEND SUCCESSFUL\n");
                             }
 
                             // reset rec_msg buffer for reading
@@ -517,18 +524,22 @@ int main () {
                         status = source_maintenance_routine_read(transceiver, serial_port);
                         readCounter = 0;
                         if (status == 0) {
-                            printf("COMMUNICATION TIMEOUT\n");
+                            //printf("COMMUNICATION TIMEOUT\n");
                             fseek(fp, -7, SEEK_CUR);
                             end_file = 0;
                         } else if (rec_msg[0] == '0') {
                             writeCounter++;
-                            printf("COMMUNICATION SUCCESS\n");
+                            if(num_packet % 20 == 0){
+                                printf("SENT %i PACKETS\n",num_packet);
+                            }
+                            num_packet++;
+                            //printf("COMMUNICATION SUCCESS\n");
                             //printf("ENTIRE MESSAGE: %s\n",rec_msg);
                             //int read_bytes = strlen(rec_msg);
                             //printf("READ BYTES: %i\n",read_bytes);
                             status = 1;
                         } else if (rec_msg[0] == '1') {
-                            printf("Error: Bad Data\n");
+                            //printf("Error: Bad Data\n");
                             fseek(fp, -7, SEEK_CUR);
                             status = 2;
                             end_file = 0;
@@ -633,16 +644,16 @@ int main () {
                             readCounter = 0;
 
                             if (status == 0) {
-                                printf("COMMUNICATION TIMEOUT\n");
+                                //printf("COMMUNICATION TIMEOUT\n");
                                 NewEvent = Timeout_Event;
 
                             } else if (status == 1) {
-                                printf("COMMUNICATION SUCCESS\n");
+                                //printf("COMMUNICATION SUCCESS\n");
                                 transceiver = testTransciver;
                                 NewEvent = Code_Finished_Event;
                                 break;
                             } else if (rec_msg[0] == '1') {
-                                printf("Error: Bad Data\n");
+                                //printf("Error: Bad Data\n");
                                 status = 2;
                                 NewEvent = Bad_Data_Event;
                             }else{
@@ -660,10 +671,10 @@ int main () {
                             readCounter = 0;
 
                             if (status == 0) {
-                                printf("RECOVERY COMMUNICATION TIMEOUT\n");
+                                //printf("RECOVERY COMMUNICATION TIMEOUT\n");
                                 NewEvent =Timeout_Event;
                             } else if (status == 1) {
-                                printf("RECOVERY COMMUNICATION SUCCESS\n");
+                                //printf("RECOVERY COMMUNICATION SUCCESS\n");
 
                                 //printf("MESSAGE: %s\n", rec_msg);
 
@@ -718,19 +729,19 @@ int main () {
                                     NewEvent = Should_Not_Get_Here_Event;
                                     //printf("ERROR SENDING\n");
                                 } else if (status == 1) {
-                                    printf("RECOVERY SEND SUCCESSFUL\n");
+                                     //printf("RECOVERY SEND SUCCESSFUL\n");
                                      NewEvent = Code_Finished_Event;
                                      break;
                                 }
                                 else{
-                                printf("STATUS IS NOT GOOD\n");
+                                    //printf("STATUS IS NOT GOOD\n");
                                 }
                                 // reset rec_msg buffer for reading
                                 memset(rec_msg, 0, 8);
                             }
                         }
                         recoveryCount++;
-                        printf("recoveryCount: %i\n",recoveryCount);
+                        printf("Trying Recovery again\n",recoveryCount);
                     }
 
                     if (Bad_Data_Event == NewEvent) {
