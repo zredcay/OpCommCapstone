@@ -208,7 +208,9 @@ int main () {
 
 
     int end_file = 0;   // status used to check if the end of file marker has been reached
-/*
+
+
+    /*
     // testing whole bluetooth thing
     sharMem = createMemory(); // creates shared memory
     mutex = createNamedSem(); // creates named semaphore
@@ -236,7 +238,9 @@ int main () {
     }
 
     exit(-1);
+
 */
+
     State NextState = Intialization;
     printf("setting event\n");
     Event NewEvent = Code_Finished_Event;
@@ -341,10 +345,10 @@ int main () {
             case Discovery: {
 
                 if (Code_Finished_Event == NewEvent) {
-                    lidar = rplidarPi();                    // transceiver is the tranciever number
-                    transceiver = lidar.trans;
-                    angle = lidar.angle;
-                    dist = lidar.dist;
+                    //lidar = rplidarPi();                    // transceiver is the transceiver number
+                    //transceiver = lidar.trans;
+                    //angle = lidar.angle;
+                    //dist = lidar.dist;
                     printf("return value transceievr %i and angle %f and distance %f\n", transceiver, angle, dist);
                     if (angle == 0) // the transceiver was not found
                     {
@@ -390,6 +394,7 @@ int main () {
 
             case Maintenance: {
                 int status;
+                //transceiver = 3;      // used for testing, hardcode transceiver number you want to use
                 //Jeff
                 if (flag == 1) {
 
@@ -478,10 +483,14 @@ int main () {
                     int i = 0;
                     int j = 0;
 
-                    while (writeCounter <= num_packet) {
+                    if (end_file == 0) {
 
                         for (i = (writeCounter * 7); i <= ((writeCounter * 7) + 6); i++) {
                             msg[j] = fgetc(fp);
+                            if (msg[j] == '^'){
+                                printf("REACHED END OF FILE\n");
+                                end_file = 1;
+                            }
                             j++;
                         }
 
@@ -516,6 +525,7 @@ int main () {
                         if (status == 0) {
                             printf("COMMUNICATION TIMEOUT\n");
                             fseek(fp, -7, SEEK_CUR);
+                            end_file = 0;
                         } else if (rec_msg[0] == '0') {
                             writeCounter++;
                             printf("COMMUNICATION SUCCESS\n");
@@ -527,10 +537,12 @@ int main () {
                             printf("Error: Bad Data\n");
                             fseek(fp, -7, SEEK_CUR);
                             status = 2;
+                            end_file = 0;
                         }else{
                             //printf("ENTIRE MESSAGE: %s\n",rec_msg);
                             //printf("STATUS %i\n",status);
                             fseek(fp, -7, SEEK_CUR);
+                            end_file = 0;
                         }
                         //printf("Write Counter: %i\n",writeCounter);
                         //printf("FILE POINTER %i\n",ftell(fp));
@@ -623,7 +635,6 @@ int main () {
                             } else if (status == 1) {
                                 //printf("SEND SUCCESSFUL\n");
                             }
-
                             // wait for JEFF response
                             status = source_maintenance_routine_read(testTransciver, serial_port);
 
