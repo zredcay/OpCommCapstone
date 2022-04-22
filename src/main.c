@@ -665,8 +665,7 @@ int main () {
                               NewEvent = Timeout_Event;
                                 //printf("COMMUNICATION TIMEOUT\n");
                             } else if (status == 1) {
-                                //printf("COMMUNICATION SUCCESS\n");
-
+                                printf("COMMUNICATION SUCCESS\n");
 
                                 int result;
 
@@ -692,7 +691,7 @@ int main () {
 
                                 // reset the rec_msg buffer in order to send response
                                 memset(rec_msg, '\0', 8);
-
+                                NewEvent = Timeout_Event;
                                 // if the checksums match, send a 0
                                 rec_msg[0] = '0';
                             }
