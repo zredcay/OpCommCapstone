@@ -112,8 +112,8 @@ int recovery_trans_select(int recoveryCounter, int transceiver)
 {
     int testTransciver = 0;
 //try tans +1 and trans -1 in new recovery code
-    transceiverLeft = transceiver - 1;
-    transceiverRight = transceiver + 1;
+    int transceiverLeft = transceiver - 1;
+    int transceiverRight = transceiver + 1;
     if(transceiverLeft > 7)
     {
         transceiverLeft = 0;
@@ -122,7 +122,7 @@ int recovery_trans_select(int recoveryCounter, int transceiver)
     {
         transceiverRight = 7;
     }
-    return testTransciver
+    return testTransciver;
 }
 
 int openFile(int flag)
@@ -207,8 +207,8 @@ int main () {
     float Vx = 0;
     float Vy = 0;
 
-    int transceiverLeft;
-    int transceiverRight;
+    //int transceiverLeft;
+    //int transceiverRight;
 
     struct lidarData lidar;
     struct shared sharMem;
@@ -362,10 +362,10 @@ int main () {
 
             case Discovery: {
 
-                //lidar = rplidarPi();                    // transceiver is the transceiver number
-                //transceiver = lidar.trans;
-                //angle = lidar.angle;
-                //dist = lidar.dist;
+                lidar = rplidarPi();                    // transceiver is the transceiver number
+                transceiver = lidar.trans;
+                angle = lidar.angle;
+                dist = lidar.dist;
                 printf("return value transceievr %i and angle %f and distance %f\n", transceiver, angle, dist);
                 if (angle == 0) // the transceiver was not found
                 {
