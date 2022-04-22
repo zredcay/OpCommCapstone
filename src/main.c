@@ -108,6 +108,23 @@ struct mainData trans_select(float Ax, float Ay, float Az, float Mx, float My, f
     return data;
 }
 
+int recovery_trans_select(int recoveryCounter, int transceiver)
+{
+    int testTransciver = 0;
+//try tans +1 and trans -1 in new recovery code
+    transceiverLeft = transceiver - 1;
+    transceiverRight = transceiver + 1;
+    if(transceiverLeft > 7)
+    {
+        transceiverLeft = 0;
+    }
+     if(transceiverRight < 0)
+    {
+        transceiverRight = 7;
+    }
+    return testTransciver
+}
+
 int openFile(int flag)
 {
     if (flag == 1) {
@@ -391,7 +408,7 @@ int main () {
 
             case Maintenance: {
                 int status;
-                transceiver = 2;      // used for testing, hardcode transceiver number you want to use
+                transceiver = 3;      // used for testing, hardcode transceiver number you want to use
                 //printf("RUNNING MAINTENANCE\n");
                 //Jeff
                 if (flag == 1) {
@@ -611,20 +628,11 @@ int main () {
                     int testTransciver = 0;
                     int recoveryCount = 0; //makes the while loop run three time for each transiver
 
-                    //try tans +1 and trans -1 in new recovery code
-                    transceiverLeft = transceiver - 1;
-                    transceiverRight = transceiver + 1;
-                    if(transceiverLeft > 7)
-                    {
-                        transceiverLeft = 0;
-                    }
-                     if(transceiverRight < 0)
-                    {
-                        transceiverRight = 7;
-                    }
+
                     // try original then direction its going then other direction
 			        //Source
                     while(recoveryCount < 3) {
+                       //testTransciver =  recovery_trans_select(recoveryCount, transceiver);
                         testTransciver = 2; //adding transicever logic later
                         if (flag == 0) {
                             printf("RUNNING SOURCE RECOVERY\n");
