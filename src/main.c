@@ -182,7 +182,7 @@ int openFile(int flag)
 
 
 int main () {
-    int flag = 1;
+    int flag = 0;
 
     if(flag == 0){
         printf("RUNNING SOURCE\n");
@@ -251,12 +251,12 @@ int main () {
     printf("return value transceievr %i and angle %f and distance %f\n", transceiver, angle, dist);
 
 	for(int i = 0; i < 4; i++){
-        data = trans_select(Ax, Ay, Az, Mx, My, Mz, mainTimer, data);
+        //data = trans_select(Ax, Ay, Az, Mx, My, Mz, mainTimer, data);
     }
 
     exit(-1);
-
 */
+
 
     State NextState = Intialization;
     printf("setting event\n");
@@ -408,7 +408,7 @@ int main () {
 
             case Maintenance: {
                 int status;
-                transceiver = 3;      // used for testing, hardcode transceiver number you want to use
+                //transceiver = 3;      // used for testing, hardcode transceiver number you want to use
                 //printf("RUNNING MAINTENANCE\n");
                 //Jeff
                 if (flag == 1) {

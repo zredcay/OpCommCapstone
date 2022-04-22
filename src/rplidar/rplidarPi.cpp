@@ -145,8 +145,8 @@ struct lidarData rplidarPi()
             for (int pos = 0; pos < (int)count ; pos = pos + div) {
             //my code
             if((nodes[pos].quality >> SL_LIDAR_RESP_MEASUREMENT_QUALITY_SHIFT) > 30){
-            	avgDist[pos/div][0] = (nodes[pos].angle_z_q14 * 90.f) / 16384.f;
-            	avgDist[pos/div][1] = nodes[pos].dist_mm_q2/4.0f;
+            	//avgDist[pos/div][0] = (nodes[pos].angle_z_q14 * 90.f) / 16384.f;
+            	//avgDist[pos/div][1] = nodes[pos].dist_mm_q2/4.0f;
             }
             //end of my code
             
@@ -171,23 +171,23 @@ struct lidarData rplidarPi()
             break;
         }
     }
-    /*
+    
     smallest = avgDist[0][1];
 	for(int i = 0; i < size; i++){
-		printf("theta: %03.2f Dist: %08.2f \n", avgDist[i][0], avgDist[i][1]);
+		//printf("theta: %03.2f Dist: %08.2f \n", avgDist[i][0], avgDist[i][1]);
 		if(avgDist[i][1] < smallest && avgDist[i][1] > 0){
 			smallest = avgDist[i][1];
 			angle = avgDist[i][0];
 		}
     
 	}
-    */
-   angle = angle - 180 - 22.5;
+   
+   angle = angle - 180;
     if (angle < 0)
     {
         angle = angle + 360;
     }
-    printf("theta: %03.2f Dist: %08.2f \n", angle, smallest);
+    //printf("theta: %03.2f Dist: %08.2f \n", angle, smallest);
 	tran = (int)round(angle/45);
     //angle = angle + 22.5;
 	printf("transciever : %i \n", tran);
