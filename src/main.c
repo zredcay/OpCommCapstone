@@ -394,7 +394,7 @@ int main () {
 
             case Maintenance: {
                 int status;
-                //transceiver = 3;      // used for testing, hardcode transceiver number you want to use
+                transceiver = 3;      // used for testing, hardcode transceiver number you want to use
                 //Jeff
                 if (flag == 1) {
 
@@ -618,7 +618,7 @@ int main () {
                     {
                         transceiverRight = 7;
                     }
-			// try original then direction its going then other direction 
+			// try original then direction its going then other direction
 			        //Source
                     while(foundTransceiver || recoveryCount < 3) {
                         testTransciver = transceiver; //adding transicever logic later
@@ -640,15 +640,18 @@ int main () {
 
                             if (status == 0) {
                                 printf("COMMUNICATION TIMEOUT\n");
+                                NewEvent = Timeout_Event;
 
                             } else if (rec_msg[0] == '0') {
                                 printf("COMMUNICATION SUCCESS\n");
                                 foundTransceiver = true;
                                 transceiver = testTransciver;
                                 status = 1;
+                                NewEvent = Code_Finished_Event;
                             } else if (rec_msg[0] == '1') {
                                 printf("Error: Bad Data\n");
                                 status = 2;
+                                NewEvent = Bad_Data_Event;
                             }else{
                                 //printf("ENTIRE MESSAGE: %s\n",rec_msg);
                                 //printf("STATUS %i\n",status);
@@ -660,7 +663,8 @@ int main () {
                             printf("RUNNING JEFF RECOVERY\n");
                             printf("\n");
 
-                            status = jeff_maintenance_routine_read(testTransciver, serial_port);                            if (status == 0) {
+                            status = jeff_maintenance_routine_read(testTransciver, serial_port);
+                            if (status == 0) {
                                 //printf("COMMUNICATION TIMEOUT\n");
                             } else if (status == 1) {
                                 //printf("COMMUNICATION SUCCESS\n");
@@ -673,10 +677,15 @@ int main () {
                                     status = jeff_maintenance_routine_send(testTransciver, rec_msg, serial_port);
                                     if (status == 0) {
                                         //printf("ERROR SENDING\n");
+                                        NewEvent = Timeout_Event;
                                     } else if (status == 1) {
                                         //printf("SEND SUCCESSFUL\n");
                                         foundTransceiver = true;
                                         transceiver = testTransciver;
+                                        NewEvent = Code_Finished_Event;
+                                    }
+                                    else {
+                                        NewEvent = Timeout_Event;
                                     }
 
                                     // reset rec_msg buffer for reading
@@ -692,6 +701,7 @@ int main () {
 
                         }
                         recoveryCount++;
+                        printf("recoveryCount: %i\n",recoveryCount);
                     }
                     if (Bad_Data_Event == NewEvent) {
                         if (true) {
