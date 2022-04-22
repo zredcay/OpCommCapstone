@@ -344,29 +344,25 @@ int main () {
 
             case Discovery: {
 
-                if (Code_Finished_Event == NewEvent) {
-                    //lidar = rplidarPi();                    // transceiver is the transceiver number
-                    //transceiver = lidar.trans;
-                    //angle = lidar.angle;
-                    //dist = lidar.dist;
-                    printf("return value transceievr %i and angle %f and distance %f\n", transceiver, angle, dist);
-                    if (angle == 0) // the transceiver was not found
-                    {
-                        NewEvent = Bad_Data_Event;
-                        NextState = BadDataHandler(NextState);
-                    } else if (angle < 360 && angle > 0) // in a given transcieer 1 - 8
-                    {
-                        NewEvent = Code_Finished_Event;
-                        NextState = CodeFinishedHandler(NextState);
-                    } else // angle should not give a number higher than 360
-                    {
-                        NewEvent = Should_Not_Get_Here_Event;
-                        NextState = ShouldNotGetHandler(NextState);
-                    }
-                    startTime = clock();
-
+                //lidar = rplidarPi();                    // transceiver is the transceiver number
+                //transceiver = lidar.trans;
+                //angle = lidar.angle;
+                //dist = lidar.dist;
+                printf("return value transceievr %i and angle %f and distance %f\n", transceiver, angle, dist);
+                if (angle == 0) // the transceiver was not found
+                {
+                    NewEvent = Bad_Data_Event;
+                    NextState = BadDataHandler(NextState);
+                } else if (angle < 360 && angle > 0) // in a given transcieer 1 - 8
+                {
+                    NewEvent = Code_Finished_Event;
+                    NextState = CodeFinishedHandler(NextState);
+                } else // angle should not give a number higher than 360
+                {
+                    NewEvent = Should_Not_Get_Here_Event;
+                    NextState = ShouldNotGetHandler(NextState);
                 }
-
+                startTime = clock();
 
             }
                 break;
@@ -631,6 +627,7 @@ int main () {
 
                             // check if msg was sent correctly
                             if (status == 4) {
+                              NewEvent = Bad_Data_Event;
                                 //printf("ERROR SENDING\n");
                             } else if (status == 1) {
                                 //printf("SEND SUCCESSFUL\n");
@@ -665,6 +662,7 @@ int main () {
 
                             status = jeff_maintenance_routine_read(testTransciver, serial_port);
                             if (status == 0) {
+                              NewEvent = Timeout_Event;
                                 //printf("COMMUNICATION TIMEOUT\n");
                             } else if (status == 1) {
                                 //printf("COMMUNICATION SUCCESS\n");
@@ -704,29 +702,20 @@ int main () {
                         printf("recoveryCount: %i\n",recoveryCount);
                     }
                     if (Bad_Data_Event == NewEvent) {
-                        if (true) {
-                            NewEvent = Code_Finished_Event;
-                            NextState = CodeFinishedHandler(NextState);
 
-                        } else {
-                            NewEvent = Bad_Data_Event;
-                            NextState = BadDataHandler(NextState);
-                        }
-                        startTime = clock();
+                        NewEvent = Bad_Data_Event;
+                        NextState = BadDataHandler(NextState);
                     }
                     if (Timeout_Event == NewEvent) {
 
-                        if (true) {
-                            NewEvent = Code_Finished_Event;
-                            NextState = CodeFinishedHandler(NextState);
-
-                        } else {
-                            NewEvent = Bad_Data_Event;
-                            NextState = BadDataHandler(NextState);
-                        }
-                        startTime = clock();
+                        NewEvent = Timeout_Event;
+                        NextState = TimeoutEventHandler(NextState);
                     }
-
+                    if(Code_Finished_Event == NewEvent){
+                      NewEvent = Code_Finished_Event;
+                        NextState = CodeFinishedHandler(NextState);
+                    }
+                    startTime = clock();
                 }
                 break;
             }
