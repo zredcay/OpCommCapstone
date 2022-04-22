@@ -94,6 +94,9 @@ State TimeoutEventHandler(State thisState){
 	{
 		return Discovery;
 	}
+	else if(thisState == Discovery){
+        return Discovery;
+	}
 	else{
 	    return Recovery;
 	}

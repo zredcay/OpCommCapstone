@@ -106,7 +106,7 @@ int jeff_maintenance_routine_read(int transceiver, int port)
                 status = 1;
             }
         }
-    }while(elapsed_time < 100);
+    }while(elapsed_time < 200);
     // timer runs for 0.1 s
 
     return status;

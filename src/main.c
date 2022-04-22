@@ -165,7 +165,7 @@ int openFile(int flag)
 
 
 int main () {
-    int flag = 0;
+    int flag = 1;
 
     if(flag == 0){
         printf("RUNNING SOURCE\n");
@@ -390,7 +390,8 @@ int main () {
 
             case Maintenance: {
                 int status;
-                transceiver = 3;      // used for testing, hardcode transceiver number you want to use
+                transceiver = 2;      // used for testing, hardcode transceiver number you want to use
+                printf("RUNNING MAINTENANCE\n");
                 //Jeff
                 if (flag == 1) {
 
@@ -404,11 +405,11 @@ int main () {
 
                         readCounter = 0;
                         if (status == 0) {
-                            //printf("COMMUNICATION TIMEOUT\n");
+                            printf("MAINTENANCE COMMUNICATION TIMEOUT\n");
                         } else if (status == 1) {
-                            //printf("COMMUNICATION SUCCESS\n");
+                            printf("MAINTENANCE COMMUNICATION SUCCESS\n");
 
-                            //printf("MESSAGE: %s\n", rec_msg);
+                            printf("MESSAGE: %s\n", rec_msg);
 
                             // checksum calculation
                             int checksum = 0;
@@ -453,22 +454,19 @@ int main () {
                                 rec_msg[0] = '1';
                                 status = 2;
                             }
-                        }
+                            // send a response to SOURCE with if the data was rec correctly
+                            status = jeff_maintenance_routine_send(transceiver, rec_msg, serial_port);
+                            if (status == 0) {
+                                //printf("ERROR SENDING\n");
+                            } else if (status == 1) {
+                                printf("MAINTENANCE SEND SUCCESSFUL\n");
+                            }
 
-                        // send a response to SOURCE with if the data was rec correctly
-                        status = jeff_maintenance_routine_send(transceiver, rec_msg, serial_port);
-                        if (status == 0) {
-                            //printf("ERROR SENDING\n");
-                        } else if (status == 1) {
-                            //printf("SEND SUCCESSFUL\n");
-                        }
+                            // reset rec_msg buffer for reading
+                            memset(rec_msg, 0, 8);
 
-                        // reset rec_msg buffer for reading
-                        memset(rec_msg, 0, 8);
+                        }
                     }
-
-                    // close file
-                    close(fp);
                 }
                 //Source
                 if (flag == 0) {
@@ -600,7 +598,6 @@ int main () {
                     char recovery_msg[8] = "recovery";       // buffer for sending data
                     int status;
                     int testTransciver = 0;
-                    bool foundTransceiver = false;
                     int recoveryCount = 0; //makes the while loop run three time for each transiver
 
                     //try tans +1 and trans -1 in new recovery code
@@ -614,13 +611,12 @@ int main () {
                     {
                         transceiverRight = 7;
                     }
-			// try original then direction its going then other direction
+                    // try original then direction its going then other direction
 			        //Source
-                    while(foundTransceiver || recoveryCount < 3) {
-                        testTransciver = transceiver; //adding transicever logic later
+                    while(recoveryCount < 3) {
+                        testTransciver = 2; //adding transicever logic later
                         if (flag == 0) {
                             printf("RUNNING SOURCE RECOVERY\n");
-                            printf("\n");
 
                             // send msg to JEFF
                             status = source_maintenance_routine_send(testTransciver, recovery_msg, serial_port);
@@ -634,17 +630,17 @@ int main () {
                             }
                             // wait for JEFF response
                             status = source_maintenance_routine_read(testTransciver, serial_port);
+                            readCounter = 0;
 
                             if (status == 0) {
                                 printf("COMMUNICATION TIMEOUT\n");
                                 NewEvent = Timeout_Event;
 
-                            } else if (rec_msg[0] == '0') {
+                            } else if (status == 1) {
                                 printf("COMMUNICATION SUCCESS\n");
-                                foundTransceiver = true;
                                 transceiver = testTransciver;
-                                status = 1;
                                 NewEvent = Code_Finished_Event;
+                                break;
                             } else if (rec_msg[0] == '1') {
                                 printf("Error: Bad Data\n");
                                 status = 2;
@@ -652,67 +648,109 @@ int main () {
                             }else{
                                 //printf("ENTIRE MESSAGE: %s\n",rec_msg);
                                 //printf("STATUS %i\n",status);
-
                             }
+                            memset(rec_msg, 0, 8);
                         }
                         //Jeff
                         if (flag == 1) {
                             printf("RUNNING JEFF RECOVERY\n");
-                            printf("\n");
 
-                            status = jeff_maintenance_routine_read(testTransciver, serial_port);
+                            // try to read a message from SOURCE
+                            status = jeff_maintenance_routine_read(transceiver, serial_port);
+                            readCounter = 0;
+
                             if (status == 0) {
-                              NewEvent = Timeout_Event;
-                                //printf("COMMUNICATION TIMEOUT\n");
+                                printf("RECOVERY COMMUNICATION TIMEOUT\n");
+                                NewEvent =Timeout_Event;
                             } else if (status == 1) {
-                                printf("COMMUNICATION SUCCESS\n");
+                                printf("RECOVERY COMMUNICATION SUCCESS\n");
 
-                                int result;
+                                //printf("MESSAGE: %s\n", rec_msg);
 
-                                if ((result = strcmp(rec_msg, recovery_msg)) != 0) {
-                                    // send a response to SOURCE with if the data was rec correctly
-                                    status = jeff_maintenance_routine_send(testTransciver, rec_msg, serial_port);
-                                    if (status == 0) {
-                                        //printf("ERROR SENDING\n");
-                                        NewEvent = Timeout_Event;
-                                    } else if (status == 1) {
-                                        //printf("SEND SUCCESSFUL\n");
-                                        foundTransceiver = true;
-                                        transceiver = testTransciver;
-                                        NewEvent = Code_Finished_Event;
+                                // checksum calculation
+                                int checksum = 0;
+                                for (int k = 0; k <= 6; k++) {
+                                    checksum += (int) rec_msg[k];
+                                }
+                                checksum = (((checksum % 100) / 10) + ((checksum % 100) % 10)) % 10;
+
+                                // if checksum value rec == checksum value calculated
+                                if (checksum + '0' == rec_msg[7]) {
+
+                                    // set checksum value in rec_msg buffer to null
+                                    rec_msg[7] = '\0';
+
+                                    int result;
+
+                                    if ((result = strcmp(rec_msg, prev_msg)) != 0){
+                                        for (int k = 0; k <= 6; k++){
+                                            prev_msg[k] = rec_msg[k];
+                                        }
+                                        fputs(rec_msg, fp);
                                     }
-                                    else {
-                                        NewEvent = Timeout_Event;
+
+                                    // check to see if the end of the file has been reached
+                                    int c = 0;
+                                    while (c <= 6) {
+                                        if (rec_msg[c] == '^') {
+                                            //printf("END OF FILE\n");
+                                            end_file = 1;
+                                            status = 3;
+                                        }
+                                        c++;
                                     }
 
-                                    // reset rec_msg buffer for reading
-                                    memset(rec_msg, 0, 8);
+                                    // reset the rec_msg buffer in order to send response
+                                    memset(rec_msg, '\0', 8);
+
+                                    // if the checksums match, send a 0
+                                    rec_msg[0] = '0';
+                                } else {
+                                    // else send a 1
+                                    rec_msg[0] = '1';
+                                    status = 2;
                                 }
 
-                                // reset the rec_msg buffer in order to send response
-                                memset(rec_msg, '\0', 8);
-                                NewEvent = Timeout_Event;
-                                // if the checksums match, send a 0
-                                rec_msg[0] = '0';
-                            }
+                                // send a response to SOURCE with if the data was rec correctly
+                                status = jeff_maintenance_routine_send(transceiver, rec_msg, serial_port);
 
+                                if (status == 0) {
+                                    NewEvent = Should_Not_Get_Here_Event;
+                                    //printf("ERROR SENDING\n");
+                                } else if (status == 1) {
+                                    printf("RECOVERY SEND SUCCESSFUL\n");
+                                     NewEvent = Code_Finished_Event;
+                                     break;
+                                }
+                                else{
+                                printf("STATUS IS NOT GOOD\n");
+                                }
+                                // reset rec_msg buffer for reading
+                                memset(rec_msg, 0, 8);
+                            }
                         }
                         recoveryCount++;
                         printf("recoveryCount: %i\n",recoveryCount);
                     }
+
                     if (Bad_Data_Event == NewEvent) {
 
-                        NewEvent = Bad_Data_Event;
                         NextState = BadDataHandler(NextState);
                     }
-                    if (Timeout_Event == NewEvent) {
-
-                        NewEvent = Timeout_Event;
+                    else if (Timeout_Event == NewEvent) {
                         NextState = TimeoutEventHandler(NextState);
                     }
-                    if(Code_Finished_Event == NewEvent){
-                      NewEvent = Code_Finished_Event;
+                    else if(NewEvent == Code_Finished_Event){
                         NextState = CodeFinishedHandler(NextState);
+                    }
+                    else if (NewEvent == Should_Not_Get_Here_Event) //Status is something broken
+                    {
+                        NextState = ShouldNotGetHandler(NextState);
+                    }
+                    else
+                    {
+                        printf("BROKE\n");
+                        NextState = ShouldNotGetHandler(NextState);
                     }
                     startTime = clock();
                 }
