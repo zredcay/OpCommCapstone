@@ -165,7 +165,7 @@ int openFile(int flag)
 
 
 int main () {
-    int flag = 1;
+    int flag = 0;
 
     if(flag == 0){
         printf("RUNNING SOURCE\n");
@@ -208,7 +208,7 @@ int main () {
 
 
     int end_file = 0;   // status used to check if the end of file marker has been reached
-
+/*
     // testing whole bluetooth thing
     sharMem = createMemory(); // creates shared memory
     mutex = createNamedSem(); // creates named semaphore
@@ -236,7 +236,7 @@ int main () {
     }
 
     exit(-1);
-
+*/
     State NextState = Intialization;
     printf("setting event\n");
     Event NewEvent = Code_Finished_Event;
@@ -589,9 +589,15 @@ int main () {
 
 
                 case Recovery: {
+                    char recovery_msg[8] = "recovery";       // buffer for sending data
+                    int status;
+                    int testTransciver = 0;
+                    bool foundTransceiver = false;
+                    int recoveryCount = 0; //makes the while loop run three time for each transiver
+
                     //try tans +1 and trans -1 in new recovery code
-                    transceiverLeft = transceiver + 1;
-                    transceiverRight = transceiver - 1;
+                    transceiverLeft = transceiver - 1;
+                    transceiverRight = transceiver + 1;
                     if(transceiverLeft > 7)
                     {
                         transceiverLeft = 0;
@@ -600,19 +606,82 @@ int main () {
                     {
                         transceiverRight = 7;
                     }
+			// try original then direction its going then other direction 
+			        //Source
+                    while(foundTransceiver || recoveryCount < 3) {
+                        testTransciver = transceiver; //adding transicever logic later
+                        if (flag == 0) {
+                            printf("RUNNING SOURCE RECOVERY\n");
+                            printf("\n");
 
-                    if(flag = 0)
-                    {
-                    printf("RUNNING SOURCE CODE\n");
-                    printf("\n");
+                            // send msg to JEFF
+                            status = source_maintenance_routine_send(testTransciver, recovery_msg, serial_port);
+
+                            // check if msg was sent correctly
+                            if (status == 4) {
+                                //printf("ERROR SENDING\n");
+                            } else if (status == 1) {
+                                //printf("SEND SUCCESSFUL\n");
+                            }
+
+                            // wait for JEFF response
+                            status = source_maintenance_routine_read(testTransciver, serial_port);
+
+                            if (status == 0) {
+                                printf("COMMUNICATION TIMEOUT\n");
+
+                            } else if (rec_msg[0] == '0') {
+                                printf("COMMUNICATION SUCCESS\n");
+                                foundTransceiver = true;
+                                transceiver = testTransciver;
+                                status = 1;
+                            } else if (rec_msg[0] == '1') {
+                                printf("Error: Bad Data\n");
+                                status = 2;
+                            }else{
+                                //printf("ENTIRE MESSAGE: %s\n",rec_msg);
+                                //printf("STATUS %i\n",status);
+
+                            }
+                        }
+                        //Jeff
+                        if (flag == 1) {
+                            printf("RUNNING JEFF RECOVERY\n");
+                            printf("\n");
+
+                            status = jeff_maintenance_routine_read(testTransciver, serial_port);                            if (status == 0) {
+                                //printf("COMMUNICATION TIMEOUT\n");
+                            } else if (status == 1) {
+                                //printf("COMMUNICATION SUCCESS\n");
+
+
+                                int result;
+
+                                if ((result = strcmp(rec_msg, recovery_msg)) != 0) {
+                                    // send a response to SOURCE with if the data was rec correctly
+                                    status = jeff_maintenance_routine_send(testTransciver, rec_msg, serial_port);
+                                    if (status == 0) {
+                                        //printf("ERROR SENDING\n");
+                                    } else if (status == 1) {
+                                        //printf("SEND SUCCESSFUL\n");
+                                        foundTransceiver = true;
+                                        transceiver = testTransciver;
+                                    }
+
+                                    // reset rec_msg buffer for reading
+                                    memset(rec_msg, 0, 8);
+                                }
+
+                                // reset the rec_msg buffer in order to send response
+                                memset(rec_msg, '\0', 8);
+
+                                // if the checksums match, send a 0
+                                rec_msg[0] = '0';
+                            }
+
+                        }
+                        recoveryCount++;
                     }
-                    if(flag = 1)
-                    {
-                    printf("RUNNING JEFF CODE\n");
-                    printf("\n");
-                    }
-
-
                     if (Bad_Data_Event == NewEvent) {
                         if (true) {
                             NewEvent = Code_Finished_Event;
