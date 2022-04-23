@@ -14,9 +14,7 @@ def data_received(data):  # defines the data_received function which is passed t
     # write source's data to shm
     shm.shmwrite(data, 0)
     
-c = BluetoothClient("raspberrypi", data_received)  # creates the BTClient object and pass it the desired device and data function
-
-while True:
+def send(BTclient):  # takes in a bluetooth client, gethers imu data, writes to shared memory, then sends it to server
     accx, accy, accz = IMU.getAcc()  # break the acceleration tuple into its respective pieces
     gyrox, gyroy, gyroz = IMU.getGyro()  # break the gyro tuple into its respective pieces
     magx, magy, magz = IMU.getMagnetic()  # break the magentic tuple into its respective pieces
@@ -28,8 +26,8 @@ while True:
     shm.shmwrite(data, 1)
     
     # via the client connection send the following, the variable need to be cast as strings to encode correctly, needs to be one send command otherwise it will double send data
-    c.send(data)   
-    
-    time.sleep(1)
+    c.send(data)
+
+c = BluetoothClient("raspberrypi", data_received)  # creates the BTClient object and pass it the desired device and data function
 
 pause()
