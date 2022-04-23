@@ -134,7 +134,7 @@ struct lidarData rplidarPi()
     smallest = 10000;
     
     
-    for(int runtime = 1; runtime < 7; runtime++) {
+    for(int runtime = 0; runtime < 1; runtime++) {
         sl_lidar_response_measurement_node_hq_t nodes[8192];
         size_t   count = _countof(nodes);
 
@@ -172,15 +172,15 @@ struct lidarData rplidarPi()
         }
     }
     
-    smallest = avgDist[0][1];
-	for(int i = 0; i < size; i++){
+    //smallest = avgDist[0][1];
+	//for(int i = 0; i < size; i++){
 		//printf("theta: %03.2f Dist: %08.2f \n", avgDist[i][0], avgDist[i][1]);
-		if(avgDist[i][1] < smallest && avgDist[i][1] > 0){
-			smallest = avgDist[i][1];
-			angle = avgDist[i][0];
-		}
+		//if(avgDist[i][1] < smallest && avgDist[i][1] > 0){
+			//smallest = avgDist[i][1];
+			//angle = avgDist[i][0];
+		//}
     
-	}
+	//}
    
    angle = angle - 180;
     if (angle < 0)
@@ -188,9 +188,12 @@ struct lidarData rplidarPi()
         angle = angle + 360;
     }
     //printf("theta: %03.2f Dist: %08.2f \n", angle, smallest);
-	tran = (int)round(angle/45);
+    tran = (int)round(angle/45);
+    if (tran == 8){
+	tran = 0;
+    }
     //angle = angle + 22.5;
-	printf("transciever : %i \n", tran);
+    printf("transciever : %i \n", tran);
 
 
     drv->stop();
