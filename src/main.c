@@ -167,7 +167,7 @@ int openFile(int flag)
         long int size;
         if (stat(filename, &st) == 0) {
             size = st.st_size;
-            printf("Size of File: %i\n", size);
+            //printf("Size of File: %i\n", size);
         }
 
         // determine number of packets needed to be sent with 7 data bytes per packet
@@ -176,7 +176,7 @@ int openFile(int flag)
         } else {
             num_packet = size / 7;
         }
-        printf("NUM OF PACKETS: %i\n", num_packet);
+        //printf("NUM OF PACKETS: %i\n", num_packet);
     }
 }
 
@@ -185,9 +185,9 @@ int main () {
     int flag = 0;
 
     if(flag == 0){
-        printf("RUNNING SOURCE\n");
+        printf("DESIGNATION: SOURCE\n");
     }else{
-        printf("RUNNING JEFF\n");
+        printf("DESIGNATION: JEFF\n");
     }
 
     char prev_msg[7] = "0000000";
@@ -259,7 +259,7 @@ int main () {
 
 
     State NextState = Intialization;
-    printf("setting event\n");
+    printf("INITIALIZATION: BEGIN\n");
     Event NewEvent = Code_Finished_Event;
     clock_t startTime = clock();
     while (clock() < (startTime + 3 * CLOCKS_PER_SEC)) {
@@ -274,7 +274,7 @@ int main () {
                 pinMode(24, OUTPUT);  // Pin B / GPIO Pin #19 of Pi / Physical Pin 35
                 pinMode(29, OUTPUT);  // Pin C / GPIO Pin #21 of Pi / Physical Pin 40
                 pinMode(28, OUTPUT);  // Pin D / GPIO Pin #20 of Pi / Physical Pin 38
-                printf("WiringPi Setup Complete\n");
+                printf("WIRINGPI SETUP: COMPLETE\n");
                 //*****************transcoever code start************************88
                 serial_port = open("/dev/ttyS0", O_RDWR | O_NOCTTY);
 
@@ -326,9 +326,10 @@ int main () {
                     printf("Error %i from tcsetattr: %s\n", errno, strerror(errno));
                     return 1;
                 }
-                printf("Opening File\n");
+                printf("SERIAL PORT SETUP: COMPLETE\n");
+                //printf("Opening File\n");
                 openFile(flag);
-                printf("Initlization Complete\n");
+                printf("INITIALIZATION: COMPLETE\n");
                 printf("\n");
                 num_packet = 0;
 
@@ -361,18 +362,62 @@ int main () {
                 break;
 
             case Discovery: {
-		//clock_t start = clock();
-		//int elapsed_time = 0;
+                //clock_t start = clock();
+                //int elapsed_time = 0;
 
                 lidar = rplidarPi();                    // transceiver is the transceiver number
                 transceiver = lidar.trans;
                 angle = lidar.angle;
                 dist = lidar.dist;
-		//clock_t difference = clock() - start;
-		//elapsed_time = difference*1000/CLOCKS_PER_SEC;
-		//printf("TIME TO SET UP LIDAR %i\n",elapsed_time);
+                //clock_t difference = clock() - start;
+                //elapsed_time = difference*1000/CLOCKS_PER_SEC;
+                //printf("TIME TO SET UP LIDAR %i\n",elapsed_time);
 
-                printf("return value transceievr %i and angle %f and distance %f\n", transceiver, angle, dist);
+                printf("CHOSEN TRANSCEIVER %i ON ANGLE %f AT DISTANCE %f\n", transceiver, angle, dist);
+
+                printf("ATTEMPTING DISCOVERY\n");
+
+
+                int discovery_attempt = 0;
+                int discovery_status;
+                char disc_msg[] = "DISCOVER";
+                int result;
+
+                // attempt to discovery on chosen LIDAR transceiver 5 times before rerunning discovery
+                // this should increase our chances of discovery hitting and not having to reconnect to the LIDAR which is a big time hit
+                // trying to send/recieve 5 times is still less time than having to connect to the LIDAR again
+                while (discovery_attempt <= 4){
+                    // Source Discovery
+                    if (flag == 0){
+                        // send discovery message
+                        discovery_status = source_maintenance_routine_send(transceiver, disc_msg, serial_port);
+
+                        // wait for JEFF response
+                        discovery_status = source_maintenance_routine_read(transceiver, serial_port);
+                        readCounter = 0;
+                        if ((result = strcmp(rec_msg, disc_msg)) == 0){
+                            printf("DISCOVEY MESSAGE REC\n");
+                            printf("\n");
+                            break;
+                        }
+
+
+                    }
+                    // Jeff Discovery
+                    if (flag == 1){
+                        // wait for Source message
+                        discovery_status = jeff_maintenance_routine_read(transceiver, serial_port);
+                        readCounter = 0;
+
+                        if((result = strcmp(rec_msg, disc_msg)) == 0){
+                            printf("DISCOVEY MESSAGE REC\n");
+                            printf("\n");
+                            discovery_status = jeff_maintenance_routine_send(transceiver, rec_msg, serial_port);
+                            break;
+                        }
+                    }
+                    discovery_attempt++;
+                }
 
                 if (angle == 0) // the transceiver was not found
                 {
@@ -419,7 +464,6 @@ int main () {
                 //printf("RUNNING MAINTENANCE\n");
                 //Jeff
                 if (flag == 1) {
-
                     int checksum = 0;   // checksum variable
 
                     // accept data packets until the end of file marker is reached
@@ -476,7 +520,7 @@ int main () {
                                 rec_msg[0] = '0';
 
                                 if(num_packet % 20 == 0){
-                                    printf("RECEIVED %i PACKETS AND HAVE WRITTEN THEM TO THE FILE\n");
+                                    printf("RECEIVED %i PACKETS FROM SOURCE AND HAVE WRITTEN THEM TO THE FILE\n");
                                 }
                                 num_packet++;
                             } else {
@@ -554,7 +598,7 @@ int main () {
                         } else if (rec_msg[0] == '0') {
                             writeCounter++;
                             if(num_packet % 20 == 0){
-                                printf("SENT %i PACKETS\n",num_packet);
+                                printf("SENT %i PACKETS TO JEFF\n",num_packet);
                             }
                             num_packet++;
                             //printf("COMMUNICATION SUCCESS\n");
@@ -642,7 +686,7 @@ int main () {
                        //testTransciver =  recovery_trans_select(recoveryCount, transceiver);
                         testTransciver = 2; //adding transicever logic later
                         if (flag == 0) {
-                            printf("RUNNING SOURCE RECOVERY\n");
+                            printf("SOURCE HAS LOST CONNECTION, ENTERING RECOVERY\n");
 
                             // send msg to JEFF
                             status = source_maintenance_routine_send(testTransciver, recovery_msg, serial_port);
@@ -679,7 +723,7 @@ int main () {
                         }
                         //Jeff
                         if (flag == 1) {
-                            printf("RUNNING JEFF RECOVERY\n");
+                            printf("JEFF HAS LOST CONNECTION, ENTERING RECOVERY\n");
 
                             // try to read a message from SOURCE
                             status = jeff_maintenance_routine_read(transceiver, serial_port);
@@ -756,7 +800,7 @@ int main () {
                             }
                         }
                         recoveryCount++;
-                        printf("Trying Recovery again\n",recoveryCount);
+                        printf("RECOVERY UNSUCCESSFUL, ATTEMPTING ON ADJACENT TRANSCEIVER\n",recoveryCount);
                     }
 
                     if (Bad_Data_Event == NewEvent) {
