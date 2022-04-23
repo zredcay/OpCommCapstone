@@ -25,8 +25,8 @@
 #include "transceiver.h"
 
 //Pthon embedding
-#include <pyhton3.7/Python.h>
-#include <conio.h>
+//#include <pyhton3.7/Python.h>
+//#include <conio.h>
 
 
 
@@ -234,12 +234,12 @@ int main () {
     char pyFilename[] = "pyemb7.py";
 	FILE* Pyfp;
 
-	Py_Initialize();
+	//Py_Initialize();
 
-	Pyfp = _Py_fopen(pyFilename, "r");
-	PyRun_SimpleFile(Pyfps, pyFilename);
+	//Pyfp = _Py_fopen(pyFilename, "r");
+	//PyRun_SimpleFile(Pyfps, pyFilename);
 
-	Py_Finalize();
+	//Py_Finalize();
     /*
     // testing whole bluetooth thing
     sharMem = createMemory(); // creates shared memory
