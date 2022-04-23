@@ -1,6 +1,7 @@
 #ifndef _stateMachine_h_
 #define _stateMachine_h_
 
+int flag;
 
 typedef struct mainData{
 	int trans;
@@ -10,7 +11,7 @@ typedef struct mainData{
 	float Vy
 };
 
-typedef enum 
+typedef enum
 {
     Discovery,
     Alternate_Discovery,
@@ -42,17 +43,17 @@ State CodeFinishedHandler(State thisState)
 	}
 	else if(thisState == Recovery)
 	{
-		return Discovery;
+		return Maintenance;
 	}
 	else if(thisState == Maintenance)
 	{
 		return Maintenance;
 	}
-	else 
+	else
 	{
 		return End;
 	}
-    
+
 }
 
 State BadDataHandler(State thisState)
@@ -86,8 +87,21 @@ State UserExitHandler(State thisState){
 }
 
 State TimeoutEventHandler(State thisState){
+     if(thisState == Maintenance)
+	{
+		return Recovery;
+	}
+	else  if(thisState == Recovery)
+	{
+		return Discovery;
+	}
+	else if(thisState == Discovery){
+        return Discovery;
+	}
+	else{
+	    return Recovery;
+	}
 
-    return Recovery;
 }
 
 #endif

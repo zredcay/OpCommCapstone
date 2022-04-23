@@ -44,7 +44,7 @@ struct shared createMemory()
      }
      ///****************Fills memory with numbers for debugging*************
 
-     for (INT32 i = 0; i < 36; i++) {
+     for (INT32 i = 0; i < 18; i++) {
       	ShmPTR->data[i] = 0;
       	printf("array %i is %f\n",i,ShmPTR->data[i]);
      }

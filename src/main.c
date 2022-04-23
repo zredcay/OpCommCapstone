@@ -24,6 +24,10 @@
 #include "sharedMemory.h"
 #include "transceiver.h"
 
+//Pthon embedding
+#include <python3.7m/Python.h>
+//#include <conio.h>
+
 
 
 int convertTransceiver(int trans)
@@ -108,6 +112,39 @@ struct mainData trans_select(float Ax, float Ay, float Az, float Mx, float My, f
     return data;
 }
 
+int recovery_trans_select(int recoveryCounter, int transceiver)
+{
+    int testTransciver = 0;
+    //try tans +1 and trans -1 in new recovery code
+
+    if (flag == 0 && recoveryCounter == 1){
+        testTransciver = transceiver++;
+    }
+
+    if (flag == 0 && recoveryCounter == 2){
+        testTransciver = transceiver--;
+    }
+
+    if (flag == 1 && recoveryCounter == 1){
+        testTransciver = transceiver--;
+    }
+
+    if (flag == 1 && recoveryCounter == 2){
+        testTransciver = transceiver++;
+    }
+
+    if(testTransciver > 7)
+    {
+        testTransciver = 0;
+    }
+     if(testTransciver < 0)
+    {
+        testTransciver = 7;
+    }
+
+    return testTransciver;
+}
+
 int openFile(int flag)
 {
     if (flag == 1) {
@@ -150,7 +187,7 @@ int openFile(int flag)
         long int size;
         if (stat(filename, &st) == 0) {
             size = st.st_size;
-            printf("Size of File: %i\n", size);
+            //printf("Size of File: %i\n", size);
         }
 
         // determine number of packets needed to be sent with 7 data bytes per packet
@@ -159,56 +196,45 @@ int openFile(int flag)
         } else {
             num_packet = size / 7;
         }
-        printf("NUM OF PACKETS: %i\n", num_packet);
+        //printf("NUM OF PACKETS: %i\n", num_packet);
     }
 }
 
 
 int main () {
-    int flag = 1;
+    flag = 0;
 
     if(flag == 0){
-        printf("RUNNING SOURCE\n");
+        printf("DESIGNATION: SOURCE\n");
     }else{
-        printf("RUNNING JEFF\n");
+        printf("DESIGNATION: JEFF\n");
     }
 
     char prev_msg[7] = "0000000";
-    float Ax = .2;
-    float Ay = .1;
-    float Az;
-    float Gx;
-    float Gy;
-    float Gz;
-    float Mx;
-    float My;
-    float Mz;
     float angle = 100;
     float dist = .3;
     int transceiver = 0;
-    float mainTimer = .5;
-    float Vx = 0;
-    float Vy = 0;
+    //float Vx = 0;
+    //float Vy = 0;
 
-    int transceiverLeft;
-    int transceiverRight;
+    //int transceiverLeft;
+    //int transceiverRight;
 
     struct lidarData lidar;
     struct shared sharMem;
-    struct Memory arr;
-    struct mainData data;
+    struct Memory imuData;
+    struct mainData maintananceData;
     int serial_port;
     sem_t *mutex;
 
-    data.angle = 120;
-    data.dist = .2;
-    data.trans = 3;
-    data.Vx = -.2;
-    data.Vy = -.1;
-
-
     int end_file = 0;   // status used to check if the end of file marker has been reached
 
+    const char pyFilenameClient[] = "./bluetooth/BluetoothClient.py";
+    const char pyFilenameServer[] = "./bluetooth/BluetoothServer.py";
+	FILE* Pyfp;
+
+
+    /*
     // testing whole bluetooth thing
     sharMem = createMemory(); // creates shared memory
     mutex = createNamedSem(); // creates named semaphore
@@ -232,13 +258,16 @@ int main () {
     printf("return value transceievr %i and angle %f and distance %f\n", transceiver, angle, dist);
 
 	for(int i = 0; i < 4; i++){
-        data = trans_select(Ax, Ay, Az, Mx, My, Mz, mainTimer, data);
+        //data = trans_select(Ax, Ay, Az, Mx, My, Mz, mainTimer, data);
     }
 
     exit(-1);
+    */
+
+
 
     State NextState = Intialization;
-    printf("setting event\n");
+    printf("INITIALIZATION: BEGIN\n");
     Event NewEvent = Code_Finished_Event;
     clock_t startTime = clock();
     while (clock() < (startTime + 3 * CLOCKS_PER_SEC)) {
@@ -253,8 +282,8 @@ int main () {
                 pinMode(24, OUTPUT);  // Pin B / GPIO Pin #19 of Pi / Physical Pin 35
                 pinMode(29, OUTPUT);  // Pin C / GPIO Pin #21 of Pi / Physical Pin 40
                 pinMode(28, OUTPUT);  // Pin D / GPIO Pin #20 of Pi / Physical Pin 38
-                printf("WiringPi Setup Complete\n");
-                //*****************transcoever code start************************88
+                printf("WIRINGPI SETUP: COMPLETE\n");
+                //*****************transcoever code start************************/
                 serial_port = open("/dev/ttyS0", O_RDWR | O_NOCTTY);
 
                 if (serial_port < 0) {
@@ -305,10 +334,44 @@ int main () {
                     printf("Error %i from tcsetattr: %s\n", errno, strerror(errno));
                     return 1;
                 }
-                printf("Opening File\n");
+                printf("SERIAL PORT SETUP: COMPLETE\n");
+                //printf("Opening File\n");
                 openFile(flag);
-                printf("Initlization Complete\n");
+                //***************Shared Memory Code******//
+
+                /*
+                sharMem = createMemory(); // creates shared memory
+                mutex = createNamedSem(); // creates named semaphore
+
+
+                Py_Initialize();
+                if(flag == 0)
+                //source
+                {
+                    //runing bluetooth client file
+                    Pyfp = _Py_fopen(pyFilenameServer, "r");
+                    PyRun_SimpleFile(Pyfp, pyFilenameServer);
+                }
+
+                clock_t start = clock();
+                int elapsed_time = 0;
+                do{
+                    clock_t difference = clock() - start;
+                    elapsed_time = difference*1000/CLOCKS_PER_SEC;
+                }while(elapsed_time < 2000);
+
+                if(flag == 1)
+                //Jeff
+                {
+                    //RUNNS Bluetotth clietn
+                     Pyfp = _Py_fopen(pyFilenameClient, "r");
+                    PyRun_SimpleFile(Pyfp, pyFilenameClient);
+                }
+		*/
+
+                printf("INITIALIZATION: COMPLETE\n");
                 printf("\n");
+                num_packet = 0;
 
                 NewEvent = Code_Finished_Event;
                 NextState = CodeFinishedHandler(NextState);
@@ -318,6 +381,7 @@ int main () {
             case End: {
                 // Closes named semaphore and shared memory before exiting code
                 fclose(fp);
+                fclose(Pyfp);
                 close(serial_port);
                 closeNamedSem(mutex);
                 closeMemeory(sharMem);
@@ -339,30 +403,78 @@ int main () {
                 break;
 
             case Discovery: {
+                printf("ENTERING DISCOVERY\n");
+                //clock_t start = clock();
+                //int elapsed_time = 0;
 
-                if (Code_Finished_Event == NewEvent) {
-                    lidar = rplidarPi();                    // transceiver is the tranciever number
-                    transceiver = lidar.trans;
-                    angle = lidar.angle;
-                    dist = lidar.dist;
-                    printf("return value transceievr %i and angle %f and distance %f\n", transceiver, angle, dist);
-                    if (angle == 0) // the transceiver was not found
-                    {
-                        NewEvent = Bad_Data_Event;
-                        NextState = BadDataHandler(NextState);
-                    } else if (angle < 360 && angle > 0) // in a given transcieer 1 - 8
-                    {
-                        NewEvent = Code_Finished_Event;
-                        NextState = CodeFinishedHandler(NextState);
-                    } else // angle should not give a number higher than 360
-                    {
-                        NewEvent = Should_Not_Get_Here_Event;
-                        NextState = ShouldNotGetHandler(NextState);
+                lidar = rplidarPi();  // transceiver is the transceiver number
+                transceiver = lidar.trans;
+                angle = lidar.angle;
+                dist = lidar.dist;
+                //clock_t difference = clock() - start;
+                //elapsed_time = difference*1000/CLOCKS_PER_SEC;
+                //printf("TIME TO SET UP LIDAR %i\n",elapsed_time);
+
+                printf("CHOSEN TRANSCEIVER %i ON ANGLE %f AT DISTANCE %f\n", transceiver, angle, dist);
+
+                printf("ATTEMPTING DISCOVERY\n");
+
+                int discovery_attempt = 0;
+                int discovery_status;
+                char disc_msg[] = "DISCOVER";
+                int result;
+
+                // attempt to discovery on chosen LIDAR transceiver 5 times before rerunning discovery
+                // this should increase our chances of discovery hitting and not having to reconnect to the LIDAR which is a big time hit
+                // trying to send/recieve 5 times is still less time than having to connect to the LIDAR again
+                while (discovery_attempt <= 4){
+                    // Source Discovery
+                    if (flag == 0){
+                        // send discovery message
+                        discovery_status = source_maintenance_routine_send(transceiver, disc_msg, serial_port);
+
+                        // wait for JEFF response
+                        discovery_status = source_maintenance_routine_read(transceiver, serial_port);
+                        //printf("REC: %s\n",rec_msg);
+                        readCounter = 0;
+                        if (discovery_status == 1){
+                            printf("DISCOVEY MESSAGE REC\n");
+                            printf("\n");
+                            break;
+                        }
+
+
                     }
-                    startTime = clock();
-
+                    // Jeff Discovery
+                    if (flag == 1){
+                        // wait for Source message
+                        discovery_status = jeff_maintenance_routine_read(transceiver, serial_port);
+                        readCounter = 0;
+                        //printf("REC: %s\n",rec_msg);
+                        if(discovery_status == 1){
+                            printf("DISCOVEY MESSAGE REC\n");
+                            printf("\n");
+                            discovery_status = jeff_maintenance_routine_send(transceiver, rec_msg, serial_port);
+                            break;
+                        }
+                    }
+                    discovery_attempt++;
                 }
 
+                if (angle == 0) // the transceiver was not found
+                {
+                    NewEvent = Bad_Data_Event;
+                    NextState = BadDataHandler(NextState);
+                } else if (angle < 360 && angle > 0) // in a given transcieer 1 - 8
+                {
+                    NewEvent = Code_Finished_Event;
+                    NextState = CodeFinishedHandler(NextState);
+                } else // angle should not give a number higher than 360
+                {
+                    NewEvent = Should_Not_Get_Here_Event;
+                    NextState = ShouldNotGetHandler(NextState);
+                }
+                startTime = clock();
 
             }
                 break;
@@ -390,9 +502,10 @@ int main () {
 
             case Maintenance: {
                 int status;
+                //transceiver = 3;      // used for testing, hardcode transceiver number you want to use
+                //printf("RUNNING MAINTENANCE\n");
                 //Jeff
                 if (flag == 1) {
-
                     int checksum = 0;   // checksum variable
 
                     // accept data packets until the end of file marker is reached
@@ -403,9 +516,9 @@ int main () {
 
                         readCounter = 0;
                         if (status == 0) {
-                            //printf("COMMUNICATION TIMEOUT\n");
+                            //printf("MAINTENANCE COMMUNICATION TIMEOUT\n");
                         } else if (status == 1) {
-                            //printf("COMMUNICATION SUCCESS\n");
+                            //printf("MAINTENANCE COMMUNICATION SUCCESS\n");
 
                             //printf("MESSAGE: %s\n", rec_msg);
 
@@ -447,27 +560,30 @@ int main () {
 
                                 // if the checksums match, send a 0
                                 rec_msg[0] = '0';
+
+                                if(num_packet % 20 == 0){
+                                    printf("RECEIVED %i PACKETS FROM SOURCE AND HAVE WRITTEN THEM TO THE FILE\n");
+                                }
+                                num_packet++;
                             } else {
                                 // else send a 1
                                 rec_msg[0] = '1';
                                 status = 2;
                             }
-                        }
 
-                        // send a response to SOURCE with if the data was rec correctly
-                        status = jeff_maintenance_routine_send(transceiver, rec_msg, serial_port);
-                        if (status == 0) {
-                            //printf("ERROR SENDING\n");
-                        } else if (status == 1) {
-                            //printf("SEND SUCCESSFUL\n");
-                        }
+                            // send a response to SOURCE with if the data was rec correctly
+                            status = jeff_maintenance_routine_send(transceiver, rec_msg, serial_port);
+                            if (status == 0) {
+                                //printf("ERROR SENDING\n");
+                            } else if (status == 1) {
+                                //printf("MAINTENANCE SEND SUCCESSFUL\n");
+                            }
 
-                        // reset rec_msg buffer for reading
-                        memset(rec_msg, 0, 8);
+                            // reset rec_msg buffer for reading
+                            memset(rec_msg, 0, 8);
+
+                        }
                     }
-
-                    // close file
-                    close(fp);
                 }
                 //Source
                 if (flag == 0) {
@@ -478,10 +594,14 @@ int main () {
                     int i = 0;
                     int j = 0;
 
-                    while (writeCounter <= num_packet) {
+                    if (end_file == 0) {
 
                         for (i = (writeCounter * 7); i <= ((writeCounter * 7) + 6); i++) {
                             msg[j] = fgetc(fp);
+                            if (msg[j] == '^'){
+                                printf("REACHED END OF FILE\n");
+                                end_file = 1;
+                            }
                             j++;
                         }
 
@@ -514,29 +634,52 @@ int main () {
                         status = source_maintenance_routine_read(transceiver, serial_port);
                         readCounter = 0;
                         if (status == 0) {
-                            printf("COMMUNICATION TIMEOUT\n");
+                            //printf("COMMUNICATION TIMEOUT\n");
                             fseek(fp, -7, SEEK_CUR);
+                            end_file = 0;
                         } else if (rec_msg[0] == '0') {
                             writeCounter++;
-                            printf("COMMUNICATION SUCCESS\n");
+                            if(num_packet % 20 == 0){
+                                printf("SENT %i PACKETS TO JEFF\n",num_packet);
+                            }
+                            num_packet++;
+                            //printf("COMMUNICATION SUCCESS\n");
                             //printf("ENTIRE MESSAGE: %s\n",rec_msg);
                             //int read_bytes = strlen(rec_msg);
                             //printf("READ BYTES: %i\n",read_bytes);
                             status = 1;
                         } else if (rec_msg[0] == '1') {
-                            printf("Error: Bad Data\n");
+                            //printf("Error: Bad Data\n");
                             fseek(fp, -7, SEEK_CUR);
                             status = 2;
+                            end_file = 0;
                         }else{
                             //printf("ENTIRE MESSAGE: %s\n",rec_msg);
                             //printf("STATUS %i\n",status);
                             fseek(fp, -7, SEEK_CUR);
+                            end_file = 0;
                         }
                         //printf("Write Counter: %i\n",writeCounter);
                         //printf("FILE POINTER %i\n",ftell(fp));
                         //printf("WRITE COUNTER: %i\n",writeCounter++);
                     }
                 }
+                //************Code for picking the transceiver//
+		/*
+                imuData = sharedMemory(flag, sharMem, mutex); //recieves the float value from imu
+
+                if(flag == 0)
+                //Source 0-8
+                {
+                    maintananceData = trans_select(imuData.data[0], imuData.data[1], imuData.data[2], imuData.data[6], imuData.data[7], imuData.data[8], 0.01, maintananceData);
+                }
+                else if (flag == 1)
+                //jeff 9 - 18
+                {
+                     maintananceData = trans_select(imuData.data[9], imuData.data[10], imuData.data[11], imuData.data[15], imuData.data[16], imuData.data[17], 0.01, maintananceData);
+                }
+                transceiver = maintananceData.trans;
+		*/
 
                 if (Code_Finished_Event == Code_Finished_Event) {
 
@@ -589,54 +732,155 @@ int main () {
 
 
                 case Recovery: {
-                    //try tans +1 and trans -1 in new recovery code
-                    transceiverLeft = transceiver + 1;
-                    transceiverRight = transceiver - 1;
-                    if(transceiverLeft > 7)
-                    {
-                        transceiverLeft = 0;
-                    }
-                     if(transceiverRight < 0)
-                    {
-                        transceiverRight = 7;
-                    }
+                    char recovery_msg[8] = "recovery";       // buffer for sending data
+                    int status;
+                    int testTransciver = transceiver;
+                    int recoveryCount = 0; //makes the while loop run three time for each transiver
 
-                    if(flag = 0)
-                    {
-                    printf("RUNNING SOURCE CODE\n");
-                    printf("\n");
-                    }
-                    if(flag = 1)
-                    {
-                    printf("RUNNING JEFF CODE\n");
-                    printf("\n");
-                    }
 
+                    // try original then direction its going then other direction
+			        //Source
+                    while(recoveryCount < 3) {
+
+                        if (flag == 0) {
+                            printf("SOURCE HAS LOST CONNECTION, ENTERING RECOVERY\n");
+
+                            // send msg to JEFF
+                            status = source_maintenance_routine_send(testTransciver, recovery_msg, serial_port);
+
+                            // check if msg was sent correctly
+                            if (status == 4) {
+                              NewEvent = Bad_Data_Event;
+                                //printf("ERROR SENDING\n");
+                            } else if (status == 1) {
+                                //printf("SEND SUCCESSFUL\n");
+                            }
+                            // wait for JEFF response
+                            status = source_maintenance_routine_read(testTransciver, serial_port);
+                            readCounter = 0;
+
+                            if (status == 0) {
+                                //printf("COMMUNICATION TIMEOUT\n");
+                                NewEvent = Timeout_Event;
+
+                            } else if (status == 1) {
+                                //printf("COMMUNICATION SUCCESS\n");
+                                transceiver = testTransciver;
+                                NewEvent = Code_Finished_Event;
+                                break;
+                            } else if (rec_msg[0] == '1') {
+                                //printf("Error: Bad Data\n");
+                                status = 2;
+                                NewEvent = Bad_Data_Event;
+                            }else{
+                                //printf("ENTIRE MESSAGE: %s\n",rec_msg);
+                                //printf("STATUS %i\n",status);
+                            }
+                            memset(rec_msg, 0, 8);
+                        }
+                        //Jeff
+                        if (flag == 1) {
+                            printf("JEFF HAS LOST CONNECTION, ENTERING RECOVERY\n");
+
+                            // try to read a message from SOURCE
+                            status = jeff_maintenance_routine_read(transceiver, serial_port);
+                            readCounter = 0;
+
+                            if (status == 0) {
+                                //printf("RECOVERY COMMUNICATION TIMEOUT\n");
+                                NewEvent =Timeout_Event;
+                            } else if (status == 1) {
+                                //printf("RECOVERY COMMUNICATION SUCCESS\n");
+
+                                //printf("MESSAGE: %s\n", rec_msg);
+
+                                // checksum calculation
+                                int checksum = 0;
+                                for (int k = 0; k <= 6; k++) {
+                                    checksum += (int) rec_msg[k];
+                                }
+                                checksum = (((checksum % 100) / 10) + ((checksum % 100) % 10)) % 10;
+
+                                // if checksum value rec == checksum value calculated
+                                if (checksum + '0' == rec_msg[7]) {
+
+                                    // set checksum value in rec_msg buffer to null
+                                    rec_msg[7] = '\0';
+
+                                    int result;
+
+                                    if ((result = strcmp(rec_msg, prev_msg)) != 0){
+                                        for (int k = 0; k <= 6; k++){
+                                            prev_msg[k] = rec_msg[k];
+                                        }
+                                        fputs(rec_msg, fp);
+                                    }
+
+                                    // check to see if the end of the file has been reached
+                                    int c = 0;
+                                    while (c <= 6) {
+                                        if (rec_msg[c] == '^') {
+                                            //printf("END OF FILE\n");
+                                            end_file = 1;
+                                            status = 3;
+                                        }
+                                        c++;
+                                    }
+
+                                    // reset the rec_msg buffer in order to send response
+                                    memset(rec_msg, '\0', 8);
+
+                                    // if the checksums match, send a 0
+                                    rec_msg[0] = '0';
+                                } else {
+                                    // else send a 1
+                                    rec_msg[0] = '1';
+                                    status = 2;
+                                }
+
+                                // send a response to SOURCE with if the data was rec correctly
+                                status = jeff_maintenance_routine_send(transceiver, rec_msg, serial_port);
+
+                                if (status == 0) {
+                                    NewEvent = Should_Not_Get_Here_Event;
+                                    //printf("ERROR SENDING\n");
+                                } else if (status == 1) {
+                                     //printf("RECOVERY SEND SUCCESSFUL\n");
+                                     NewEvent = Code_Finished_Event;
+                                     break;
+                                }
+                                else{
+                                    //printf("STATUS IS NOT GOOD\n");
+                                }
+                                // reset rec_msg buffer for reading
+                                memset(rec_msg, 0, 8);
+                            }
+                        }
+                        recoveryCount++;
+                        printf("RECOVERY UNSUCCESSFUL, ATTEMPTING ON ADJACENT TRANSCEIVER\n",recoveryCount);
+                        testTransciver =  recovery_trans_select(recoveryCount, transceiver);
+                    }
 
                     if (Bad_Data_Event == NewEvent) {
-                        if (true) {
-                            NewEvent = Code_Finished_Event;
-                            NextState = CodeFinishedHandler(NextState);
 
-                        } else {
-                            NewEvent = Bad_Data_Event;
-                            NextState = BadDataHandler(NextState);
-                        }
-                        startTime = clock();
+                        NextState = BadDataHandler(NextState);
                     }
-                    if (Timeout_Event == NewEvent) {
-
-                        if (true) {
-                            NewEvent = Code_Finished_Event;
-                            NextState = CodeFinishedHandler(NextState);
-
-                        } else {
-                            NewEvent = Bad_Data_Event;
-                            NextState = BadDataHandler(NextState);
-                        }
-                        startTime = clock();
+                    else if (Timeout_Event == NewEvent) {
+                        NextState = TimeoutEventHandler(NextState);
                     }
-
+                    else if(NewEvent == Code_Finished_Event){
+                        NextState = CodeFinishedHandler(NextState);
+                    }
+                    else if (NewEvent == Should_Not_Get_Here_Event) //Status is something broken
+                    {
+                        NextState = ShouldNotGetHandler(NextState);
+                    }
+                    else
+                    {
+                        printf("BROKE\n");
+                        NextState = ShouldNotGetHandler(NextState);
+                    }
+                    startTime = clock();
                 }
                 break;
             }
