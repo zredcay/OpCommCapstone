@@ -187,7 +187,7 @@ int openFile(int flag)
 
 
 int main () {
-    int flag = 0;
+    int flag = 1;
 
     if(flag == 0){
         printf("DESIGNATION: SOURCE\n");
@@ -266,9 +266,9 @@ int main () {
 	for(int i = 0; i < 4; i++){
         //data = trans_select(Ax, Ay, Az, Mx, My, Mz, mainTimer, data);
     }
-*/
-    exit(-1);
 
+    exit(-1);
+*/
 
 
     State NextState = Intialization;
@@ -288,7 +288,7 @@ int main () {
                 pinMode(29, OUTPUT);  // Pin C / GPIO Pin #21 of Pi / Physical Pin 40
                 pinMode(28, OUTPUT);  // Pin D / GPIO Pin #20 of Pi / Physical Pin 38
                 printf("WIRINGPI SETUP: COMPLETE\n");
-                //*****************transcoever code start************************88
+                //*****************transcoever code start************************/
                 serial_port = open("/dev/ttyS0", O_RDWR | O_NOCTTY);
 
                 if (serial_port < 0) {
@@ -391,6 +391,7 @@ int main () {
                 break;
 
             case Discovery: {
+		printf("ENTERING DISCOVERY\n");
                 //clock_t start = clock();
                 //int elapsed_time = 0;
 
@@ -423,8 +424,9 @@ int main () {
 
                         // wait for JEFF response
                         discovery_status = source_maintenance_routine_read(transceiver, serial_port);
+			//printf("REC: %s\n",rec_msg);
                         readCounter = 0;
-                        if ((result = strcmp(rec_msg, disc_msg)) == 0){
+                        if (discovery_status == 1){
                             printf("DISCOVEY MESSAGE REC\n");
                             printf("\n");
                             break;
@@ -437,8 +439,8 @@ int main () {
                         // wait for Source message
                         discovery_status = jeff_maintenance_routine_read(transceiver, serial_port);
                         readCounter = 0;
-
-                        if((result = strcmp(rec_msg, disc_msg)) == 0){
+			//printf("REC: %s\n",rec_msg);
+                        if(discovery_status == 1){
                             printf("DISCOVEY MESSAGE REC\n");
                             printf("\n");
                             discovery_status = jeff_maintenance_routine_send(transceiver, rec_msg, serial_port);
