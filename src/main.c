@@ -202,7 +202,7 @@ int openFile(int flag)
 
 
 int main () {
-    flag = 1;
+    flag = 0;
 
     if(flag == 0){
         printf("DESIGNATION: SOURCE\n");
@@ -339,7 +339,7 @@ int main () {
                 openFile(flag);
                 //***************Shared Memory Code******//
 
-
+                /*
                 sharMem = createMemory(); // creates shared memory
                 mutex = createNamedSem(); // creates named semaphore
 
@@ -367,6 +367,7 @@ int main () {
                      Pyfp = _Py_fopen(pyFilenameClient, "r");
                     PyRun_SimpleFile(Pyfp, pyFilenameClient);
                 }
+		*/
 
                 printf("INITIALIZATION: COMPLETE\n");
                 printf("\n");
@@ -663,8 +664,8 @@ int main () {
                         //printf("WRITE COUNTER: %i\n",writeCounter++);
                     }
                 }
-                //************Code for picking the transceiver
-
+                //************Code for picking the transceiver//
+		/*
                 imuData = sharedMemory(flag, sharMem, mutex); //recieves the float value from imu
 
                 if(flag == 0)
@@ -678,7 +679,7 @@ int main () {
                      maintananceData = trans_select(imuData.data[9], imuData.data[10], imuData.data[11], imuData.data[15], imuData.data[16], imuData.data[17], 0.01, maintananceData);
                 }
                 transceiver = maintananceData.trans;
-
+		*/
 
                 if (Code_Finished_Event == Code_Finished_Event) {
 
