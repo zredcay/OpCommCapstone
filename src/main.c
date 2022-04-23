@@ -361,16 +361,16 @@ int main () {
                 break;
 
             case Discovery: {
-		clock_t start = clock();
-		int elapsed_time = 0;
+		//clock_t start = clock();
+		//int elapsed_time = 0;
 
                 lidar = rplidarPi();                    // transceiver is the transceiver number
                 transceiver = lidar.trans;
                 angle = lidar.angle;
                 dist = lidar.dist;
-		clock_t difference = clock() - start;
-		elapsed_time = difference*1000/CLOCKS_PER_SEC;
-		printf("TIME TO SET UP LIDAR %i\n",elapsed_time);
+		//clock_t difference = clock() - start;
+		//elapsed_time = difference*1000/CLOCKS_PER_SEC;
+		//printf("TIME TO SET UP LIDAR %i\n",elapsed_time);
 
                 printf("return value transceievr %i and angle %f and distance %f\n", transceiver, angle, dist);
 
