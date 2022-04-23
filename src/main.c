@@ -24,6 +24,11 @@
 #include "sharedMemory.h"
 #include "transceiver.h"
 
+//Pthon embedding
+#include <pyhton3.7/Python.h>
+#include <conio.h>
+
+
 
 
 int convertTransceiver(int trans)
@@ -226,7 +231,15 @@ int main () {
 
     int end_file = 0;   // status used to check if the end of file marker has been reached
 
+    char pyFilename[] = "pyemb7.py";
+	FILE* Pyfp;
 
+	Py_Initialize();
+
+	Pyfp = _Py_fopen(pyFilename, "r");
+	PyRun_SimpleFile(Pyfps, pyFilename);
+
+	Py_Finalize();
     /*
     // testing whole bluetooth thing
     sharMem = createMemory(); // creates shared memory
@@ -253,9 +266,9 @@ int main () {
 	for(int i = 0; i < 4; i++){
         //data = trans_select(Ax, Ay, Az, Mx, My, Mz, mainTimer, data);
     }
-
-    exit(-1);
 */
+    exit(-1);
+
 
 
     State NextState = Intialization;
@@ -328,6 +341,24 @@ int main () {
                 }
                 printf("Opening File\n");
                 openFile(flag);
+
+                /***************8Shared Memory Code******/
+
+
+                sharMem = createMemory(); // creates shared memory
+                mutex = createNamedSem(); // creates named semaphore
+
+
+                clock_t start = clock();
+                int elapsed_time = 0;
+
+                do{
+                    clock_t difference = clock() - start;
+                    elapsed_time = difference*1000/CLOCKS_PER_SEC;
+                }while(elapsed_time < 10000);
+
+
+
                 printf("Initlization Complete\n");
                 printf("\n");
                 num_packet = 0;
@@ -578,7 +609,9 @@ int main () {
                         //printf("WRITE COUNTER: %i\n",writeCounter++);
                     }
                 }
-
+                //************Code for picking the transciever
+                    //arr = sharedMemory(flag, sharMem, mutex); //recieves the float value from imu
+                    //data = trans_select(Ax, Ay, Az, Mx, My, Mz, mainTimer, data);
                 if (Code_Finished_Event == Code_Finished_Event) {
 
                     //printf("status = %i\n", status);
