@@ -1,6 +1,7 @@
 #ifndef _stateMachine_h_
 #define _stateMachine_h_
 
+int flag;
 
 typedef struct mainData{
 	int trans;

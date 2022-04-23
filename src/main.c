@@ -115,17 +115,33 @@ struct mainData trans_select(float Ax, float Ay, float Az, float Mx, float My, f
 int recovery_trans_select(int recoveryCounter, int transceiver)
 {
     int testTransciver = 0;
-//try tans +1 and trans -1 in new recovery code
-    int transceiverLeft = transceiver - 1;
-    int transceiverRight = transceiver + 1;
-    if(transceiverLeft > 7)
-    {
-        transceiverLeft = 0;
+    //try tans +1 and trans -1 in new recovery code
+
+    if (flag == 0 && recoveryCounter == 1){
+        testTransciver = transceiver++;
     }
-     if(transceiverRight < 0)
-    {
-        transceiverRight = 7;
+
+    if (flag == 0 && recoveryCounter == 2){
+        testTransciver = transceiver--;
     }
+
+    if (flag == 1 && recoveryCounter == 1){
+        testTransciver = transceiver--;
+    }
+
+    if (flag == 1 && recoveryCounter == 2){
+        testTransciver = transceiver++;
+    }
+
+    if(testTransciver > 7)
+    {
+        testTransciver = 0;
+    }
+     if(testTransciver < 0)
+    {
+        testTransciver = 7;
+    }
+
     return testTransciver;
 }
 
@@ -186,7 +202,7 @@ int openFile(int flag)
 
 
 int main () {
-    int flag = 1;
+    flag = 1;
 
     if(flag == 0){
         printf("DESIGNATION: SOURCE\n");
@@ -198,9 +214,8 @@ int main () {
     float angle = 100;
     float dist = .3;
     int transceiver = 0;
-    float mainTimer = .5;
-    float Vx = 0;
-    float Vy = 0;
+    //float Vx = 0;
+    //float Vy = 0;
 
     //int transceiverLeft;
     //int transceiverRight;
@@ -245,8 +260,9 @@ int main () {
 	for(int i = 0; i < 4; i++){
         //data = trans_select(Ax, Ay, Az, Mx, My, Mz, mainTimer, data);
     }
-*/
+
     exit(-1);
+    */
 
 
 
@@ -321,13 +337,13 @@ int main () {
                 printf("SERIAL PORT SETUP: COMPLETE\n");
                 //printf("Opening File\n");
                 openFile(flag);
-                /***************8Shared Memory Code******/
+                //***************Shared Memory Code******//
 
 
-                //sharMem = createMemory(); // creates shared memory
-                //mutex = createNamedSem(); // creates named semaphore
+                sharMem = createMemory(); // creates shared memory
+                mutex = createNamedSem(); // creates named semaphore
 
-                /*
+
                 Py_Initialize();
                 if(flag == 0)
                 //source
@@ -337,15 +353,12 @@ int main () {
                     PyRun_SimpleFile(Pyfp, pyFilenameServer);
                 }
 
-
-
                 clock_t start = clock();
                 int elapsed_time = 0;
-
                 do{
                     clock_t difference = clock() - start;
                     elapsed_time = difference*1000/CLOCKS_PER_SEC;
-                }while(elapsed_time < 10000);
+                }while(elapsed_time < 2000);
 
                 if(flag == 1)
                 //Jeff
@@ -353,8 +366,8 @@ int main () {
                     //RUNNS Bluetotth clietn
                      Pyfp = _Py_fopen(pyFilenameClient, "r");
                     PyRun_SimpleFile(Pyfp, pyFilenameClient);
-                }\
-                */
+                }
+
                 printf("INITIALIZATION: COMPLETE\n");
                 printf("\n");
                 num_packet = 0;
@@ -367,6 +380,7 @@ int main () {
             case End: {
                 // Closes named semaphore and shared memory before exiting code
                 fclose(fp);
+                fclose(Pyfp);
                 close(serial_port);
                 closeNamedSem(mutex);
                 closeMemeory(sharMem);
@@ -388,14 +402,14 @@ int main () {
                 break;
 
             case Discovery: {
-		printf("ENTERING DISCOVERY\n");
+                printf("ENTERING DISCOVERY\n");
                 //clock_t start = clock();
                 //int elapsed_time = 0;
 
-                //lidar = rplidarPi();  // transceiver is the transceiver number
-                transceiver = 0; //lidar.trans;
-                angle = 100;//lidar.angle;
-                dist = 100;//lidar.dist;
+                lidar = rplidarPi();  // transceiver is the transceiver number
+                transceiver = lidar.trans;
+                angle = lidar.angle;
+                dist = lidar.dist;
                 //clock_t difference = clock() - start;
                 //elapsed_time = difference*1000/CLOCKS_PER_SEC;
                 //printf("TIME TO SET UP LIDAR %i\n",elapsed_time);
@@ -403,7 +417,6 @@ int main () {
                 printf("CHOSEN TRANSCEIVER %i ON ANGLE %f AT DISTANCE %f\n", transceiver, angle, dist);
 
                 printf("ATTEMPTING DISCOVERY\n");
-
 
                 int discovery_attempt = 0;
                 int discovery_status;
@@ -421,7 +434,7 @@ int main () {
 
                         // wait for JEFF response
                         discovery_status = source_maintenance_routine_read(transceiver, serial_port);
-			//printf("REC: %s\n",rec_msg);
+                        //printf("REC: %s\n",rec_msg);
                         readCounter = 0;
                         if (discovery_status == 1){
                             printf("DISCOVEY MESSAGE REC\n");
@@ -436,7 +449,7 @@ int main () {
                         // wait for Source message
                         discovery_status = jeff_maintenance_routine_read(transceiver, serial_port);
                         readCounter = 0;
-			//printf("REC: %s\n",rec_msg);
+                        //printf("REC: %s\n",rec_msg);
                         if(discovery_status == 1){
                             printf("DISCOVEY MESSAGE REC\n");
                             printf("\n");
@@ -650,22 +663,22 @@ int main () {
                         //printf("WRITE COUNTER: %i\n",writeCounter++);
                     }
                 }
-                //************Code for picking the transciever
-                /*
-                    imuData = sharedMemory(flag, sharMem, mutex); //recieves the float value from imu
+                //************Code for picking the transceiver
 
-                    if(flag == 0)
-                    //Source 0-8
-                    {
-                        maintananceData = trans_select(imuData[0], imuData[1], imuData[2], imuData[6], imuData[7], imuData[8], mainTimer, maintananceData);
-                    }
-                    else if (flag == 1)
-                    //jeff 9 - 18
-                    {
-                         maintananceData = trans_select(imuData[9], imuData[10], imuData[11], imuData[15], imuData[16], imuData[17], mainTimer, maintananceData);
-                    }
-                    transceiver = maintananceData.trans;
-                    */
+                imuData = sharedMemory(flag, sharMem, mutex); //recieves the float value from imu
+
+                if(flag == 0)
+                //Source 0-8
+                {
+                    maintananceData = trans_select(imuData.data[0], imuData.data[1], imuData.data[2], imuData.data[6], imuData.data[7], imuData.data[8], 0.01, maintananceData);
+                }
+                else if (flag == 1)
+                //jeff 9 - 18
+                {
+                     maintananceData = trans_select(imuData.data[9], imuData.data[10], imuData.data[11], imuData.data[15], imuData.data[16], imuData.data[17], 0.01, maintananceData);
+                }
+                transceiver = maintananceData.trans;
+
 
                 if (Code_Finished_Event == Code_Finished_Event) {
 
@@ -720,15 +733,14 @@ int main () {
                 case Recovery: {
                     char recovery_msg[8] = "recovery";       // buffer for sending data
                     int status;
-                    int testTransciver = 0;
+                    int testTransciver = transceiver;
                     int recoveryCount = 0; //makes the while loop run three time for each transiver
 
 
                     // try original then direction its going then other direction
 			        //Source
                     while(recoveryCount < 3) {
-                       //testTransciver =  recovery_trans_select(recoveryCount, transceiver);
-                        testTransciver = 2; //adding transicever logic later
+
                         if (flag == 0) {
                             printf("SOURCE HAS LOST CONNECTION, ENTERING RECOVERY\n");
 
@@ -845,6 +857,7 @@ int main () {
                         }
                         recoveryCount++;
                         printf("RECOVERY UNSUCCESSFUL, ATTEMPTING ON ADJACENT TRANSCEIVER\n",recoveryCount);
+                        testTransciver =  recovery_trans_select(recoveryCount, transceiver);
                     }
 
                     if (Bad_Data_Event == NewEvent) {
