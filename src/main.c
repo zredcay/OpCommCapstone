@@ -25,9 +25,8 @@
 #include "transceiver.h"
 
 //Pthon embedding
-//#include <pyhton3.7/Python.h>
+#include <python3.7m/Python.h>
 //#include <conio.h>
-
 
 
 
@@ -196,15 +195,6 @@ int main () {
     }
 
     char prev_msg[7] = "0000000";
-    float Ax = .2;
-    float Ay = .1;
-    float Az;
-    float Gx;
-    float Gy;
-    float Gz;
-    float Mx;
-    float My;
-    float Mz;
     float angle = 100;
     float dist = .3;
     int transceiver = 0;
@@ -217,29 +207,18 @@ int main () {
 
     struct lidarData lidar;
     struct shared sharMem;
-    struct Memory arr;
-    struct mainData data;
+    struct Memory imuData;
+    struct mainData maintananceData;
     int serial_port;
     sem_t *mutex;
 
-    data.angle = 120;
-    data.dist = .2;
-    data.trans = 3;
-    data.Vx = -.2;
-    data.Vy = -.1;
-
-
     int end_file = 0;   // status used to check if the end of file marker has been reached
 
-    char pyFilename[] = "pyemb7.py";
+    const char pyFilenameClient[] = "./bluetooth/BluetoothClient.py";
+    const char pyFilenameServer[] = "./bluetooth/BluetoothServer.py";
 	FILE* Pyfp;
 
-	//Py_Initialize();
 
-	//Pyfp = _Py_fopen(pyFilename, "r");
-	//PyRun_SimpleFile(Pyfps, pyFilename);
-
-	//Py_Finalize();
     /*
     // testing whole bluetooth thing
     sharMem = createMemory(); // creates shared memory
@@ -266,9 +245,9 @@ int main () {
 	for(int i = 0; i < 4; i++){
         //data = trans_select(Ax, Ay, Az, Mx, My, Mz, mainTimer, data);
     }
-
-    exit(-1);
 */
+    exit(-1);
+
 
 
     State NextState = Intialization;
@@ -349,6 +328,17 @@ int main () {
                 //mutex = createNamedSem(); // creates named semaphore
 
                 /*
+                Py_Initialize();
+                if(flag == 0)
+                //source
+                {
+                    //runing bluetooth client file
+                    Pyfp = _Py_fopen(pyFilenameServer, "r");
+                    PyRun_SimpleFile(Pyfp, pyFilenameServer);
+                }
+
+
+
                 clock_t start = clock();
                 int elapsed_time = 0;
 
@@ -356,8 +346,15 @@ int main () {
                     clock_t difference = clock() - start;
                     elapsed_time = difference*1000/CLOCKS_PER_SEC;
                 }while(elapsed_time < 10000);
-*/
 
+                if(flag == 1)
+                //Jeff
+                {
+                    //RUNNS Bluetotth clietn
+                     Pyfp = _Py_fopen(pyFilenameClient, "r");
+                    PyRun_SimpleFile(Pyfp, pyFilenameClient);
+                }\
+                */
                 printf("INITIALIZATION: COMPLETE\n");
                 printf("\n");
                 num_packet = 0;
@@ -395,10 +392,10 @@ int main () {
                 //clock_t start = clock();
                 //int elapsed_time = 0;
 
-                lidar = rplidarPi();                    // transceiver is the transceiver number
-                transceiver = lidar.trans;
-                angle = lidar.angle;
-                dist = lidar.dist;
+                //lidar = rplidarPi();  // transceiver is the transceiver number
+                transceiver = 0; //lidar.trans;
+                angle = 100;//lidar.angle;
+                dist = 100;//lidar.dist;
                 //clock_t difference = clock() - start;
                 //elapsed_time = difference*1000/CLOCKS_PER_SEC;
                 //printf("TIME TO SET UP LIDAR %i\n",elapsed_time);
@@ -654,8 +651,22 @@ int main () {
                     }
                 }
                 //************Code for picking the transciever
-                    //arr = sharedMemory(flag, sharMem, mutex); //recieves the float value from imu
-                    //data = trans_select(Ax, Ay, Az, Mx, My, Mz, mainTimer, data);
+                /*
+                    imuData = sharedMemory(flag, sharMem, mutex); //recieves the float value from imu
+
+                    if(flag == 0)
+                    //Source 0-8
+                    {
+                        maintananceData = trans_select(imuData[0], imuData[1], imuData[2], imuData[6], imuData[7], imuData[8], mainTimer, maintananceData);
+                    }
+                    else if (flag == 1)
+                    //jeff 9 - 18
+                    {
+                         maintananceData = trans_select(imuData[9], imuData[10], imuData[11], imuData[15], imuData[16], imuData[17], mainTimer, maintananceData);
+                    }
+                    transceiver = maintananceData.trans;
+                    */
+
                 if (Code_Finished_Event == Code_Finished_Event) {
 
                     //printf("status = %i\n", status);
