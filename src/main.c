@@ -74,7 +74,7 @@ struct mainData trans_select(float Ax, float Ay, float Az, float Mx, float My, f
 { // uses imu and discovery data to calculate the new transicever
 
 	struct mainData data = ex;
-	printf(" angle %f distance %f transceiver %d Velocity %f %f\n", data.angle, data.dist, data.trans, data.Vx, data.Vy);
+	//printf(" angle %f distance %f transceiver %d Velocity %f %f\n", data.angle, data.dist, data.trans, data.Vx, data.Vy);
 	float PI  = 3.14159265;
 	 float val = PI / 180.0;
 
@@ -85,7 +85,7 @@ struct mainData trans_select(float Ax, float Ay, float Az, float Mx, float My, f
 	float Xf = Xo + .5*(Vfx + data.Vx)*timer;
 	float Yf = Yo + .5*(Vfy + data.Vy)*timer;
 
-	printf("Vfx %f Vfy %f Xo %f Yo %f Xf %f Yf %f \n", Vfx, Vfy, Xo, Yo, Xf, Yf);
+	//printf("Vfx %f Vfy %f Xo %f Yo %f Xf %f Yf %f \n", Vfx, Vfy, Xo, Yo, Xf, Yf);
 
 
 	data.angle = (atan(Yf/Xf))/val;
@@ -106,7 +106,7 @@ struct mainData trans_select(float Ax, float Ay, float Az, float Mx, float My, f
 
 
 
-	printf(" angle %f distance %f transceiver %d Velocity %f %f\n",  data.angle, data.dist, data.trans, data.Vx, data.Vy);
+	//printf(" angle %f distance %f transceiver %d Velocity %f %f\n",  data.angle, data.dist, data.trans, data.Vx, data.Vy);
 
 
     return data;
