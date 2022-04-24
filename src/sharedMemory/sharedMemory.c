@@ -112,7 +112,7 @@ struct Memory sharedMemory(int flag, struct shared ex, sem_t* mutex)
 
      sem_wait(mutex);////**************8waiting till semaphore is open to read from **************
 
-     printf("flag is %i\n", flag);
+     //printf("flag is %i\n", flag);
 
      if(flag == 1)
      {
@@ -124,7 +124,7 @@ struct Memory sharedMemory(int flag, struct shared ex, sem_t* mutex)
      for(int i = offset; i < max; i++)
      {
      	  arr.data[i] = ShmPTR->data[i];
-     	  printf("Server has filled %f to shared memory...\n", arr.data[i]);
+     	  //printf("Server has filled %f to shared memory...\n", arr.data[i]);
      }
 
      memset(ShmPTR->data, NULL, 18);
