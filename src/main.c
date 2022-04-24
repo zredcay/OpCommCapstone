@@ -681,7 +681,7 @@ int main () {
                 {
                      maintananceData = trans_select(imuData.data[9], imuData.data[10], imuData.data[11], imuData.data[15], imuData.data[16], imuData.data[17], 0.01, maintananceData);
                 }
-                transceiver = maintananceData.trans;
+                //transceiver = maintananceData.trans;
 
                 if (Code_Finished_Event == Code_Finished_Event) {
 
