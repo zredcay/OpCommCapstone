@@ -3,12 +3,12 @@
 # SPDX-License-Identifier: MIT
 import time
 import board
-from adafruit_lsm6ds.lsm6dsox import LSM6DSOX
+import adafruit_lsm6ds
 import adafruit_lis3mdl
 
 
 i2c = board.I2C()  # uses board.SCL and board.SDA
-lsm = LSM6DSOX(i2c)
+lsm = adafruit_lsm6ds.LSM6DSOX(i2c)
 lis = adafruit_lis3mdl.LIS3MDL(i2c)
 
 
