@@ -46,7 +46,7 @@ struct shared createMemory()
 
      for (INT32 i = 0; i < 18; i++) {
       	ShmPTR->data[i] = 0;
-      	printf("array %i is %f\n",i,ShmPTR->data[i]);
+      	//printf("array %i is %f\n",i,ShmPTR->data[i]);
      }
      ex.ShmKEY = ShmKEY;
      ex.ShmID = ShmID;

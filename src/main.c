@@ -339,11 +339,11 @@ int main () {
                 openFile(flag);
                 //***************Shared Memory Code******//
 
-                /*
+                
                 sharMem = createMemory(); // creates shared memory
                 mutex = createNamedSem(); // creates named semaphore
 
-
+		/*
                 Py_Initialize();
                 if(flag == 0)
                 //source
@@ -352,14 +352,16 @@ int main () {
                     Pyfp = _Py_fopen(pyFilenameServer, "r");
                     PyRun_SimpleFile(Pyfp, pyFilenameServer);
                 }
+		*/
 
                 clock_t start = clock();
                 int elapsed_time = 0;
                 do{
                     clock_t difference = clock() - start;
                     elapsed_time = difference*1000/CLOCKS_PER_SEC;
-                }while(elapsed_time < 2000);
+                }while(elapsed_time < 10000);
 
+		/*
                 if(flag == 1)
                 //Jeff
                 {
