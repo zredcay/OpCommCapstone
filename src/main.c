@@ -229,9 +229,9 @@ int main () {
 
     int end_file = 0;   // status used to check if the end of file marker has been reached
 
-    const char pyFilenameClient[] = "./bluetooth/BluetoothClient.py";
-    const char pyFilenameServer[] = "./bluetooth/BluetoothServer.py";
-	FILE* Pyfp;
+    //const char pyFilenameClient[] = "./bluetooth/BluetoothClient.py";
+    //const char pyFilenameServer[] = "./bluetooth/BluetoothServer.py";
+    // FILE* Pyfp;
 
 
     /*
@@ -270,7 +270,7 @@ int main () {
     printf("INITIALIZATION: BEGIN\n");
     Event NewEvent = Code_Finished_Event;
     clock_t startTime = clock();
-    while (clock() < (startTime + 3 * CLOCKS_PER_SEC)) {
+    while (clock() < (startTime + 20 * CLOCKS_PER_SEC)) {
         switch (NextState) {
             case Intialization: {
 
@@ -375,7 +375,7 @@ int main () {
                 printf("\n");
                 num_packet = 0;
 
-                NewEvent = Code_Finished_Event;
+		NewEvent = Code_Finished_Event;
                 NextState = CodeFinishedHandler(NextState);
             }
                 break;
@@ -383,7 +383,7 @@ int main () {
             case End: {
                 // Closes named semaphore and shared memory before exiting code
                 fclose(fp);
-                fclose(Pyfp);
+                //fclose(Pyfp);
                 close(serial_port);
                 closeNamedSem(mutex);
                 closeMemeory(sharMem);
@@ -550,7 +550,7 @@ int main () {
                                 int c = 0;
                                 while (c <= 6) {
                                     if (rec_msg[c] == '^') {
-                                        //printf("END OF FILE\n");
+                                        printf("END OF FILE\n");
                                         end_file = 1;
                                         status = 3;
                                     }
@@ -602,6 +602,7 @@ int main () {
                             msg[j] = fgetc(fp);
                             if (msg[j] == '^'){
                                 printf("REACHED END OF FILE\n");
+				printf("\n");
                                 end_file = 1;
                             }
                             j++;
@@ -667,7 +668,7 @@ int main () {
                     }
                 }
                 //************Code for picking the transceiver//
-		/*
+		
                 imuData = sharedMemory(flag, sharMem, mutex); //recieves the float value from imu
 
                 if(flag == 0)
@@ -681,7 +682,6 @@ int main () {
                      maintananceData = trans_select(imuData.data[9], imuData.data[10], imuData.data[11], imuData.data[15], imuData.data[16], imuData.data[17], 0.01, maintananceData);
                 }
                 transceiver = maintananceData.trans;
-		*/
 
                 if (Code_Finished_Event == Code_Finished_Event) {
 
@@ -769,6 +769,7 @@ int main () {
                                 //printf("COMMUNICATION SUCCESS\n");
                                 transceiver = testTransciver;
                                 NewEvent = Code_Finished_Event;
+				printf("\n");
                                 break;
                             } else if (rec_msg[0] == '1') {
                                 //printf("Error: Bad Data\n");
@@ -822,7 +823,8 @@ int main () {
                                     int c = 0;
                                     while (c <= 6) {
                                         if (rec_msg[c] == '^') {
-                                            //printf("END OF FILE\n");
+                                            printf("END OF FILE\n");
+					    printf("\n");
                                             end_file = 1;
                                             status = 3;
                                         }
@@ -849,6 +851,7 @@ int main () {
                                 } else if (status == 1) {
                                      //printf("RECOVERY SEND SUCCESSFUL\n");
                                      NewEvent = Code_Finished_Event;
+				     printf("\n");
                                      break;
                                 }
                                 else{

@@ -14,7 +14,7 @@ def data_received(data):  # defines the data_received function which is passed t
     # write source's data to shm
     shm.shmwrite(data, 0)
     
-print("Client Created")
+print("BLUETOOTH CLIENT CREATED")
 c = BluetoothClient("raspberrypi", data_received)  # creates the BTClient object and pass it the desired device and data function
     
 accx, accy, accz = IMU.getAcc()  # break the acceleration tuple into its respective pieces
