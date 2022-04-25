@@ -37,6 +37,7 @@ void sigfun(int sig)
 {
 	printf("User Exited\n");
 	printf("CLEAN UP: BEGIN\n");
+
 	// Closes named semaphore and shared memory before exiting code
 	fclose(fp);
 	printf("CLOSING: FILE\n");
@@ -45,6 +46,7 @@ void sigfun(int sig)
 	printf("CLOSING: SERIAL PORT\n");
 	closeNamedSem(mutex);
 	closeMemeory(sharMem);
+	(void) signal(SIGINT,SIG_DFL);
 	//printf("case end state\n");
 	exit(-1);
 }
@@ -222,6 +224,7 @@ int openFile(int flag)
 
 
 int main () {
+    (void) signal(SIGINT, sigfun);
     flag = 0;
 
     if(flag == 0){
@@ -284,7 +287,7 @@ int main () {
     exit(-1);
     */
 
-    (void) signal(SIGINT, SIG_DFL);
+    
 
     State NextState = Intialization; // which state is the current state
     printf("INITIALIZATION: BEGIN\n");
