@@ -25,13 +25,14 @@
 #include "transceiver.h"
 
 //Pthon embedding
-#include <python3.7m/Python.h>
+//#include <python3.7m/Python.h>
 //#include <conio.h>
 
 
 
 int convertTransceiver(int trans)
 {
+	// coverts transeover from maintennce math function output to actual transiver on the car
 	int newtrans;
 
 	if( trans == 0)
@@ -220,12 +221,12 @@ int main () {
     //int transceiverLeft;
     //int transceiverRight;
 
-    struct lidarData lidar;
-    struct shared sharMem;
-    struct Memory imuData;
-    struct mainData maintananceData;
+    struct lidarData lidar; //Data ouptuted from lidar
+    struct shared sharMem; // the pointer to the shared memory location
+    struct Memory imuData; // the array of 18 from shared memory
+    struct mainData maintananceData; // the calcuated data from maintenance data math
     int serial_port;
-    sem_t *mutex;
+    sem_t *mutex;  // the pointer to the mutex
 
     int end_file = 0;   // status used to check if the end of file marker has been reached
 
@@ -266,10 +267,10 @@ int main () {
 
 
 
-    State NextState = Intialization;
+    State NextState = Intialization; // which state is the current state
     printf("INITIALIZATION: BEGIN\n");
-    Event NewEvent = Code_Finished_Event;
-    clock_t startTime = clock();
+    Event NewEvent = Code_Finished_Event; // the next event being snet into the handler 
+    clock_t startTime = clock(); // overall timer that after certain time will kick to end state then exit code
     while (clock() < (startTime + 20 * CLOCKS_PER_SEC)) {
         switch (NextState) {
             case Intialization: {
@@ -283,7 +284,7 @@ int main () {
                 pinMode(29, OUTPUT);  // Pin C / GPIO Pin #21 of Pi / Physical Pin 40
                 pinMode(28, OUTPUT);  // Pin D / GPIO Pin #20 of Pi / Physical Pin 38
                 printf("WIRINGPI SETUP: COMPLETE\n");
-                //*****************transcoever code start************************/
+                //*****************transciever code start************************/
                 serial_port = open("/dev/ttyS0", O_RDWR | O_NOCTTY);
 
                 if (serial_port < 0) {
@@ -353,7 +354,7 @@ int main () {
                     PyRun_SimpleFile(Pyfp, pyFilenameServer);
                 }
 		*/
-
+		// Wait timer to start bluetooth client independatly
                 clock_t start = clock();
                 int elapsed_time = 0;
                 do{
@@ -677,15 +678,18 @@ int main () {
                 imuData = sharedMemory(flag, sharMem, mutex); //recieves the float value from imu
 
                 if(flag == 0)
-                //Source 0-8
-                {
+  		{
+                //Source 0-8 
+                //This is to run a calculation using IMU and LIDAR data to find the right transicer after the car has moved
                     maintananceData = trans_select(imuData.data[0], imuData.data[1], imuData.data[2], imuData.data[6], imuData.data[7], imuData.data[8], 0.01, maintananceData);
                 }
                 else if (flag == 1)
                 //jeff 9 - 18
                 {
+               //This is to run a calculation using IMU and LIDAR data to find the right transicer after the car has moved
                      maintananceData = trans_select(imuData.data[9], imuData.data[10], imuData.data[11], imuData.data[15], imuData.data[16], imuData.data[17], 0.01, maintananceData);
                 }
+                //Setting the calculated transiver to the transiver being used for maintenance
                 //transceiver = maintananceData.trans;
 
                 if (Code_Finished_Event == Code_Finished_Event) {
