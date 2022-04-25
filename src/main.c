@@ -35,7 +35,7 @@
 
 void sigfun(int sig)
 {
-	printf("User Exited\n");
+	printf("\nUSER EXIT\n");
 	printf("CLEAN UP: BEGIN\n");
 
 	// Closes named semaphore and shared memory before exiting code
