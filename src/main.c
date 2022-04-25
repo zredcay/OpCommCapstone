@@ -29,6 +29,25 @@
 //#include <conio.h>
 
 
+//user exit catch 
+#include <signal.h>
+
+
+void sigfun(int sig)
+{
+	printf("User Exited\n");
+	printf("CLEAN UP: BEGIN\n");
+	// Closes named semaphore and shared memory before exiting code
+	fclose(fp);
+	printf("CLOSING: FILE\n");
+	//fclose(Pyfp);
+	close(serial_port);
+	printf("CLOSING: SERIAL PORT\n");
+	closeNamedSem(mutex);
+	closeMemeory(sharMem);
+	//printf("case end state\n");
+	exit(-1);
+}
 
 int convertTransceiver(int trans)
 {
@@ -222,11 +241,11 @@ int main () {
     //int transceiverRight;
 
     struct lidarData lidar; //Data ouptuted from lidar
-    struct shared sharMem; // the pointer to the shared memory location
+    
     struct Memory imuData; // the array of 18 from shared memory
     struct mainData maintananceData; // the calcuated data from maintenance data math
-    int serial_port;
-    sem_t *mutex;  // the pointer to the mutex
+    
+   
 
     int end_file = 0;   // status used to check if the end of file marker has been reached
 
@@ -265,7 +284,7 @@ int main () {
     exit(-1);
     */
 
-
+    (void) signal(SIGINT, SIG_DFL);
 
     State NextState = Intialization; // which state is the current state
     printf("INITIALIZATION: BEGIN\n");
