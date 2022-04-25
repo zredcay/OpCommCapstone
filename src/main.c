@@ -381,16 +381,20 @@ int main () {
                 break;
 
             case End: {
+		printf("CLEAN UP: BEGIN\n");
                 // Closes named semaphore and shared memory before exiting code
                 fclose(fp);
+		printf("CLOSING: FILE\n");
                 //fclose(Pyfp);
                 close(serial_port);
+		printf("CLOSING: SERIAL PORT\n");
                 closeNamedSem(mutex);
                 closeMemeory(sharMem);
                 //printf("case end state\n");
                 if (User_Exit_Event == NewEvent) // code completes safely and exits S
                 {
-                    printf("Code Finished\n");
+                    printf("CLEAN UP: COMPLETE\n");
+		    exit(0);
                 } else if (Should_Not_Get_Here_Event == NewEvent) // uncaught error or bug in code
                 {
                     printf("big error stop code now\n");
@@ -550,7 +554,8 @@ int main () {
                                 int c = 0;
                                 while (c <= 6) {
                                     if (rec_msg[c] == '^') {
-                                        printf("END OF FILE\n");
+                                        printf("END OF FILE RECIEVED\n");
+					printf("\n");
                                         end_file = 1;
                                         status = 3;
                                     }

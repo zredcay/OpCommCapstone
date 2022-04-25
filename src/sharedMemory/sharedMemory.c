@@ -91,12 +91,10 @@ int closeMemeory(struct shared ex)
 
 
      shmdt((void *) ShmPTR);
-     printf("Server has detached its shared memory...\n");
+     printf("DETACHING SHARED MEMORY\n");
      shmctl(ShmID, IPC_RMID, NULL);
 
-     printf("Server has removed its shared memory...\n");
-     printf("Server exits...\n");
-     exit(0);
+     printf("REMOVING SHARED MEMORY\n");
 
 }
 

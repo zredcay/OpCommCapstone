@@ -15,7 +15,7 @@ def data_received(data):  # defines the data_received function which is passed t
     accx, accy, accz = IMU.getAcc()  # break the acceleration tuple into its respective parts
     gyrox, gyroy, gyroz = IMU.getGyro()  # break the gyro tuple into its respective parts
     magx, magy, magz = IMU.getMagnetic()  # break the magnetic tuple into its respective parts
-    
+    print(accx,accy,accz)
     # assign data to val variable
     val = str(accx) + ' ' + str(accy) + ' ' + str(accz) + ' ' + str(gyrox) + ' ' + str(gyroy) + ' ' + str(gyroz) + ' ' + str(magx) + ' ' + str(magy) + ' ' + str(magz)
     
