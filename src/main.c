@@ -225,7 +225,7 @@ int openFile(int flag)
 
 int main () {
     (void) signal(SIGINT, sigfun);
-    flag = 1;
+    flag = 0;
 
     if(flag == 0){
         printf("DESIGNATION: SOURCE\n");

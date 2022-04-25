@@ -24,7 +24,7 @@ magyoff = 12.3063
 magzoff = 26.0596
 
 def getAcc():
-    accx, accy, accz = lsm.acceleration\
+    accx, accy, accz = lsm.acceleration
     accx -= accxoff
     accy -= accyoff
     accz -= acczoff
