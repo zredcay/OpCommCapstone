@@ -712,7 +712,8 @@ int main () {
                      maintananceData = trans_select(imuData.data[9], imuData.data[10], imuData.data[11], imuData.data[15], imuData.data[16], imuData.data[17], 0.01, maintananceData);
                 }
                 //Setting the calculated transiver to the transiver being used for maintenance
-                //transceiver = maintananceData.trans;
+                transceiver = maintananceData.trans;
+		printf("SELECTING TRANSCEIVER: %i\n",transceiver);
 
                 if (Code_Finished_Event == Code_Finished_Event) {
 
