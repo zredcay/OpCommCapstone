@@ -46,7 +46,7 @@ struct shared createMemory()
 
      for (INT32 i = 0; i < 18; i++) {
       	ShmPTR->data[i] = 0;
-      	printf("array %i is %f\n",i,ShmPTR->data[i]);
+      	//printf("array %i is %f\n",i,ShmPTR->data[i]);
      }
      ex.ShmKEY = ShmKEY;
      ex.ShmID = ShmID;
@@ -91,12 +91,10 @@ int closeMemeory(struct shared ex)
 
 
      shmdt((void *) ShmPTR);
-     printf("Server has detached its shared memory...\n");
+     printf("DETACHING SHARED MEMORY\n");
      shmctl(ShmID, IPC_RMID, NULL);
 
-     printf("Server has removed its shared memory...\n");
-     printf("Server exits...\n");
-     exit(0);
+     printf("REMOVING SHARED MEMORY\n");
 
 }
 
@@ -112,7 +110,7 @@ struct Memory sharedMemory(int flag, struct shared ex, sem_t* mutex)
 
      sem_wait(mutex);////**************8waiting till semaphore is open to read from **************
 
-     printf("flag is %i\n", flag);
+     //printf("flag is %i\n", flag);
 
      if(flag == 1)
      {
@@ -124,7 +122,7 @@ struct Memory sharedMemory(int flag, struct shared ex, sem_t* mutex)
      for(int i = offset; i < max; i++)
      {
      	  arr.data[i] = ShmPTR->data[i];
-     	  printf("Server has filled %f to shared memory...\n", arr.data[i]);
+     	  //printf("Server has filled %f to shared memory...\n", arr.data[i]);
      }
 
      memset(ShmPTR->data, NULL, 18);

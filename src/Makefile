@@ -14,7 +14,7 @@ program_LIBRARIES := $(wildcard *.a)
 
 CC=gcc
 CXX=g++
-CXXFLAGS += -std=c++11 -objdump -objcopy -Wall -pthread -funsigned-char -fPIC -lwiringPi -fPIE -I/usr/include/python3.m/ -lpython3.7m
+CXXFLAGS += -std=c++11 -objdump -objcopy -Wall -pthread -funsigned-char -fPIC -lwiringPi -fPIE  #-I/usr/include/python3.m/ -lpython3.7m
 CPPFLAGS += $(foreach includedir,$(program_INCLUDE_DIRS),-I$(includedir))
 LDFLAGS += $(foreach librarydir,$(program_LIBRARY_DIRS),-L$(librarydir))
 LDFLAGS += $(foreach library,$(program_LIBRARIES),$(library))

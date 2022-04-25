@@ -31,7 +31,7 @@ bool checkSLAMTECLIDARHealth(ILidarDriver * drv)
 
     op_result = drv->getHealth(healthinfo);
     if (SL_IS_OK(op_result)) { // the macro IS_OK is the preperred way to judge whether the operation is succeed.
-        printf("SLAMTEC Lidar health status : %d\n", healthinfo.status);
+        //printf("SLAMTEC Lidar health status : %d\n", healthinfo.status);
         if (healthinfo.status == SL_LIDAR_STATUS_ERROR) {
             fprintf(stderr, "Error, slamtec lidar internal error detected. Please reboot the device to retry.\n");
             // enable the following code if you want slamtec lidar to be reboot by software
@@ -47,12 +47,6 @@ bool checkSLAMTECLIDARHealth(ILidarDriver * drv)
     }
 }
 
-
-bool ctrl_c_pressed;
-void ctrlc(int)
-{
-    ctrl_c_pressed = true;
-}
 
 int connectRP(){
 return 0;
@@ -98,10 +92,10 @@ struct lidarData rplidarPi()
                 if (SL_IS_OK(op_result)) 
                 {
 	                connectSuccess = true;
-	                printf("Model: %d, Firmware Version: %d.%d, Hardware Version: %d\n",
-            		devinfo.model,
-            		devinfo.firmware_version >> 8, devinfo.firmware_version & 0xffu,
-            		devinfo.hardware_version);
+	               // printf("Model: %d, Firmware Version: %d.%d, Hardware Version: %d\n",
+            		//devinfo.model,
+            		//devinfo.firmware_version >> 8, devinfo.firmware_version & 0xffu,
+            		//devinfo.hardware_version);
                 }
                 else{
                 	fprintf(stderr, "Failed to get device information from LIDAR %08x\r\n", op_result);
@@ -121,7 +115,6 @@ struct lidarData rplidarPi()
     }
 
 
-    signal(SIGINT, ctrlc);
     
 	if(opt_channel_type == CHANNEL_TYPE_SERIALPORT)
         drv->setMotorSpeed();
@@ -167,9 +160,6 @@ struct lidarData rplidarPi()
             
         }
 
-        if (ctrl_c_pressed){ 
-            break;
-        }
     }
     
     //smallest = avgDist[0][1];
@@ -193,7 +183,7 @@ struct lidarData rplidarPi()
 	tran = 0;
     }
     //angle = angle + 22.5;
-    printf("transciever : %i \n", tran);
+    //printf("transciever : %i \n", tran);
 
 
     drv->stop();

@@ -25,13 +25,35 @@
 #include "transceiver.h"
 
 //Pthon embedding
-#include <python3.7m/Python.h>
+//#include <python3.7m/Python.h>
 //#include <conio.h>
 
 
+//user exit catch 
+#include <signal.h>
+
+
+void sigfun(int sig)
+{
+	printf("\nUSER EXIT\n");
+	printf("CLEAN UP: BEGIN\n");
+
+	// Closes named semaphore and shared memory before exiting code
+	fclose(fp);
+	printf("CLOSING: FILE\n");
+	//fclose(Pyfp);
+	close(serial_port);
+	printf("CLOSING: SERIAL PORT\n");
+	closeNamedSem(mutex);
+	closeMemeory(sharMem);
+	(void) signal(SIGINT,SIG_DFL);
+	//printf("case end state\n");
+	exit(-1);
+}
 
 int convertTransceiver(int trans)
 {
+	// coverts transeover from maintennce math function output to actual transiver on the car
 	int newtrans;
 
 	if( trans == 0)
@@ -74,7 +96,7 @@ struct mainData trans_select(float Ax, float Ay, float Az, float Mx, float My, f
 { // uses imu and discovery data to calculate the new transicever
 
 	struct mainData data = ex;
-	printf(" angle %f distance %f transceiver %d Velocity %f %f\n", data.angle, data.dist, data.trans, data.Vx, data.Vy);
+	//printf(" angle %f distance %f transceiver %d Velocity %f %f\n", data.angle, data.dist, data.trans, data.Vx, data.Vy);
 	float PI  = 3.14159265;
 	 float val = PI / 180.0;
 
@@ -85,7 +107,7 @@ struct mainData trans_select(float Ax, float Ay, float Az, float Mx, float My, f
 	float Xf = Xo + .5*(Vfx + data.Vx)*timer;
 	float Yf = Yo + .5*(Vfy + data.Vy)*timer;
 
-	printf("Vfx %f Vfy %f Xo %f Yo %f Xf %f Yf %f \n", Vfx, Vfy, Xo, Yo, Xf, Yf);
+	//printf("Vfx %f Vfy %f Xo %f Yo %f Xf %f Yf %f \n", Vfx, Vfy, Xo, Yo, Xf, Yf);
 
 
 	data.angle = (atan(Yf/Xf))/val;
@@ -106,7 +128,7 @@ struct mainData trans_select(float Ax, float Ay, float Az, float Mx, float My, f
 
 
 
-	printf(" angle %f distance %f transceiver %d Velocity %f %f\n",  data.angle, data.dist, data.trans, data.Vx, data.Vy);
+	//printf(" angle %f distance %f transceiver %d Velocity %f %f\n",  data.angle, data.dist, data.trans, data.Vx, data.Vy);
 
 
     return data;
@@ -202,6 +224,7 @@ int openFile(int flag)
 
 
 int main () {
+    (void) signal(SIGINT, sigfun);
     flag = 0;
 
     if(flag == 0){
@@ -220,18 +243,18 @@ int main () {
     //int transceiverLeft;
     //int transceiverRight;
 
-    struct lidarData lidar;
-    struct shared sharMem;
-    struct Memory imuData;
-    struct mainData maintananceData;
-    int serial_port;
-    sem_t *mutex;
+    struct lidarData lidar; //Data ouptuted from lidar
+    
+    struct Memory imuData; // the array of 18 from shared memory
+    struct mainData maintananceData; // the calcuated data from maintenance data math
+    
+   
 
     int end_file = 0;   // status used to check if the end of file marker has been reached
 
-    const char pyFilenameClient[] = "./bluetooth/BluetoothClient.py";
-    const char pyFilenameServer[] = "./bluetooth/BluetoothServer.py";
-	FILE* Pyfp;
+    //const char pyFilenameClient[] = "./bluetooth/BluetoothClient.py";
+    //const char pyFilenameServer[] = "./bluetooth/BluetoothServer.py";
+    // FILE* Pyfp;
 
 
     /*
@@ -264,13 +287,13 @@ int main () {
     exit(-1);
     */
 
+    
 
-
-    State NextState = Intialization;
+    State NextState = Intialization; // which state is the current state
     printf("INITIALIZATION: BEGIN\n");
-    Event NewEvent = Code_Finished_Event;
-    clock_t startTime = clock();
-    while (clock() < (startTime + 3 * CLOCKS_PER_SEC)) {
+    Event NewEvent = Code_Finished_Event; // the next event being snet into the handler 
+    clock_t startTime = clock(); // overall timer that after certain time will kick to end state then exit code
+    while (clock() < (startTime + 20 * CLOCKS_PER_SEC)) {
         switch (NextState) {
             case Intialization: {
 
@@ -283,7 +306,7 @@ int main () {
                 pinMode(29, OUTPUT);  // Pin C / GPIO Pin #21 of Pi / Physical Pin 40
                 pinMode(28, OUTPUT);  // Pin D / GPIO Pin #20 of Pi / Physical Pin 38
                 printf("WIRINGPI SETUP: COMPLETE\n");
-                //*****************transcoever code start************************/
+                //*****************transciever code start************************/
                 serial_port = open("/dev/ttyS0", O_RDWR | O_NOCTTY);
 
                 if (serial_port < 0) {
@@ -339,11 +362,11 @@ int main () {
                 openFile(flag);
                 //***************Shared Memory Code******//
 
-                /*
+                
                 sharMem = createMemory(); // creates shared memory
                 mutex = createNamedSem(); // creates named semaphore
 
-
+		/*
                 Py_Initialize();
                 if(flag == 0)
                 //source
@@ -352,14 +375,16 @@ int main () {
                     Pyfp = _Py_fopen(pyFilenameServer, "r");
                     PyRun_SimpleFile(Pyfp, pyFilenameServer);
                 }
-
+		*/
+		// Wait timer to start bluetooth client independatly
                 clock_t start = clock();
                 int elapsed_time = 0;
                 do{
                     clock_t difference = clock() - start;
                     elapsed_time = difference*1000/CLOCKS_PER_SEC;
-                }while(elapsed_time < 2000);
+                }while(elapsed_time < 10000);
 
+		/*
                 if(flag == 1)
                 //Jeff
                 {
@@ -373,22 +398,26 @@ int main () {
                 printf("\n");
                 num_packet = 0;
 
-                NewEvent = Code_Finished_Event;
+		NewEvent = Code_Finished_Event;
                 NextState = CodeFinishedHandler(NextState);
             }
                 break;
 
             case End: {
+		printf("CLEAN UP: BEGIN\n");
                 // Closes named semaphore and shared memory before exiting code
                 fclose(fp);
-                fclose(Pyfp);
+		printf("CLOSING: FILE\n");
+                //fclose(Pyfp);
                 close(serial_port);
+		printf("CLOSING: SERIAL PORT\n");
                 closeNamedSem(mutex);
                 closeMemeory(sharMem);
                 //printf("case end state\n");
                 if (User_Exit_Event == NewEvent) // code completes safely and exits S
                 {
-                    printf("Code Finished\n");
+                    printf("CLEAN UP: COMPLETE\n");
+		    exit(0);
                 } else if (Should_Not_Get_Here_Event == NewEvent) // uncaught error or bug in code
                 {
                     printf("big error stop code now\n");
@@ -548,7 +577,8 @@ int main () {
                                 int c = 0;
                                 while (c <= 6) {
                                     if (rec_msg[c] == '^') {
-                                        //printf("END OF FILE\n");
+                                        printf("END OF FILE RECIEVED\n");
+					printf("\n");
                                         end_file = 1;
                                         status = 3;
                                     }
@@ -600,6 +630,7 @@ int main () {
                             msg[j] = fgetc(fp);
                             if (msg[j] == '^'){
                                 printf("REACHED END OF FILE\n");
+				printf("\n");
                                 end_file = 1;
                             }
                             j++;
@@ -665,21 +696,23 @@ int main () {
                     }
                 }
                 //************Code for picking the transceiver//
-		/*
+		
                 imuData = sharedMemory(flag, sharMem, mutex); //recieves the float value from imu
 
                 if(flag == 0)
-                //Source 0-8
-                {
+  		{
+                //Source 0-8 
+                //This is to run a calculation using IMU and LIDAR data to find the right transicer after the car has moved
                     maintananceData = trans_select(imuData.data[0], imuData.data[1], imuData.data[2], imuData.data[6], imuData.data[7], imuData.data[8], 0.01, maintananceData);
                 }
                 else if (flag == 1)
                 //jeff 9 - 18
                 {
+               //This is to run a calculation using IMU and LIDAR data to find the right transicer after the car has moved
                      maintananceData = trans_select(imuData.data[9], imuData.data[10], imuData.data[11], imuData.data[15], imuData.data[16], imuData.data[17], 0.01, maintananceData);
                 }
-                transceiver = maintananceData.trans;
-		*/
+                //Setting the calculated transiver to the transiver being used for maintenance
+                //transceiver = maintananceData.trans;
 
                 if (Code_Finished_Event == Code_Finished_Event) {
 
@@ -767,6 +800,7 @@ int main () {
                                 //printf("COMMUNICATION SUCCESS\n");
                                 transceiver = testTransciver;
                                 NewEvent = Code_Finished_Event;
+				printf("\n");
                                 break;
                             } else if (rec_msg[0] == '1') {
                                 //printf("Error: Bad Data\n");
@@ -820,7 +854,8 @@ int main () {
                                     int c = 0;
                                     while (c <= 6) {
                                         if (rec_msg[c] == '^') {
-                                            //printf("END OF FILE\n");
+                                            printf("END OF FILE\n");
+					    printf("\n");
                                             end_file = 1;
                                             status = 3;
                                         }
@@ -847,6 +882,7 @@ int main () {
                                 } else if (status == 1) {
                                      //printf("RECOVERY SEND SUCCESSFUL\n");
                                      NewEvent = Code_Finished_Event;
+				     printf("\n");
                                      break;
                                 }
                                 else{

@@ -2,6 +2,9 @@
 #define _stateMachine_h_
 
 int flag;
+int serial_port;
+ sem_t *mutex;  // the pointer to the mutex
+ struct shared sharMem; // the pointer to the shared memory location
 
 typedef struct mainData{
 	int trans;

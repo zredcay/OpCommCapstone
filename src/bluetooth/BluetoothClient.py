@@ -14,22 +14,24 @@ def data_received(data):  # defines the data_received function which is passed t
     # write source's data to shm
     shm.shmwrite(data, 0)
     
-print("Client Created")
+print("BLUETOOTH CLIENT CREATED")
 c = BluetoothClient("raspberrypi", data_received)  # creates the BTClient object and pass it the desired device and data function
-    
-accx, accy, accz = IMU.getAcc()  # break the acceleration tuple into its respective pieces
-gyrox, gyroy, gyroz = IMU.getGyro()  # break the gyro tuple into its respective pieces
-magx, magy, magz = IMU.getMagnetic()  # break the magentic tuple into its respective pieces
 
-# assign data to data variable
-data = str(accx) + ' ' + str(accy) + ' ' + str(accz) + ' ' + str(gyrox) + ' ' + str(gyroy) + ' ' + str(gyroz) + ' ' + str(magx) + ' ' + str(magy) + ' ' + str(magz)
+while True: 
+   
+    accx, accy, accz = IMU.getAcc()  # break the acceleration tuple into its respective pieces
+    gyrox, gyroy, gyroz = IMU.getGyro()  # break the gyro tuple into its respective pieces
+    magx, magy, magz = IMU.getMagnetic()  # break the magentic tuple into its respective pieces
 
-# write jeff's data to shm
-shm.shmwrite(data, 1)
+    # assign data to data variable
+    data = str(accx) + ' ' + str(accy) + ' ' + str(accz) + ' ' + str(gyrox) + ' ' + str(gyroy) + ' ' + str(gyroz) + ' ' + str(magx) + ' ' + str(magy) + ' ' + str(magz)
 
-# via the client connection send the following, the variable need to be cast as strings to encode correctly, needs to be one send command otherwise it will double send data
-c.send(data)
+    # write jeff's data to shm
+    shm.shmwrite(data, 1)
 
+    # via the client connection send the following, the variable need to be cast as strings to encode correctly, needs to be one send command otherwise it will double send data
+    c.send(data)
 
+    time.sleep(1);
 
 pause()
