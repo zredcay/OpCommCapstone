@@ -25,9 +25,9 @@ magzoff = 26.0596
 
 def getAcc():
     accx, accy, accz = lsm.acceleration
-    accx -= accxoff
-    accy -= accyoff
-    accz -= acczoff
+    #accx -= accxoff
+    #accy -= accyoff
+    #accz -= acczoff
     return accx, accy, accz
 
 def getGyro():
@@ -43,3 +43,8 @@ def getMagnetic():
     magy -= magyoff
     magz -= magzoff
     return magx, magy, magz
+while True:
+    accx, accy, accz = getAcc()
+    print(accx, accy, accz)
+    time.sleep(1)
+    

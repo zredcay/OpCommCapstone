@@ -212,9 +212,9 @@ def main():
         max_y = max(max_y, accel_y)
         max_z = max(max_z, accel_z)
 
-        offset_x = (max_x + min_x) / 2
-        offset_y = (max_y + min_y) / 2
-        offset_z = (max_z + min_z) / 2
+        offset_x = min_x #(max_x + min_x) / 2
+        offset_y = min_y #(max_y + min_y) / 2
+        offset_z = min_z #(max_z + min_z) / 2
 
         noise_x = max_x - min_x
         noise_y = max_y - min_y
