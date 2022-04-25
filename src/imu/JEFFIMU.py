@@ -13,15 +13,15 @@ i2c = board.I2C()  # uses board.SCL and board.SDA
 lsm = adafruit_lsm6ds.LSM6DSOX(i2c)
 lis = adafruit_lis3mdl.LIS3MDL(i2c)
 lsm.accelerometer_range = AccelRange.RANGE_2G
-accxoff =
-accyoff =
-acczoff =
-gyroxoff =
-gyroyoff =
-gyrozoff =
-magxoff =
-magyoff =
-magzoff =
+accxoff = 0.2729
+accyoff = 0.2261
+acczoff = 10.1163
+gyroxoff = 0.2363
+gyroyoff = 0.1925
+gyrozoff = 1.0675
+magxoff = 4.8232
+magyoff = 12.7960
+magzoff = 12.3429
 
 def getAcc():
     accx, accy, accz = lsm.acceleration\

@@ -3,7 +3,7 @@ from bluedot.btcomm import BluetoothClient  # imports the Bluetooth Client libra
 from signal import pause  # imports pause function from signal allowing program to idle until a connection is created
 import sys
 sys.path.append('/home/pi/OpCommCapstone/src/imu')
-import IMU
+import JEFFIMU
 sys.path.append('/home/pi/OpCommCapstone/src/sharedMemory')
 import shm
 
@@ -19,9 +19,9 @@ c = BluetoothClient("raspberrypi", data_received)  # creates the BTClient object
 
 while True: 
    
-    accx, accy, accz = IMU.getAcc()  # break the acceleration tuple into its respective pieces
-    gyrox, gyroy, gyroz = IMU.getGyro()  # break the gyro tuple into its respective pieces
-    magx, magy, magz = IMU.getMagnetic()  # break the magentic tuple into its respective pieces
+    accx, accy, accz = JEFFIMU.getAcc()  # break the acceleration tuple into its respective pieces
+    gyrox, gyroy, gyroz = JEFFIMU.getGyro()  # break the gyro tuple into its respective pieces
+    magx, magy, magz = JEFFIMU.getMagnetic()  # break the magentic tuple into its respective pieces
 
     # assign data to data variable
     data = str(accx) + ' ' + str(accy) + ' ' + str(accz) + ' ' + str(gyrox) + ' ' + str(gyroy) + ' ' + str(gyroz) + ' ' + str(magx) + ' ' + str(magy) + ' ' + str(magz)
