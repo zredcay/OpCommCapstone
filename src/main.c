@@ -100,8 +100,8 @@ struct mainData trans_select(float Ax, float Ay, float Az, float Mx, float My, f
 	float PI  = 3.14159265;
 	 float val = PI / 180.0;
 
-	float Vfx = data.Vx + (Ax * timer);
-	float Vfy = data.Vy + (Ay * timer);
+	float Vfx = 0; //data.Vx + (Ax * timer);
+	float Vfy = 0; //data.Vy + (Ay * timer);
 	float Xo = data.dist*cos(data.angle*val);
 	float Yo = data.dist*sin(data.angle*val);
 	float Xf = Xo + .5*(Vfx + data.Vx)*timer;
@@ -248,6 +248,8 @@ int main () {
     struct Memory imuData; // the array of 18 from shared memory
     struct mainData maintananceData; // the calcuated data from maintenance data math
     
+    maintananceData.Vx = 0;
+    maintananceData.Vy = 0;
    
 
     int end_file = 0;   // status used to check if the end of file marker has been reached
@@ -777,7 +779,7 @@ int main () {
                     while(recoveryCount < 3) {
 
                         if (flag == 0) {
-                            printf("SOURCE HAS LOST CONNECTION, ENTERING RECOVERY\n");
+                            //printf("SOURCE HAS LOST CONNECTION, ENTERING RECOVERY\n");
 
                             // send msg to JEFF
                             status = source_maintenance_routine_send(testTransciver, recovery_msg, serial_port);
@@ -815,7 +817,7 @@ int main () {
                         }
                         //Jeff
                         if (flag == 1) {
-                            printf("JEFF HAS LOST CONNECTION, ENTERING RECOVERY\n");
+                            //printf("JEFF HAS LOST CONNECTION, ENTERING RECOVERY\n");
 
                             // try to read a message from SOURCE
                             status = jeff_maintenance_routine_read(transceiver, serial_port);
