@@ -13,9 +13,9 @@ i2c = board.I2C()  # uses board.SCL and board.SDA
 lsm = adafruit_lsm6ds.LSM6DSOX(i2c)
 lis = adafruit_lis3mdl.LIS3MDL(i2c)
 lsm.accelerometer_range = AccelRange.RANGE_2G
-accxoff = -0.8805587168
-accyoff = -0.2967100024
-acczoff = 9.7316095142
+accxoff = -0.2093
+accyoff =  0.0059
+acczoff =  9.8261
 gyroxoff = 0.5425
 gyroyoff = 0.3194
 gyrozoff = 0.1269
@@ -46,10 +46,10 @@ def getMagnetic():
 while True:
     accx, accy, accz = getAcc()
     print(accx, accy, accz)
-    if accx > 2:
+    if accx > 1:
         print("x did it")
         break
-    if accy > 2:
+    if accy > 1:
         print("y did it")
         break
     time.sleep(.1)
