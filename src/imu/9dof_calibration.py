@@ -212,9 +212,9 @@ def main():
         max_y = max(max_y, accel_y)
         max_z = max(max_z, accel_z)
 
-        offset_x = min_x #(max_x + min_x) / 2
-        offset_y = min_y #(max_y + min_y) / 2
-        offset_z = min_z #(max_z + min_z) / 2
+        offset_x = max_x #(max_x + min_x) / 2
+        offset_y = max_y #(max_y + min_y) / 2
+        offset_z = max_z #(max_z + min_z) / 2
 
         noise_x = max_x - min_x
         noise_y = max_y - min_y
@@ -223,6 +223,17 @@ def main():
         print(
             "Zero Rate Offset:  X: {0:8.2f}, Y:{1:8.2f}, Z:{2:8.2f} m/s^2".format(
                 offset_x, offset_y, offset_z
+            )
+            
+        )
+        print(
+            "Max:  X: {0:8.2f}, Y:{1:8.2f}, Z:{2:8.2f} m/s^2".format(
+                max_x, max_y, max_z
+            )
+        )
+        print(
+            "Min:  X: {0:8.2f}, Y:{1:8.2f}, Z:{2:8.2f} m/s^2".format(
+                min_x, min_y, min_z
             )
         )
         print(
@@ -243,7 +254,8 @@ def main():
     print("Final Magnetometer Calibration Values: ", mag_calibration)
     print("Final Gyro Calibration Values: ", gyro_calibration)
     print("Final Accelerometer Calibration Values: ", accel_calibration)
-
+    print("Max:  X: {0:8.2f}, Y:{1:8.2f}, Z:{2:8.2f} m/s^2".format(max_x, max_y, max_z))
+    print("Min:  X: {0:8.2f}, Y:{1:8.2f}, Z:{2:8.2f} m/s^2".format(min_x, min_y, min_z))
 
 
 if __name__ == "__main__":
