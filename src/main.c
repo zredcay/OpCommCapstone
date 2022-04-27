@@ -445,13 +445,20 @@ int main () {
                 printf("ATTEMPTING DISCOVERY\n");
 
                 int discovery_attempt = 0;
+                int discovery_try = 0;
                 int discovery_status;
                 int result;
+
+                if (flag == 0){
+                    discovery_try = 20;
+                }else {
+                    discovery_try = 0;
+                }
 
                 // attempt to discovery on chosen LIDAR transceiver 5 times before rerunning discovery
                 // this should increase our chances of discovery hitting and not having to reconnect to the LIDAR which is a big time hit
                 // trying to send/recieve 5 times is still less time than having to connect to the LIDAR again
-                while (discovery_attempt <= 10){
+                while (discovery_attempt <= discovery_try){
                     // Source Discovery
                     if (flag == 0){
                         // send discovery message
