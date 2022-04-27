@@ -794,19 +794,31 @@ int main () {
                                 //printf("COMMUNICATION TIMEOUT\n");
                                 NewEvent = Timeout_Event;
 
-                            } else if (status == 1) {
-                                //printf("COMMUNICATION SUCCESS\n");
+                            } else if (rec_msg[0] == '0') {
                                 transceiver = testTransceiver;
-                                NewEvent = Code_Finished_Event;
-                                printf("\n");
+                                writeCounter++;
+                                if(num_packet % 20 == 0){
+                                    printf("SENT %i PACKETS TO JEFF\n",num_packet);
+                                }
+                                num_packet++;
                                 break;
+                                //printf("COMMUNICATION SUCCESS\n");
+                                //printf("ENTIRE MESSAGE: %s\n",rec_msg);
+                                //int read_bytes = strlen(rec_msg);
+                                //printf("READ BYTES: %i\n",read_bytes);
+                                status = 1;
                             } else if (rec_msg[0] == '1') {
+                                transceiver = testTransceiver;
                                 //printf("Error: Bad Data\n");
+                                fseek(fp, -7, SEEK_CUR);
                                 status = 2;
-                                NewEvent = Bad_Data_Event;
+                                end_file = 0;
+                                break;
                             }else{
                                 //printf("ENTIRE MESSAGE: %s\n",rec_msg);
                                 //printf("STATUS %i\n",status);
+                                fseek(fp, -7, SEEK_CUR);
+                                end_file = 0;
                             }
                             memset(rec_msg, 0, 8);
                         }
