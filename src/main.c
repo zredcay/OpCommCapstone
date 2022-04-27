@@ -446,8 +446,8 @@ int main () {
 
                 int discovery_attempt = 0;
                 int discovery_try = 0;
-                int discovery_status;
-                int result;
+                int discovery_status = 0;
+                int result = 0;
 
                 if (flag == 0){
                     discovery_try = 20;
@@ -492,6 +492,7 @@ int main () {
                     }
                     discovery_attempt++;
                 }
+                discovery_attempt = 0;
 
                 if (angle == 0) // the transceiver was not found
                 {
@@ -881,7 +882,9 @@ int main () {
 
                                     // if the checksums match, send a 0
                                     rec_msg[0] = '0';
+                                    num_packet++;
                                 }else{
+                                    memset(rec_msg, '\0', 8);
                                     rec_msg[0] = '1';
                                 }
 
