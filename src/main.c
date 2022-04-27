@@ -611,7 +611,7 @@ int main () {
 
                                 num_packet++;
                                 if(num_packet % 2 == 0){
-                                    printf("RECEIVED %i PACKETS FROM SOURCE AND HAVE WRITTEN THEM TO THE FILE\n",num_packet);
+                                    printf("RECEIVED PACKETS FROM SOURCE AND HAVE WRITTEN THEM TO THE FILE\n");
                                 }
                             } else {
                                 // else send a 1
