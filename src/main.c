@@ -545,6 +545,7 @@ int main () {
                 int status;
                 //transceiver = 3;      // used for testing, hardcode transceiver number you want to use
                 //printf("RUNNING MAINTENANCE\n");
+
                 //Jeff
                 if (flag == 1) {
                     int checksum = 0;   // checksum variable
@@ -625,7 +626,7 @@ int main () {
                             }
 
                             // reset rec_msg buffer for reading
-                            memset(rec_msg, 0, 8);
+                            memset(rec_msg, '\0', 8);
 
                         }
                     }
