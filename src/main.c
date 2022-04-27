@@ -470,7 +470,7 @@ int main () {
                         readCounter = 0;
                         if (discovery_status == 1){
                             printf("DISCOVEY MESSAGE REC\n");
-                            printf("///////////////// DISCOVERY: COMPLETE /////////////////\n");
+                            printf("//////////////////// DISCOVERY: COMPLETE ////////////////////\n");
                             printf("\n");
                             break;
                         }
@@ -485,7 +485,7 @@ int main () {
                         //printf("REC: %s\n",rec_msg);
                         if(discovery_status == 1){
                             printf("DISCOVEY MESSAGE REC\n");
-                            printf("///////////////// DISCOVERY: COMPLETE /////////////////\n");
+                            printf("//////////////////// DISCOVERY: COMPLETE ////////////////////\n");
                             printf("\n");
                             rec_msg[0] = '1';
                             discovery_status = jeff_maintenance_routine_send(transceiver, rec_msg, serial_port);
@@ -590,8 +590,6 @@ int main () {
                                 int c = 0;
                                 while (c <= 6) {
                                     if (rec_msg[c] == '^') {
-                                        printf("///////////////// END OF FILE RECIEVED /////////////////\n");
-                                        printf("\n");
                                         end_file = 1;
                                         status = 3;
                                     }
@@ -642,8 +640,6 @@ int main () {
                         for (i = (writeCounter * 7); i <= ((writeCounter * 7) + 6); i++) {
                             msg[j] = fgetc(fp);
                             if (msg[j] == '^'){
-                                printf("///////////////// REACHED END OF FILE /////////////////\n");
-                                printf("\n");
                                 end_file = 1;
                             }
                             j++;
@@ -739,8 +735,10 @@ int main () {
                     //printf("status = %i\n", status);
                     if( end_file == 1)
                     {
-                    NewEvent = User_Exit_Event;
-                    NextState = UserExitHandler(NextState);
+                        printf("//////////////////// END OF FILE RECIEVED ////////////////////\n");
+                        printf("\n");
+                        NewEvent = User_Exit_Event;
+                        NextState = UserExitHandler(NextState);
                     }
                     else if (status == 0) // status is timeout got to recovery
                     {
