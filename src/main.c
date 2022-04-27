@@ -226,8 +226,8 @@ int main () {
     }
     printf("\n");
 
-    char prev_msg[7] = "0000000";
-    char disc_msg[8] = "DISCOVER";
+    char prev_msg[10] = "0000000";
+    char disc_msg[10] = "DISCOVER";
     float angle = 100;
     float dist = .3;
     int transceiver = 0;
