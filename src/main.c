@@ -603,10 +603,10 @@ int main () {
                                 rec_msg[0] = '0';
                                 //printf("GOOD DATA\n");
 
-                                if(num_packet % 2 == 0){
-                                    printf("RECEIVED %i PACKETS FROM SOURCE AND HAVE WRITTEN THEM TO THE FILE\n");
-                                }
                                 num_packet++;
+                                if(num_packet % 2 == 0){
+                                    printf("RECEIVED %i PACKETS FROM SOURCE AND HAVE WRITTEN THEM TO THE FILE\n",num_packet);
+                                }
                             } else {
                                 // else send a 1
                                 //printf("BAD DATA\n");
@@ -817,6 +817,7 @@ int main () {
                             } else if (rec_msg[0] == '0') {
                                 writeCounter++;
                                 printf("RECOVERY COMMUNICATION SUCCESS\n");
+                                NewEvent = Code_Finished_Event;
                                 transceiver = testTransceiver;
                                 break;
                             } else if (rec_msg[0] == '1') {
@@ -924,7 +925,7 @@ int main () {
                             testTransceiver = 7;
                         }
                         printf("RECOVERY: UNSUCCESSFUL, ATTEMPTING ON TRANSCEIVER %i\n",testTransceiver);
-            }
+                }
 
                     if (Bad_Data_Event == NewEvent) {
 
