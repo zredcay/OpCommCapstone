@@ -227,7 +227,7 @@ int main () {
     printf("\n");
 
     char prev_msg[7] = "0000000";
-    char disc_msg[] = "DISCOVER";
+    char disc_msg[8] = "DISCOVER";
     float angle = 100;
     float dist = .3;
     int transceiver = 0;
@@ -379,7 +379,7 @@ int main () {
                 do{
                     clock_t difference = clock() - start;
                     elapsed_time = difference*1000/CLOCKS_PER_SEC;
-                }while(elapsed_time < 5000);
+                }while(elapsed_time < 2000);
 
 		/*
                 if(flag == 1)
