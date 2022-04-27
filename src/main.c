@@ -682,9 +682,10 @@ int main () {
                                 end_file = 0;
                             }else {
                                 printf("SOURCE DID NOT GET A 0 OR A 1\n");
+                                fseek(fp, -7, SEEK_CUR);
                             }
                         }else {
-                            printf("SOURCE DID NOT GET A 0 OR A 1\n");
+                            //printf("SOURCE DID NOT GET A 0 OR A 1\n");
                             //printf("STATUS %i\n",status);
                             //fseek(fp, -7, SEEK_CUR);
                             end_file = 0;
