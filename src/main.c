@@ -583,6 +583,7 @@ int main () {
 
                                 if ((result = strcmp(rec_msg, prev_msg)) != 0){
                                     if ((result = strcmp(rec_msg,disc_msg)) != 0){
+                                        printf("PREV MSG REC: %s\n",prev_msg);
                                         printf("DIFFERENT MSG REC: %s\n",rec_msg);
                                         for (int k = 0; k <= 6; k++){
                                             prev_msg[k] = rec_msg[k];
