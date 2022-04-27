@@ -393,26 +393,26 @@ int main () {
                 printf("\n");
                 num_packet = 0;
 
-		NewEvent = Code_Finished_Event;
+                NewEvent = Code_Finished_Event;
                 NextState = CodeFinishedHandler(NextState);
             }
                 break;
 
             case End: {
-		printf("CLEAN UP: BEGIN\n");
+                printf("CLEAN UP: BEGIN\n");
                 // Closes named semaphore and shared memory before exiting code
                 fclose(fp);
-		printf("CLOSING: FILE\n");
+                printf("CLOSING: FILE\n");
                 //fclose(Pyfp);
                 close(serial_port);
-		printf("CLOSING: SERIAL PORT\n");
+                printf("CLOSING: SERIAL PORT\n");
                 closeNamedSem(mutex);
                 closeMemeory(sharMem);
                 //printf("case end state\n");
                 if (User_Exit_Event == NewEvent) // code completes safely and exits S
                 {
                     printf("CLEAN UP: COMPLETE\n");
-		    exit(0);
+                    exit(0);
                 } else if (Should_Not_Get_Here_Event == NewEvent) // uncaught error or bug in code
                 {
                     printf("big error stop code now\n");
@@ -670,16 +670,16 @@ int main () {
                             //printf("ENTIRE MESSAGE: %s\n",rec_msg);
                             //int read_bytes = strlen(rec_msg);
                             //printf("READ BYTES: %i\n",read_bytes);
-                            status = 1;
                         } else if (rec_msg[0] == '1') {
                             //printf("Error: Bad Data\n");
                             fseek(fp, -7, SEEK_CUR);
                             status = 2;
                             end_file = 0;
-                        }else{
+                        }else if (status == 1){
                             //printf("ENTIRE MESSAGE: %s\n",rec_msg);
+                            status = 0;
                             //printf("STATUS %i\n",status);
-                            fseek(fp, -7, SEEK_CUR);
+                            //fseek(fp, -7, SEEK_CUR);
                             end_file = 0;
                         }
                         //printf("Write Counter: %i\n",writeCounter);
@@ -827,7 +827,10 @@ int main () {
 
                                 int result;
 
+                                rec_msg[7] = '\0';
+
                                 if ((result = strcmp(rec_msg, prev_msg)) != 0){
+                                    writeCounter++;
                                     for (int k = 0; k <= 6; k++){
                                         prev_msg[k] = rec_msg[k];
                                     }
@@ -860,10 +863,10 @@ int main () {
                                     NewEvent = Should_Not_Get_Here_Event;
                                     //printf("ERROR SENDING\n");
                                 } else if (status == 1) {
-                                     //printf("RECOVERY SEND SUCCESSFUL\n");
-                                     NewEvent = Code_Finished_Event;
-                                     printf("\n");
-                                     break;
+                                    //printf("RECOVERY SEND SUCCESSFUL\n");
+                                    NewEvent = Code_Finished_Event;
+                                    printf("\n");
+                                    break;
                                 }
                                 else{
                                     printf("STATUS IS NOT GOOD\n");
