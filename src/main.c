@@ -452,7 +452,7 @@ int main () {
                 if (flag == 0){
                     discovery_try = 20;
                 }else {
-                    discovery_try = 0;
+                    discovery_try = 10;
                 }
 
                 // attempt to discovery on chosen LIDAR transceiver 5 times before rerunning discovery
