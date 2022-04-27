@@ -136,35 +136,27 @@ struct mainData trans_select(float Ax, float Ay, float Az, float Mx, float My, f
 
 int recovery_trans_select(int recoveryCounter, int transceiver)
 {
-    int testTransciver = 0;
+    int testTransceiver = transceiver;
     //try tans +1 and trans -1 in new recovery code
 
-    if (flag == 0 && recoveryCounter == 1){
-        testTransciver = transceiver++;
+    if (flag == 0){
+        testTransceiver = testTransceiver++;
     }
 
-    if (flag == 0 && recoveryCounter == 2){
-        testTransciver = transceiver--;
+    if (flag == 1){
+        testTransceiver = testTransceiver--;
     }
 
-    if (flag == 1 && recoveryCounter == 1){
-        testTransciver = transceiver--;
-    }
-
-    if (flag == 1 && recoveryCounter == 2){
-        testTransciver = transceiver++;
-    }
-
-    if(testTransciver > 7)
+    if(testTransceiver > 7)
     {
-        testTransciver = 0;
+        testTransceiver = 0;
     }
-     if(testTransciver < 0)
+     if(testTransceiver < 0)
     {
-        testTransciver = 7;
+        testTransceiver = 7;
     }
 
-    return testTransciver;
+    return testTransceiver;
 }
 
 int openFile(int flag)
@@ -384,7 +376,7 @@ int main () {
                 do{
                     clock_t difference = clock() - start;
                     elapsed_time = difference*1000/CLOCKS_PER_SEC;
-                }while(elapsed_time < 10000);
+                }while(elapsed_time < 5000);
 
 		/*
                 if(flag == 1)
@@ -714,8 +706,8 @@ int main () {
                      maintananceData = trans_select(imuData.data[9], imuData.data[10], imuData.data[11], imuData.data[15], imuData.data[16], imuData.data[17], 0.01, maintananceData);
                 }
                 //Setting the calculated transiver to the transiver being used for maintenance
-                transceiver = maintananceData.trans;
-		printf("SELECTING TRANSCEIVER: %i\n",transceiver);
+                //transceiver = maintananceData.trans;
+		//printf("SELECTING TRANSCEIVER: %i\n",transceiver);
 
                 if (Code_Finished_Event == Code_Finished_Event) {
 
@@ -768,21 +760,22 @@ int main () {
 
 
                 case Recovery: {
+		    printf("RECOVERY: BEGIN\n");
                     char recovery_msg[8] = "recovery";       // buffer for sending data
                     int status;
-                    int testTransciver = transceiver;
+                    int testTransceiver = transceiver;
                     int recoveryCount = 0; //makes the while loop run three time for each transiver
 
 
                     // try original then direction its going then other direction
 			        //Source
-                    while(recoveryCount < 3) {
+                    while(recoveryCount <= 7) {
 
                         if (flag == 0) {
                             //printf("SOURCE HAS LOST CONNECTION, ENTERING RECOVERY\n");
 
                             // send msg to JEFF
-                            status = source_maintenance_routine_send(testTransciver, recovery_msg, serial_port);
+                            status = source_maintenance_routine_send(testTransceiver, recovery_msg, serial_port);
 
                             // check if msg was sent correctly
                             if (status == 4) {
@@ -792,7 +785,7 @@ int main () {
                                 //printf("SEND SUCCESSFUL\n");
                             }
                             // wait for JEFF response
-                            status = source_maintenance_routine_read(testTransciver, serial_port);
+                            status = source_maintenance_routine_read(testTransceiver, serial_port);
                             readCounter = 0;
 
                             if (status == 0) {
@@ -801,7 +794,7 @@ int main () {
 
                             } else if (status == 1) {
                                 //printf("COMMUNICATION SUCCESS\n");
-                                transceiver = testTransciver;
+                                transceiver = testTransceiver;
                                 NewEvent = Code_Finished_Event;
 				printf("\n");
                                 break;
@@ -820,7 +813,7 @@ int main () {
                             //printf("JEFF HAS LOST CONNECTION, ENTERING RECOVERY\n");
 
                             // try to read a message from SOURCE
-                            status = jeff_maintenance_routine_read(transceiver, serial_port);
+                            status = jeff_maintenance_routine_read(testTransceiver, serial_port);
                             readCounter = 0;
 
                             if (status == 0) {
@@ -877,7 +870,7 @@ int main () {
                                 }
 
                                 // send a response to SOURCE with if the data was rec correctly
-                                status = jeff_maintenance_routine_send(transceiver, rec_msg, serial_port);
+                                status = jeff_maintenance_routine_send(testTransceiver, rec_msg, serial_port);
 
                                 if (status == 0) {
                                     NewEvent = Should_Not_Get_Here_Event;
@@ -896,8 +889,22 @@ int main () {
                             }
                         }
                         recoveryCount++;
-                        printf("RECOVERY UNSUCCESSFUL, ATTEMPTING ON ADJACENT TRANSCEIVER\n",recoveryCount);
-                        testTransciver =  recovery_trans_select(recoveryCount, transceiver);
+			//printf("RECOVERY COUNT: %i\n",recoveryCount);
+			//printf("CURRENT TRANS: %i\n",testTransceiver);
+			//testTransceiver = recovery_trans_select(recoveryCount, testTransceiver);
+			if (flag == 0){
+				testTransceiver++;
+			}
+			if (flag == 1){
+				testTransceiver--;
+			}
+			if (testTransceiver > 7){
+				testTransceiver = 0;
+			}
+			if (testTransceiver < 0){
+				testTransceiver = 7;
+			}
+                        printf("RECOVERY: UNSUCCESSFUL, ATTEMPTING ON TRANSCEIVER %i\n",testTransceiver);
                     }
 
                     if (Bad_Data_Event == NewEvent) {
