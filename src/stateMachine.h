@@ -63,7 +63,7 @@ State BadDataHandler(State thisState)
 {
     	if(thisState == Discovery)
 	{
-		return Alternate_Discovery;
+		return Recovery;
 	}
 	else if(thisState == Maintenance)
 	{

@@ -497,10 +497,15 @@ int main () {
                 {
                     NewEvent = Bad_Data_Event;
                     NextState = BadDataHandler(NextState);
-                } else if (angle < 360 && angle > 0) // in a given transcieer 1 - 8
+                } else if( discovery_status == 1)
                 {
                     NewEvent = Code_Finished_Event;
                     NextState = CodeFinishedHandler(NextState);
+                }
+                 else if (angle < 360 && angle > 0) // in a given transcieer 1 - 8
+                {
+                    NewEvent = Timeout_Event;
+                    NextState = TimeoutEventHandler(NextState);
                 } else // angle should not give a number higher than 360
                 {
                     NewEvent = Should_Not_Get_Here_Event;
@@ -694,7 +699,6 @@ int main () {
                                 printf("SOURCE DID NOT GET A 0 OR A 1\n");
                                 fseek(fp, -7, SEEK_CUR);
                                 status = 2;
-                                end_file = 0;
                             }
                         }else {
                             //printf("SOURCE DID NOT GET A 0 OR A 1\n");
@@ -850,8 +854,6 @@ int main () {
                                     rec_msg[7] = '\0';
 
                                     int result;
-
-                                    rec_msg[7] = '\0';
 
                                     if ((result = strcmp(rec_msg, prev_msg)) != 0){
                                         if ((result = strcmp(rec_msg,disc_msg)) != 0){
