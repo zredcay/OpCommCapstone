@@ -286,7 +286,7 @@ int main () {
 
 
     State NextState = Intialization; // which state is the current state
-    printf("//////////////////////// INITIALIZATION: BEGIN ////////////////////////\n");
+    printf("/////////////////////// INITIALIZATION: BEGIN    ////////////////////////\n");
     Event NewEvent = Code_Finished_Event; // the next event being snet into the handler
     clock_t startTime = clock(); // overall timer that after certain time will kick to end state then exit code
     while (clock() < (startTime + 20 * CLOCKS_PER_SEC)) {
@@ -390,7 +390,7 @@ int main () {
                 }
 		*/
 
-                printf("//////////////////////// INITIALIZATION: COMPLETE ////////////////////////\n");
+                printf("///////////////////////  INITIALIZATION: COMPLETE ////////////////////////\n");
                 printf("\n");
                 num_packet = 0;
 
@@ -400,7 +400,7 @@ int main () {
                 break;
 
             case End: {
-                printf("//////////////////////// CLEAN UP: BEGIN ////////////////////////\n");
+                printf("/////////////////////// CLEAN UP: BEGIN /////////////////////////////////\n");
                 // Closes named semaphore and shared memory before exiting code
                 fclose(fp);
                 printf("CLOSING: FILE\n");
@@ -412,7 +412,7 @@ int main () {
                 //printf("case end state\n");
                 if (User_Exit_Event == NewEvent) // code completes safely and exits S
                 {
-                    printf("//////////////////////// CLEAN UP: COMPLETE ////////////////////////\n");
+                    printf("/////////////////////// CLEAN UP: COMPLETE //////////////////////////////\n");
                     exit(0);
                 } else if (Should_Not_Get_Here_Event == NewEvent) // uncaught error or bug in code
                 {
@@ -428,7 +428,7 @@ int main () {
                 break;
 
             case Discovery: {
-                printf("//////////////////////// DISCOVERY: BEGIN ////////////////////////\n");
+                printf("/////////////////////// DISCOVERY: BEGIN ////////////////////////////////\n");
                 //clock_t start = clock();
                 //int elapsed_time = 0;
 
@@ -492,8 +492,8 @@ int main () {
                     discovery_attempt++;
                 }
                 discovery_attempt = 0;
-                printf("///////////////////////// DISCOVERY: COMPLETE /////////////////////////\n");
-                            printf("\n");
+                printf("/////////////////////// DISCOVERY: COMPLETE /////////////////////////////\n");
+                printf("\n");
 
                 if (angle == 0) // the transceiver was not found
                 {
@@ -734,7 +734,7 @@ int main () {
                     //printf("status = %i\n", status);
                     if( end_file == 1)
                     {
-                        printf("///////////////////////// END OF FILE RECIEVED /////////////////////////\n");
+                        printf("/////////////////////// END OF FILE RECIEVED ////////////////////////////\n");
                         printf("\n");
                         NewEvent = User_Exit_Event;
                         NextState = UserExitHandler(NextState);
@@ -782,7 +782,7 @@ int main () {
 
 
                 case Recovery: {
-                    printf("//////////////////////// RECOVERY: BEGIN ////////////////////////\n");
+                    printf("/////////////////////// RECOVERY: BEGIN /////////////////////////////////\n");
                     //char recovery_msg[8] = "recovery";       // buffer for sending data
                     int status;
                     int testTransceiver = transceiver;
@@ -922,7 +922,7 @@ int main () {
                         }
                         printf("RECOVERY: UNSUCCESSFUL, ATTEMPTING ON TRANSCEIVER %i\n",testTransceiver);
                     }
-                    printf("//////////////////////// RECOVERY: COMPLETE ////////////////////////\n");
+                    printf("/////////////////////// RECOVERY: COMPLETE //////////////////////////////\n");
                     printf("\n");
                     if (Bad_Data_Event == NewEvent) {
 
