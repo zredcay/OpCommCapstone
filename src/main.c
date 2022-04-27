@@ -597,7 +597,7 @@ int main () {
                                     }
                                     c++;
                                 }
-
+                                printf("MSG: %s\n",rec_msg);
                                 // reset the rec_msg buffer in order to send response
                                 memset(rec_msg, '\0', 8);
 
@@ -840,7 +840,7 @@ int main () {
 
                             if (status == 0) {
                                 //printf("RECOVERY COMMUNICATION TIMEOUT\n");
-                                NewEvent =Timeout_Event;
+                                NewEvent = Timeout_Event;
                             } else if (status == 1) {
                                 printf("RECOVERY COMMUNICATION SUCCESS\n");
                                 //printf("MESSAGE: %s\n", rec_msg);
@@ -877,7 +877,7 @@ int main () {
                                         }
                                         c++;
                                     }
-
+                                    printf("MSG: %s\n",rec_msg);
                                     // reset the rec_msg buffer in order to send response
                                     memset(rec_msg, '\0', 8);
 
