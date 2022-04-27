@@ -564,6 +564,8 @@ int main () {
 
                             //printf("MESSAGE: %s\n", rec_msg);
 
+                            printf("MSG REC: %s\n",rec_msg);
+
                             // checksum calculation
                             int checksum = 0;
                             for (int k = 0; k <= 6; k++) {
@@ -581,7 +583,7 @@ int main () {
 
                                 if ((result = strcmp(rec_msg, prev_msg)) != 0){
                                     if ((result = strcmp(rec_msg,disc_msg)) != 0){
-                                        printf("SAME MSG REC\n");
+                                        printf("DIFFERENT MSG REC: %s\n",rec_msg);
                                         for (int k = 0; k <= 6; k++){
                                             prev_msg[k] = rec_msg[k];
                                         }
@@ -598,7 +600,6 @@ int main () {
                                     }
                                     c++;
                                 }
-                                printf("MSG: %s\n",rec_msg);
                                 // reset the rec_msg buffer in order to send response
                                 memset(rec_msg, '\0', 8);
 
@@ -844,6 +845,7 @@ int main () {
                                 NewEvent = Timeout_Event;
                             } else if (status == 1) {
                                 printf("RECOVERY COMMUNICATION SUCCESS\n");
+                                printf("MSG REC: %s\n",rec_msg);
                                 //printf("MESSAGE: %s\n", rec_msg);
                                 // if checksum value rec == checksum value calculated
                                 int checksum = 0;
@@ -862,7 +864,7 @@ int main () {
 
                                     if ((result = strcmp(rec_msg, prev_msg)) != 0){
                                         if ((result = strcmp(rec_msg,disc_msg)) != 0){
-                                            printf("SAME MSG REC\n");
+                                            printf("DIFFERENT MSG REC: %s\n",rec_msg);
                                             for (int k = 0; k <= 6; k++){
                                                 prev_msg[k] = rec_msg[k];
                                             }
@@ -879,7 +881,7 @@ int main () {
                                         }
                                         c++;
                                     }
-                                    printf("MSG: %s\n",rec_msg);
+
                                     // reset the rec_msg buffer in order to send response
                                     memset(rec_msg, '\0', 8);
 
