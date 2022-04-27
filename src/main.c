@@ -484,7 +484,7 @@ int main () {
                         //printf("REC: %s\n",rec_msg);
                         if(discovery_status == 1){
                             printf("DISCOVEY MESSAGE REC\n");
-                            memset(rec_msg, '\0', 8);
+                            memset(rec_msg, '\0', sizeof(rec_msg));
                             rec_msg[0] = '1';
                             discovery_status = jeff_maintenance_routine_send(transceiver, rec_msg, serial_port);
                             break;
@@ -492,7 +492,7 @@ int main () {
                     }
                     discovery_attempt++;
                 }
-                memset(rec_msg, '\0', 8);
+                memset(rec_msg, '\0', sizeof(rec_msg));
                 discovery_attempt = 0;
                 printf("/////////////////////// DISCOVERY: COMPLETE /////////////////////////////\n");
                 printf("\n");
@@ -602,7 +602,7 @@ int main () {
                                     c++;
                                 }
                                 // reset the rec_msg buffer in order to send response
-                                memset(rec_msg, '\0', 8);
+                                memset(rec_msg, '\0', sizeof(rec_msg));
 
                                 // if the checksums match, send a 0
                                 rec_msg[0] = '0';
@@ -615,7 +615,7 @@ int main () {
                             } else {
                                 // else send a 1
                                 //printf("BAD DATA\n");
-                                memset(rec_msg, '\0', 8);
+                                memset(rec_msg, '\0', sizeof(rec_msg));
                                 rec_msg[0] = '1';
                                 status = 2;
                             }
@@ -629,7 +629,7 @@ int main () {
                             }
 
                             // reset rec_msg buffer for reading
-                            memset(rec_msg, '\0', 8);
+                            memset(rec_msg, '\0', sizeof(rec_msg));
 
                         }
                     }
@@ -710,6 +710,7 @@ int main () {
                             //fseek(fp, -7, SEEK_CUR);
                             end_file = 0;
                         }
+                        memset(rec_msg, '\0', sizeof(rec_msg));
                         //printf("Write Counter: %i\n",writeCounter);
                         //printf("FILE POINTER %i\n",ftell(fp));
                         //printf("WRITE COUNTER: %i\n",writeCounter++);
@@ -831,7 +832,7 @@ int main () {
                                 fseek(fp, -7, SEEK_CUR);
                                 break;
                             }
-                            memset(rec_msg, '\0', 8);
+                            memset(rec_msg, '\0', sizeof(rec_msg));
                         }
                         //Jeff
                         if (flag == 1) {
@@ -884,13 +885,13 @@ int main () {
                                     }
 
                                     // reset the rec_msg buffer in order to send response
-                                    memset(rec_msg, '\0', 8);
+                                    memset(rec_msg, '\0', sizeof(rec_msg));
 
                                     // if the checksums match, send a 0
                                     rec_msg[0] = '0';
                                     num_packet++;
                                 }else{
-                                    memset(rec_msg, '\0', 8);
+                                    memset(rec_msg, '\0', sizeof(rec_msg));
                                     rec_msg[0] = '1';
                                 }
 
@@ -909,7 +910,7 @@ int main () {
                                     //printf("STATUS IS NOT GOOD\n");
                                 }
                                 // reset rec_msg buffer for reading
-                                memset(rec_msg, '\0', 8);
+                                memset(rec_msg, '\0', sizeof(rec_msg));
                             }
                         }
                         recoveryCount++;
