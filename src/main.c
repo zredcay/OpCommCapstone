@@ -428,7 +428,7 @@ int main () {
                 break;
 
             case Discovery: {
-                printf("ENTERING DISCOVERY\n");
+                printf("/////////////////// DISCOVERY: BEGIN ///////////////////\n");
                 //clock_t start = clock();
                 //int elapsed_time = 0;
 
@@ -440,7 +440,7 @@ int main () {
                 //elapsed_time = difference*1000/CLOCKS_PER_SEC;
                 //printf("TIME TO SET UP LIDAR %i\n",elapsed_time);
 
-                printf("CHOSEN TRANSCEIVER %i ON ANGLE %f AT DISTANCE %f\n", transceiver, angle, dist);
+                printf("CHOSE TRANSCEIVER %i ON ANGLE %f AT DISTANCE %f\n", transceiver, angle, dist);
 
                 printf("ATTEMPTING DISCOVERY\n");
 
@@ -470,6 +470,7 @@ int main () {
                         readCounter = 0;
                         if (discovery_status == 1){
                             printf("DISCOVEY MESSAGE REC\n");
+                            printf("///////////////// DISCOVERY: COMPLETE /////////////////\n");
                             printf("\n");
                             break;
                         }
@@ -484,6 +485,7 @@ int main () {
                         //printf("REC: %s\n",rec_msg);
                         if(discovery_status == 1){
                             printf("DISCOVEY MESSAGE REC\n");
+                            printf("///////////////// DISCOVERY: COMPLETE /////////////////\n");
                             printf("\n");
                             rec_msg[0] = '1';
                             discovery_status = jeff_maintenance_routine_send(transceiver, rec_msg, serial_port);
@@ -588,7 +590,7 @@ int main () {
                                 int c = 0;
                                 while (c <= 6) {
                                     if (rec_msg[c] == '^') {
-                                        printf("END OF FILE RECIEVED\n");
+                                        printf("///////////////// END OF FILE RECIEVED /////////////////\n");
                                         printf("\n");
                                         end_file = 1;
                                         status = 3;
@@ -640,7 +642,7 @@ int main () {
                         for (i = (writeCounter * 7); i <= ((writeCounter * 7) + 6); i++) {
                             msg[j] = fgetc(fp);
                             if (msg[j] == '^'){
-                                printf("REACHED END OF FILE\n");
+                                printf("///////////////// REACHED END OF FILE /////////////////\n");
                                 printf("\n");
                                 end_file = 1;
                             }
@@ -683,10 +685,10 @@ int main () {
                             if (rec_msg[0] == '0') {
                                 //printf("JEFF GOT GOOD DATA\n");
                                 writeCounter++;
+                                num_packet++;
                                 if(num_packet % 2 == 0){
                                     printf("SENT %i PACKETS TO JEFF\n",num_packet);
                                 }
-                                num_packet++;
                                 //printf("COMMUNICATION SUCCESS\n");
                                 //printf("ENTIRE MESSAGE: %s\n",rec_msg);
                                 //int read_bytes = strlen(rec_msg);
@@ -697,7 +699,7 @@ int main () {
                                 status = 2;
                                 end_file = 0;
                             }else {
-                                printf("SOURCE DID NOT GET A 0 OR A 1\n");
+                                //printf("SOURCE DID NOT GET A 0 OR A 1\n");
                                 fseek(fp, -7, SEEK_CUR);
                                 status = 2;
                             }
@@ -783,7 +785,7 @@ int main () {
 
 
                 case Recovery: {
-                    printf("RECOVERY: BEGIN\n");
+                    printf("/////////////////// RECOVERY: BEGIN ///////////////////\n");
                     //char recovery_msg[8] = "recovery";       // buffer for sending data
                     int status;
                     int testTransceiver = transceiver;
@@ -812,7 +814,7 @@ int main () {
                             readCounter = 0;
 
                             if (status == 0) {
-                                printf("RECOVERY COMMUNICATION TIMEOUT\n");
+                                //printf("RECOVERY COMMUNICATION TIMEOUT\n");
                                 NewEvent = Timeout_Event;
                             } else if (rec_msg[0] == '0') {
                                 writeCounter++;
@@ -821,7 +823,7 @@ int main () {
                                 transceiver = testTransceiver;
                                 break;
                             } else if (rec_msg[0] == '1') {
-                                printf("RECOVERY COMMUNICATION BAD DATA\n");
+                                //printf("RECOVERY COMMUNICATION BAD DATA\n");
                                 transceiver = testTransceiver;
                                 fseek(fp, -7, SEEK_CUR);
                                 break;
@@ -837,7 +839,7 @@ int main () {
                             readCounter = 0;
 
                             if (status == 0) {
-                                printf("RECOVERY COMMUNICATION TIMEOUT\n");
+                                //printf("RECOVERY COMMUNICATION TIMEOUT\n");
                                 NewEvent =Timeout_Event;
                             } else if (status == 1) {
                                 printf("RECOVERY COMMUNICATION SUCCESS\n");
@@ -896,13 +898,12 @@ int main () {
                                     NewEvent = Should_Not_Get_Here_Event;
                                     //printf("ERROR SENDING\n");
                                 } else if (status == 1) {
-                                    printf("RECOVERY SEND SUCCESSFUL\n");
+                                    //printf("RECOVERY SEND SUCCESSFUL\n");
                                     NewEvent = Code_Finished_Event;
-                                    printf("\n");
                                     break;
                                 }
                                 else{
-                                    printf("STATUS IS NOT GOOD\n");
+                                    //printf("STATUS IS NOT GOOD\n");
                                 }
                                 // reset rec_msg buffer for reading
                                 memset(rec_msg, '\0', 8);
@@ -926,7 +927,7 @@ int main () {
                         }
                         printf("RECOVERY: UNSUCCESSFUL, ATTEMPTING ON TRANSCEIVER %i\n",testTransceiver);
                 }
-
+                    printf("\n");
                     if (Bad_Data_Event == NewEvent) {
 
                         NextState = BadDataHandler(NextState);
