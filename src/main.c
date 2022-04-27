@@ -837,38 +837,51 @@ int main () {
                                 printf("RECOVERY COMMUNICATION SUCCESS\n");
                                 //printf("MESSAGE: %s\n", rec_msg);
                                 // if checksum value rec == checksum value calculated
+                                int checksum = 0;
+                                for (int k = 0; k <= 6; k++) {
+                                    checksum += (int) rec_msg[k];
+                                }
+                                checksum = (((checksum % 100) / 10) + ((checksum % 100) % 10)) % 10;
 
-                                int result;
+                                // if checksum value rec == checksum value calculated
+                                if (checksum + '0' == rec_msg[7]) {
 
-                                rec_msg[7] = '\0';
+                                // set checksum value in rec_msg buffer to null
+                                    rec_msg[7] = '\0';
 
-                                if ((result = strcmp(rec_msg, prev_msg)) != 0){
-                                    if ((result = strcmp(rec_msg,disc_msg)) != 0){
-                                        for (int k = 0; k <= 6; k++){
-                                            prev_msg[k] = rec_msg[k];
+                                    int result;
+
+                                    rec_msg[7] = '\0';
+
+                                    if ((result = strcmp(rec_msg, prev_msg)) != 0){
+                                        if ((result = strcmp(rec_msg,disc_msg)) != 0){
+                                            for (int k = 0; k <= 6; k++){
+                                                prev_msg[k] = rec_msg[k];
+                                            }
+                                            fputs(rec_msg, fp);
                                         }
-                                        fputs(rec_msg, fp);
                                     }
-                                }
 
-                                // check to see if the end of the file has been reached
-                                int c = 0;
-                                while (c <= 6) {
-                                    if (rec_msg[c] == '^') {
-                                        printf("END OF FILE\n");
-                                        printf("\n");
-                                        end_file = 1;
-                                        status = 3;
+                                    // check to see if the end of the file has been reached
+                                    int c = 0;
+                                    while (c <= 6) {
+                                        if (rec_msg[c] == '^') {
+                                            printf("END OF FILE\n");
+                                            printf("\n");
+                                            end_file = 1;
+                                            status = 3;
+                                        }
+                                        c++;
                                     }
-                                    c++;
+
+                                    // reset the rec_msg buffer in order to send response
+                                    memset(rec_msg, '\0', 8);
+
+                                    // if the checksums match, send a 0
+                                    rec_msg[0] = '0';
+                                }else{
+                                    rec_msg[0] = '1';
                                 }
-
-                                // reset the rec_msg buffer in order to send response
-                                memset(rec_msg, '\0', 8);
-
-                                // if the checksums match, send a 0
-                                rec_msg[0] = '0';
-
 
                                 // send a response to SOURCE with if the data was rec correctly
                                 status = jeff_maintenance_routine_send(testTransceiver, rec_msg, serial_port);
