@@ -490,6 +490,7 @@ int main () {
                             break;
                         }
                     }
+                    memset(rec_msg, '\0', sizeof(rec_msg));
                     discovery_attempt++;
                 }
                 memset(rec_msg, '\0', sizeof(rec_msg));
