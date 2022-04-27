@@ -663,22 +663,26 @@ int main () {
                             printf("COMMUNICATION TIMEOUT\n");
                             fseek(fp, -7, SEEK_CUR);
                             end_file = 0;
-                        } else if (rec_msg[0] == '0') {
-                            printf("JEFF GOT GOOD DATA\n");
-                            writeCounter++;
-                            if(num_packet % 20 == 0){
-                                printf("SENT %i PACKETS TO JEFF\n",num_packet);
+                        } else if (status == 1){
+                            if (rec_msg[0] == '0') {
+                                printf("JEFF GOT GOOD DATA\n");
+                                writeCounter++;
+                                if(num_packet % 20 == 0){
+                                    printf("SENT %i PACKETS TO JEFF\n",num_packet);
+                                }
+                                num_packet++;
+                                //printf("COMMUNICATION SUCCESS\n");
+                                //printf("ENTIRE MESSAGE: %s\n",rec_msg);
+                                //int read_bytes = strlen(rec_msg);
+                                //printf("READ BYTES: %i\n",read_bytes);
+                            } else if (rec_msg[0] == '1') {
+                                printf("JEFF GOT BAD DATA\n");
+                                fseek(fp, -7, SEEK_CUR);
+                                status = 2;
+                                end_file = 0;
+                            }else {
+                                printf("SOURCE DID NOT GET A 0 OR A 1\n");
                             }
-                            num_packet++;
-                            //printf("COMMUNICATION SUCCESS\n");
-                            //printf("ENTIRE MESSAGE: %s\n",rec_msg);
-                            //int read_bytes = strlen(rec_msg);
-                            //printf("READ BYTES: %i\n",read_bytes);
-                        } else if (rec_msg[0] == '1') {
-                            printf("JEFF GOT BAD DATA\n");
-                            fseek(fp, -7, SEEK_CUR);
-                            status = 2;
-                            end_file = 0;
                         }else {
                             printf("SOURCE DID NOT GET A 0 OR A 1\n");
                             //printf("STATUS %i\n",status);
