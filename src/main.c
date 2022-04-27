@@ -660,14 +660,14 @@ int main () {
                         status = source_maintenance_routine_read(transceiver, serial_port);
                         readCounter = 0;
                         if (status == 0) {
-                            printf("COMMUNICATION TIMEOUT\n");
+                            //printf("COMMUNICATION TIMEOUT\n");
                             fseek(fp, -7, SEEK_CUR);
                             end_file = 0;
                         } else if (status == 1){
                             if (rec_msg[0] == '0') {
-                                printf("JEFF GOT GOOD DATA\n");
+                                //printf("JEFF GOT GOOD DATA\n");
                                 writeCounter++;
-                                if(num_packet % 20 == 0){
+                                if(num_packet % 2 == 0){
                                     printf("SENT %i PACKETS TO JEFF\n",num_packet);
                                 }
                                 num_packet++;
@@ -676,13 +676,15 @@ int main () {
                                 //int read_bytes = strlen(rec_msg);
                                 //printf("READ BYTES: %i\n",read_bytes);
                             } else if (rec_msg[0] == '1') {
-                                printf("JEFF GOT BAD DATA\n");
+                                //printf("JEFF GOT BAD DATA\n");
                                 fseek(fp, -7, SEEK_CUR);
                                 status = 2;
                                 end_file = 0;
                             }else {
                                 printf("SOURCE DID NOT GET A 0 OR A 1\n");
                                 fseek(fp, -7, SEEK_CUR);
+                                status = 2;
+                                end_file = 0;
                             }
                         }else {
                             //printf("SOURCE DID NOT GET A 0 OR A 1\n");
@@ -795,9 +797,8 @@ int main () {
                             readCounter = 0;
 
                             if (status == 0) {
-                                printf("COMMUNICATION TIMEOUT\n");
+                                printf("RECOVERY COMMUNICATION TIMEOUT\n");
                                 NewEvent = Timeout_Event;
-
                             } else if (rec_msg[0] == '0') {
                                 printf("RECOVERY COMMUNICATION SUCCESS\n");
                                 transceiver = testTransceiver;
@@ -805,14 +806,14 @@ int main () {
                                 NewEvent = Code_Finished_Event;
                                 printf("\n");
                             } else if (rec_msg[0] == '1') {
-                                printf("RECOVERY COMMUNICATION SUCCESS\n");
+                                printf("RECOVERY COMMUNICATION BAD DATA\n");
                                 transceiver = testTransceiver;
+                                fseek(fp, -7, SEEK_CUR);
                                 break;
                                 NewEvent = Code_Finished_Event;
                                 printf("\n");
                             }else{
-                                //printf("ENTIRE MESSAGE: %s\n",rec_msg);
-                                //printf("STATUS %i\n",status);
+
                             }
                             memset(rec_msg, 0, 8);
                         }
