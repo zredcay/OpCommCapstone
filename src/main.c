@@ -220,10 +220,11 @@ int main () {
     flag = 0;
 
     if(flag == 0){
-        printf("DESIGNATION: SOURCE\n");
+        printf("/////////////////////// DESIGNATION: SOURCE /////////////////////////////\n");
     }else{
-        printf("DESIGNATION: JEFF\n");
+        printf("/////////////////////// DESIGNATION: JEFF ///////////////////////////////\n");
     }
+    printf("\n");
 
     char prev_msg[7] = "0000000";
     char disc_msg[] = "DISCOVER";
@@ -390,7 +391,7 @@ int main () {
                 }
 		*/
 
-                printf("///////////////////////  INITIALIZATION: COMPLETE ////////////////////////\n");
+                printf("/////////////////////// INITIALIZATION: COMPLETE ////////////////////////\n");
                 printf("\n");
                 num_packet = 0;
 
@@ -470,7 +471,6 @@ int main () {
                         readCounter = 0;
                         if (discovery_status == 1){
                             printf("DISCOVEY MESSAGE REC\n");
-
                             break;
                         }
 
@@ -484,6 +484,7 @@ int main () {
                         //printf("REC: %s\n",rec_msg);
                         if(discovery_status == 1){
                             printf("DISCOVEY MESSAGE REC\n");
+                            memset(rec_msg, '\0', 8);
                             rec_msg[0] = '1';
                             discovery_status = jeff_maintenance_routine_send(transceiver, rec_msg, serial_port);
                             break;
@@ -491,6 +492,7 @@ int main () {
                     }
                     discovery_attempt++;
                 }
+                memset(rec_msg, '\0', 8);
                 discovery_attempt = 0;
                 printf("/////////////////////// DISCOVERY: COMPLETE /////////////////////////////\n");
                 printf("\n");
