@@ -226,6 +226,7 @@ int main () {
     }
 
     char prev_msg[7] = "0000000";
+    char disc_msg[] = "DISCOVER";
     float angle = 100;
     float dist = .3;
     int transceiver = 0;
@@ -445,7 +446,6 @@ int main () {
 
                 int discovery_attempt = 0;
                 int discovery_status;
-                char disc_msg[] = "DISCOVER";
                 int result;
 
                 // attempt to discovery on chosen LIDAR transceiver 5 times before rerunning discovery
@@ -563,7 +563,7 @@ int main () {
                                 int result;
 
                                 if ((result = strcmp(rec_msg, prev_msg)) != 0){
-                                    if ((result = strcmp(rec_msg,"DISCOVER")) != 0){
+                                    if ((result = strcmp(rec_msg,disc_msg)) != 0){
                                         for (int k = 0; k <= 6; k++){
                                             prev_msg[k] = rec_msg[k];
                                         }
@@ -588,15 +588,15 @@ int main () {
 
                                 // if the checksums match, send a 0
                                 rec_msg[0] = '0';
-                                printf("GOOD DATA\n");
+                                //printf("GOOD DATA\n");
 
-                                if(num_packet % 20 == 0){
+                                if(num_packet % 2 == 0){
                                     printf("RECEIVED %i PACKETS FROM SOURCE AND HAVE WRITTEN THEM TO THE FILE\n");
                                 }
                                 num_packet++;
                             } else {
                                 // else send a 1
-                                printf("BAD DATA\n");
+                                //printf("BAD DATA\n");
                                 memset(rec_msg, '\0', 8);
                                 rec_msg[0] = '1';
                                 status = 2;
@@ -807,17 +807,11 @@ int main () {
                                 printf("RECOVERY COMMUNICATION SUCCESS\n");
                                 transceiver = testTransceiver;
                                 break;
-                                NewEvent = Code_Finished_Event;
-                                printf("\n");
                             } else if (rec_msg[0] == '1') {
                                 printf("RECOVERY COMMUNICATION BAD DATA\n");
                                 transceiver = testTransceiver;
                                 fseek(fp, -7, SEEK_CUR);
                                 break;
-                                NewEvent = Code_Finished_Event;
-                                printf("\n");
-                            }else{
-
                             }
                             memset(rec_msg, '\0', 8);
                         }
@@ -834,10 +828,7 @@ int main () {
                                 NewEvent =Timeout_Event;
                             } else if (status == 1) {
                                 printf("RECOVERY COMMUNICATION SUCCESS\n");
-
                                 //printf("MESSAGE: %s\n", rec_msg);
-
-
                                 // if checksum value rec == checksum value calculated
 
                                 int result;
@@ -845,7 +836,7 @@ int main () {
                                 rec_msg[7] = '\0';
 
                                 if ((result = strcmp(rec_msg, prev_msg)) != 0){
-                                    if ((result = strcmp(rec_msg,"DISCOVER")) != 0){
+                                    if ((result = strcmp(rec_msg,disc_msg)) != 0){
                                         for (int k = 0; k <= 6; k++){
                                             prev_msg[k] = rec_msg[k];
                                         }
@@ -879,7 +870,7 @@ int main () {
                                     NewEvent = Should_Not_Get_Here_Event;
                                     //printf("ERROR SENDING\n");
                                 } else if (status == 1) {
-                                    //printf("RECOVERY SEND SUCCESSFUL\n");
+                                    printf("RECOVERY SEND SUCCESSFUL\n");
                                     NewEvent = Code_Finished_Event;
                                     printf("\n");
                                     break;
