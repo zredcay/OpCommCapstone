@@ -848,7 +848,7 @@ int main () {
                                 NewEvent = Timeout_Event;
                             } else if (status == 1) {
                                 printf("RECOVERY COMMUNICATION SUCCESS\n");
-                                printf("MSG REC: %s\n",rec_msg);
+                                //printf("MSG REC: %s\n",rec_msg);
                                 //printf("MESSAGE: %s\n", rec_msg);
                                 // if checksum value rec == checksum value calculated
                                 int checksum = 0;
