@@ -451,7 +451,7 @@ int main () {
                 // attempt to discovery on chosen LIDAR transceiver 5 times before rerunning discovery
                 // this should increase our chances of discovery hitting and not having to reconnect to the LIDAR which is a big time hit
                 // trying to send/recieve 5 times is still less time than having to connect to the LIDAR again
-                while (discovery_attempt <= 4){
+                while (discovery_attempt <= 10){
                     // Source Discovery
                     if (flag == 0){
                         // send discovery message
@@ -563,10 +563,12 @@ int main () {
                                 int result;
 
                                 if ((result = strcmp(rec_msg, prev_msg)) != 0){
-                                    for (int k = 0; k <= 6; k++){
-                                        prev_msg[k] = rec_msg[k];
+                                    if ((result = strcmp(rec_msg,"DISCOVER")) != 0){
+                                        for (int k = 0; k <= 6; k++){
+                                            prev_msg[k] = rec_msg[k];
+                                        }
+                                        fputs(rec_msg, fp);
                                     }
-                                    fputs(rec_msg, fp);
                                 }
 
                                 // check to see if the end of the file has been reached
@@ -595,6 +597,7 @@ int main () {
                             } else {
                                 // else send a 1
                                 printf("BAD DATA\n");
+                                memset(rec_msg, '\0', 8);
                                 rec_msg[0] = '1';
                                 status = 2;
                             }
@@ -800,6 +803,7 @@ int main () {
                                 printf("RECOVERY COMMUNICATION TIMEOUT\n");
                                 NewEvent = Timeout_Event;
                             } else if (rec_msg[0] == '0') {
+                                writeCounter++;
                                 printf("RECOVERY COMMUNICATION SUCCESS\n");
                                 transceiver = testTransceiver;
                                 break;
@@ -815,7 +819,7 @@ int main () {
                             }else{
 
                             }
-                            memset(rec_msg, 0, 8);
+                            memset(rec_msg, '\0', 8);
                         }
                         //Jeff
                         if (flag == 1) {
@@ -841,11 +845,12 @@ int main () {
                                 rec_msg[7] = '\0';
 
                                 if ((result = strcmp(rec_msg, prev_msg)) != 0){
-                                    writeCounter++;
-                                    for (int k = 0; k <= 6; k++){
-                                        prev_msg[k] = rec_msg[k];
+                                    if ((result = strcmp(rec_msg,"DISCOVER")) != 0){
+                                        for (int k = 0; k <= 6; k++){
+                                            prev_msg[k] = rec_msg[k];
+                                        }
+                                        fputs(rec_msg, fp);
                                     }
-                                    fputs(rec_msg, fp);
                                 }
 
                                 // check to see if the end of the file has been reached
@@ -883,7 +888,7 @@ int main () {
                                     printf("STATUS IS NOT GOOD\n");
                                 }
                                 // reset rec_msg buffer for reading
-                                memset(rec_msg, 0, 8);
+                                memset(rec_msg, '\0', 8);
                             }
                         }
                         recoveryCount++;
