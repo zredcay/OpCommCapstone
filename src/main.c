@@ -231,6 +231,7 @@ int main () {
     int transceiver = 0;
     //float Vx = 0;
     //float Vy = 0;
+    char msg[8];        // buffer for sending data
 
     //int transceiverLeft;
     //int transceiverRight;
@@ -243,7 +244,6 @@ int main () {
     maintananceData.Vx = 0;
     maintananceData.Vy = 0;
 
-    char msg[8];        // buffer for sending data
 
     int end_file = 0;   // status used to check if the end of file marker has been reached
 
@@ -527,7 +527,7 @@ int main () {
             case Maintenance: {
                 int status;
                 //transceiver = 3;      // used for testing, hardcode transceiver number you want to use
-                //printf("MAINTENANCE: BEGIN\n");
+                //printf("RUNNING MAINTENANCE\n");
                 //Jeff
                 if (flag == 1) {
                     int checksum = 0;   // checksum variable
@@ -612,9 +612,6 @@ int main () {
                 }
                 //Source
                 if (flag == 0) {
-
-
-
                     // counters used for sending packets
                     int i = 0;
                     int j = 0;
@@ -696,20 +693,19 @@ int main () {
 
                 if(flag == 0)
                 {
-                    //Source 0-8
-                    //This is to run a calculation using IMU and LIDAR data to find the right transicer after the car has moved
+                //Source 0-8
+                //This is to run a calculation using IMU and LIDAR data to find the right transicer after the car has moved
                     maintananceData = trans_select(imuData.data[0], imuData.data[1], imuData.data[2], imuData.data[6], imuData.data[7], imuData.data[8], 0.01, maintananceData);
                 }
                 else if (flag == 1)
-                    //jeff 9 - 18
+                //jeff 9 - 18
                 {
-                    //This is to run a calculation using IMU and LIDAR data to find the right transicer after the car has moved
+               //This is to run a calculation using IMU and LIDAR data to find the right transicer after the car has moved
                      maintananceData = trans_select(imuData.data[9], imuData.data[10], imuData.data[11], imuData.data[15], imuData.data[16], imuData.data[17], 0.01, maintananceData);
                 }
                 //Setting the calculated transiver to the transiver being used for maintenance
                 //transceiver = maintananceData.trans;
                 //printf("SELECTING TRANSCEIVER: %i\n",transceiver);
-                //printf("MAINTENANCE: COMPLETE\n");
 
                 if (Code_Finished_Event == Code_Finished_Event) {
 
@@ -762,8 +758,8 @@ int main () {
 
 
                 case Recovery: {
-                printf("RECOVERY: BEGIN\n");
-                    char recovery_msg[8] = "recovery";       // buffer for sending data
+                    printf("RECOVERY: BEGIN\n");
+                    //char recovery_msg[8] = "recovery";       // buffer for sending data
                     int status;
                     int testTransceiver = transceiver;
                     int recoveryCount = 0; //makes the while loop run three time for each transiver
@@ -777,7 +773,7 @@ int main () {
                             //printf("SOURCE HAS LOST CONNECTION, ENTERING RECOVERY\n");
 
                             // send msg to JEFF
-                            status = source_maintenance_routine_send(testTransceiver, recovery_msg, serial_port);
+                            status = source_maintenance_routine_send(testTransceiver, msg, serial_port);
 
                             // check if msg was sent correctly
                             if (status == 4) {
@@ -791,16 +787,22 @@ int main () {
                             readCounter = 0;
 
                             if (status == 0) {
-                                //printf("COMMUNICATION TIMEOUT\n");
+                                printf("COMMUNICATION TIMEOUT\n");
                                 NewEvent = Timeout_Event;
 
-                            } else if (status) {
+                            } else if (rec_msg[0] == '0') {
+                                printf("RECOVERY COMMUNICATION SUCCESS\n");
                                 transceiver = testTransceiver;
                                 break;
-                                //printf("COMMUNICATION SUCCESS\n");
+                                NewEvent = Code_Finished_Event;
+                                printf("\n");
+                            } else if (rec_msg[0] == '1') {
+                                //printf("Error: Bad Data\n");
+                                status = 2;
+                                NewEvent = Bad_Data_Event;
+                            }else{
                                 //printf("ENTIRE MESSAGE: %s\n",rec_msg);
-                                //int read_bytes = strlen(rec_msg);
-                                //printf("READ BYTES: %i\n",read_bytes);
+                                //printf("STATUS %i\n",status);
                             }
                             memset(rec_msg, 0, 8);
                         }
@@ -813,53 +815,58 @@ int main () {
                             readCounter = 0;
 
                             if (status == 0) {
-                                //printf("RECOVERY COMMUNICATION TIMEOUT\n");
+                                printf("RECOVERY COMMUNICATION TIMEOUT\n");
                                 NewEvent =Timeout_Event;
                             } else if (status == 1) {
-                                //printf("RECOVERY COMMUNICATION SUCCESS\n");
+                                printf("RECOVERY COMMUNICATION SUCCESS\n");
 
                                 //printf("MESSAGE: %s\n", rec_msg);
 
-                                // checksum calculation
+
+                                // if checksum value rec == checksum value calculated
 
                                 int result;
 
-                                if ((result = strcmp(rec_msg, recovery_msg)) == 0){
-                                    printf("\n#######RECOVERY MESSAGE REC#######\n");
-
-                                    // check to see if the end of the file has been reached
-                                    int c = 0;
-                                    while (c <= 6) {
-                                        if (rec_msg[c] == '^') {
-                                            printf("END OF FILE\n");
-                                            printf("\n");
-                                            end_file = 1;
-                                            status = 3;
-                                        }
-                                        c++;
+                                if ((result = strcmp(rec_msg, prev_msg)) != 0){
+                                    for (int k = 0; k <= 6; k++){
+                                        prev_msg[k] = rec_msg[k];
                                     }
+                                    fputs(rec_msg, fp);
+                                }
 
-                                    // reset the rec_msg buffer in order to send response
-                                    memset(rec_msg, '\0', 8);
-
-                                    // if the checksums match, send a 0
-
-                                    // send a response to SOURCE with if the data was rec correctly
-                                    status = jeff_maintenance_routine_send(testTransceiver, rec_msg, serial_port);
-
-
-                                    if (status == 0) {
-                                        NewEvent = Should_Not_Get_Here_Event;
-                                        //printf("ERROR SENDING\n");
-                                    } else if (status == 1) {
-                                         //printf("RECOVERY SEND SUCCESSFUL\n");
-                                         transceiver = testTransceiver;
-                                         NewEvent = Code_Finished_Event;
-                                         break;
+                                // check to see if the end of the file has been reached
+                                int c = 0;
+                                while (c <= 6) {
+                                    if (rec_msg[c] == '^') {
+                                        printf("END OF FILE\n");
+                                        printf("\n");
+                                        end_file = 1;
+                                        status = 3;
                                     }
-                                    else{
-                                        //printf("STATUS IS NOT GOOD\n");
-                                    }
+                                    c++;
+                                }
+
+                                // reset the rec_msg buffer in order to send response
+                                memset(rec_msg, '\0', 8);
+
+                                // if the checksums match, send a 0
+                                rec_msg[0] = '0';
+
+
+                                // send a response to SOURCE with if the data was rec correctly
+                                status = jeff_maintenance_routine_send(testTransceiver, rec_msg, serial_port);
+
+                                if (status == 0) {
+                                    NewEvent = Should_Not_Get_Here_Event;
+                                    //printf("ERROR SENDING\n");
+                                } else if (status == 1) {
+                                     //printf("RECOVERY SEND SUCCESSFUL\n");
+                                     NewEvent = Code_Finished_Event;
+                                     printf("\n");
+                                     break;
+                                }
+                                else{
+                                    printf("STATUS IS NOT GOOD\n");
                                 }
                                 // reset rec_msg buffer for reading
                                 memset(rec_msg, 0, 8);
@@ -882,7 +889,7 @@ int main () {
                             testTransceiver = 7;
                         }
                         printf("RECOVERY: UNSUCCESSFUL, ATTEMPTING ON TRANSCEIVER %i\n",testTransceiver);
-                    }
+            }
 
                     if (Bad_Data_Event == NewEvent) {
 
