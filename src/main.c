@@ -29,7 +29,7 @@
 //#include <conio.h>
 
 
-//user exit catch 
+//user exit catch
 #include <signal.h>
 
 
@@ -236,13 +236,14 @@ int main () {
     //int transceiverRight;
 
     struct lidarData lidar; //Data ouptuted from lidar
-    
+
     struct Memory imuData; // the array of 18 from shared memory
     struct mainData maintananceData; // the calcuated data from maintenance data math
-    
+
     maintananceData.Vx = 0;
     maintananceData.Vy = 0;
-   
+
+    char msg[8];        // buffer for sending data
 
     int end_file = 0;   // status used to check if the end of file marker has been reached
 
@@ -281,11 +282,11 @@ int main () {
     exit(-1);
     */
 
-    
+
 
     State NextState = Intialization; // which state is the current state
     printf("INITIALIZATION: BEGIN\n");
-    Event NewEvent = Code_Finished_Event; // the next event being snet into the handler 
+    Event NewEvent = Code_Finished_Event; // the next event being snet into the handler
     clock_t startTime = clock(); // overall timer that after certain time will kick to end state then exit code
     while (clock() < (startTime + 20 * CLOCKS_PER_SEC)) {
         switch (NextState) {
@@ -356,7 +357,7 @@ int main () {
                 openFile(flag);
                 //***************Shared Memory Code******//
 
-                
+
                 sharMem = createMemory(); // creates shared memory
                 mutex = createNamedSem(); // creates named semaphore
 
@@ -526,7 +527,7 @@ int main () {
             case Maintenance: {
                 int status;
                 //transceiver = 3;      // used for testing, hardcode transceiver number you want to use
-                //printf("RUNNING MAINTENANCE\n");
+                printf("MAINTENANCE: BEGIN\n");
                 //Jeff
                 if (flag == 1) {
                     int checksum = 0;   // checksum variable
@@ -572,7 +573,7 @@ int main () {
                                 while (c <= 6) {
                                     if (rec_msg[c] == '^') {
                                         printf("END OF FILE RECIEVED\n");
-					printf("\n");
+                                        printf("\n");
                                         end_file = 1;
                                         status = 3;
                                     }
@@ -612,7 +613,7 @@ int main () {
                 //Source
                 if (flag == 0) {
 
-                    char msg[8];        // buffer for sending data
+
 
                     // counters used for sending packets
                     int i = 0;
@@ -624,7 +625,7 @@ int main () {
                             msg[j] = fgetc(fp);
                             if (msg[j] == '^'){
                                 printf("REACHED END OF FILE\n");
-				printf("\n");
+                                printf("\n");
                                 end_file = 1;
                             }
                             j++;
@@ -690,24 +691,25 @@ int main () {
                     }
                 }
                 //************Code for picking the transceiver//
-		
+
                 imuData = sharedMemory(flag, sharMem, mutex); //recieves the float value from imu
 
                 if(flag == 0)
-  		{
-                //Source 0-8 
-                //This is to run a calculation using IMU and LIDAR data to find the right transicer after the car has moved
+                {
+                    //Source 0-8
+                    //This is to run a calculation using IMU and LIDAR data to find the right transicer after the car has moved
                     maintananceData = trans_select(imuData.data[0], imuData.data[1], imuData.data[2], imuData.data[6], imuData.data[7], imuData.data[8], 0.01, maintananceData);
                 }
                 else if (flag == 1)
-                //jeff 9 - 18
+                    //jeff 9 - 18
                 {
-               //This is to run a calculation using IMU and LIDAR data to find the right transicer after the car has moved
+                    //This is to run a calculation using IMU and LIDAR data to find the right transicer after the car has moved
                      maintananceData = trans_select(imuData.data[9], imuData.data[10], imuData.data[11], imuData.data[15], imuData.data[16], imuData.data[17], 0.01, maintananceData);
                 }
                 //Setting the calculated transiver to the transiver being used for maintenance
                 //transceiver = maintananceData.trans;
-		//printf("SELECTING TRANSCEIVER: %i\n",transceiver);
+                //printf("SELECTING TRANSCEIVER: %i\n",transceiver);
+                printf("MAINTENANCE: COMPLETE\n");
 
                 if (Code_Finished_Event == Code_Finished_Event) {
 
@@ -760,8 +762,8 @@ int main () {
 
 
                 case Recovery: {
-		    printf("RECOVERY: BEGIN\n");
-                    char recovery_msg[8] = "recovery";       // buffer for sending data
+                printf("RECOVERY: BEGIN\n");
+                    //char recovery_msg[8] = "recovery";       // buffer for sending data
                     int status;
                     int testTransceiver = transceiver;
                     int recoveryCount = 0; //makes the while loop run three time for each transiver
@@ -775,7 +777,7 @@ int main () {
                             //printf("SOURCE HAS LOST CONNECTION, ENTERING RECOVERY\n");
 
                             // send msg to JEFF
-                            status = source_maintenance_routine_send(testTransceiver, recovery_msg, serial_port);
+                            status = source_maintenance_routine_send(testTransceiver, msg, serial_port);
 
                             // check if msg was sent correctly
                             if (status == 4) {
@@ -796,7 +798,7 @@ int main () {
                                 //printf("COMMUNICATION SUCCESS\n");
                                 transceiver = testTransceiver;
                                 NewEvent = Code_Finished_Event;
-				printf("\n");
+                                printf("\n");
                                 break;
                             } else if (rec_msg[0] == '1') {
                                 //printf("Error: Bad Data\n");
@@ -851,7 +853,7 @@ int main () {
                                     while (c <= 6) {
                                         if (rec_msg[c] == '^') {
                                             printf("END OF FILE\n");
-					    printf("\n");
+                                            printf("\n");
                                             end_file = 1;
                                             status = 3;
                                         }
@@ -878,7 +880,7 @@ int main () {
                                 } else if (status == 1) {
                                      //printf("RECOVERY SEND SUCCESSFUL\n");
                                      NewEvent = Code_Finished_Event;
-				     printf("\n");
+                                     printf("\n");
                                      break;
                                 }
                                 else{
@@ -889,21 +891,21 @@ int main () {
                             }
                         }
                         recoveryCount++;
-			//printf("RECOVERY COUNT: %i\n",recoveryCount);
-			//printf("CURRENT TRANS: %i\n",testTransceiver);
-			//testTransceiver = recovery_trans_select(recoveryCount, testTransceiver);
-			if (flag == 0){
-				testTransceiver++;
-			}
-			if (flag == 1){
-				testTransceiver--;
-			}
-			if (testTransceiver > 7){
-				testTransceiver = 0;
-			}
-			if (testTransceiver < 0){
-				testTransceiver = 7;
-			}
+                        //printf("RECOVERY COUNT: %i\n",recoveryCount);
+                        //printf("CURRENT TRANS: %i\n",testTransceiver);
+                        //testTransceiver = recovery_trans_select(recoveryCount, testTransceiver);
+                        if (flag == 0){
+                            testTransceiver++;
+                        }
+                        if (flag == 1){
+                            testTransceiver--;
+                        }
+                        if (testTransceiver > 7){
+                            testTransceiver = 0;
+                        }
+                        if (testTransceiver < 0){
+                            testTransceiver = 7;
+                        }
                         printf("RECOVERY: UNSUCCESSFUL, ATTEMPTING ON TRANSCEIVER %i\n",testTransceiver);
                     }
 
