@@ -168,8 +168,9 @@ struct mainData trans_select(float Ax, float Ay, float Az, float Mx, float My, f
 { // uses imu and discovery data to calculate the new transicever
     // Ax-Az are floats representing the acceleration vector, Mx-Mz are the floats reprenting the magentic strength of the magentometer,
     // period is a float representing the period of time, data is a mainData struct containing int trans, float angle, float dist, float Vx, float Vy
+    printf("Before: angle %f distance %f transceiver %d Velocity %f %f\n", data.angle, data.dist, data.trans, data.Vx, data.Vy);
     data.angle = convertAngle(data.angle);
-	printf(" angle %f distance %f transceiver %d Velocity %f %f\n", data.angle, data.dist, data.trans, data.Vx, data.Vy);
+	printf("After: angle %f distance %f transceiver %d Velocity %f %f\n", data.angle, data.dist, data.trans, data.Vx, data.Vy);
 
 	// initialize pi and radToDeg values for converting between radians and degrees
 	float PI  = 3.14159265;
