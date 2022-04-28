@@ -243,13 +243,14 @@ int main () {
     flag = 0;
 
     if(flag == 0){
-        printf("DESIGNATION: SOURCE\n");
+        printf("/////////////////////// DESIGNATION: SOURCE /////////////////////////////\n");
     }else{
-        printf("DESIGNATION: JEFF\n");
+        printf("/////////////////////// DESIGNATION: JEFF ///////////////////////////////\n");
     }
+    printf("\n");
 
-    char prev_msg[7] = "0000000";
-    char disc_msg[] = "DISCOVER";
+    char prev_msg[10] = "0000000";
+    char disc_msg[10] = "DISCOVER";
     float angle = 100;
     float dist = .3;
     int transceiver = 0;
@@ -309,7 +310,7 @@ int main () {
 
 
     State NextState = Intialization; // which state is the current state
-    printf("INITIALIZATION: BEGIN\n");
+    printf("/////////////////////// INITIALIZATION: BEGIN    ////////////////////////\n");
     Event NewEvent = Code_Finished_Event; // the next event being snet into the handler
     clock_t startTime = clock(); // overall timer that after certain time will kick to end state then exit code
     while (clock() < (startTime + 20 * CLOCKS_PER_SEC)) {
@@ -401,7 +402,7 @@ int main () {
                 do{
                     clock_t difference = clock() - start;
                     elapsed_time = difference*1000/CLOCKS_PER_SEC;
-                }while(elapsed_time < 5000);
+                }while(elapsed_time < 2000);
 
 		/*
                 if(flag == 1)
@@ -413,7 +414,7 @@ int main () {
                 }
 		*/
 
-                printf("INITIALIZATION: COMPLETE\n");
+                printf("/////////////////////// INITIALIZATION: COMPLETE ////////////////////////\n");
                 printf("\n");
                 num_packet = 0;
 
@@ -423,7 +424,7 @@ int main () {
                 break;
 
             case End: {
-                printf("CLEAN UP: BEGIN\n");
+                printf("/////////////////////// CLEAN UP: BEGIN /////////////////////////////////\n");
                 // Closes named semaphore and shared memory before exiting code
                 fclose(fp);
                 printf("CLOSING: FILE\n");
@@ -435,7 +436,7 @@ int main () {
                 //printf("case end state\n");
                 if (User_Exit_Event == NewEvent) // code completes safely and exits S
                 {
-                    printf("CLEAN UP: COMPLETE\n");
+                    printf("/////////////////////// CLEAN UP: COMPLETE //////////////////////////////\n");
                     exit(0);
                 } else if (Should_Not_Get_Here_Event == NewEvent) // uncaught error or bug in code
                 {
@@ -451,7 +452,7 @@ int main () {
                 break;
 
             case Discovery: {
-                printf("/////////////////// DISCOVERY: BEGIN ///////////////////\n");
+                printf("/////////////////////// DISCOVERY: BEGIN ////////////////////////////////\n");
                 //clock_t start = clock();
                 //int elapsed_time = 0;
 
@@ -493,8 +494,6 @@ int main () {
                         readCounter = 0;
                         if (discovery_status == 1){
                             printf("DISCOVEY MESSAGE REC\n");
-                            printf("///////////////// DISCOVERY: COMPLETE /////////////////\n");
-                            printf("\n");
                             break;
                         }
 
@@ -508,16 +507,19 @@ int main () {
                         //printf("REC: %s\n",rec_msg);
                         if(discovery_status == 1){
                             printf("DISCOVEY MESSAGE REC\n");
-                            printf("///////////////// DISCOVERY: COMPLETE /////////////////\n");
-                            printf("\n");
+                            memset(rec_msg, '\0', sizeof(rec_msg));
                             rec_msg[0] = '1';
                             discovery_status = jeff_maintenance_routine_send(transceiver, rec_msg, serial_port);
                             break;
                         }
                     }
+                    memset(rec_msg, '\0', sizeof(rec_msg));
                     discovery_attempt++;
                 }
+                memset(rec_msg, '\0', sizeof(rec_msg));
                 discovery_attempt = 0;
+                printf("/////////////////////// DISCOVERY: COMPLETE /////////////////////////////\n");
+                printf("\n");
 
                 if (angle == 0) // the transceiver was not found
                 {
@@ -567,6 +569,7 @@ int main () {
                 int status;
                 //transceiver = 3;      // used for testing, hardcode transceiver number you want to use
                 //printf("RUNNING MAINTENANCE\n");
+
                 //Jeff
                 if (flag == 1) {
                     int checksum = 0;   // checksum variable
@@ -585,6 +588,8 @@ int main () {
 
                             //printf("MESSAGE: %s\n", rec_msg);
 
+                            //printf("MSG REC: %s\n",rec_msg);
+
                             // checksum calculation
                             int checksum = 0;
                             for (int k = 0; k <= 6; k++) {
@@ -602,6 +607,8 @@ int main () {
 
                                 if ((result = strcmp(rec_msg, prev_msg)) != 0){
                                     if ((result = strcmp(rec_msg,disc_msg)) != 0){
+                                        //printf("PREV MSG REC: %s\n",prev_msg);
+                                        //printf("DIFFERENT MSG REC: %s\n",rec_msg);
                                         for (int k = 0; k <= 6; k++){
                                             prev_msg[k] = rec_msg[k];
                                         }
@@ -613,16 +620,13 @@ int main () {
                                 int c = 0;
                                 while (c <= 6) {
                                     if (rec_msg[c] == '^') {
-                                        printf("///////////////// END OF FILE RECIEVED /////////////////\n");
-                                        printf("\n");
                                         end_file = 1;
                                         status = 3;
                                     }
                                     c++;
                                 }
-
                                 // reset the rec_msg buffer in order to send response
-                                memset(rec_msg, '\0', 8);
+                                memset(rec_msg, '\0', sizeof(rec_msg));
 
                                 // if the checksums match, send a 0
                                 rec_msg[0] = '0';
@@ -630,12 +634,12 @@ int main () {
 
                                 num_packet++;
                                 if(num_packet % 2 == 0){
-                                    printf("RECEIVED %i PACKETS FROM SOURCE AND HAVE WRITTEN THEM TO THE FILE\n",num_packet);
+                                    printf("RECEIVED PACKETS FROM SOURCE AND HAVE WRITTEN THEM TO THE FILE\n");
                                 }
                             } else {
                                 // else send a 1
                                 //printf("BAD DATA\n");
-                                memset(rec_msg, '\0', 8);
+                                memset(rec_msg, '\0', sizeof(rec_msg));
                                 rec_msg[0] = '1';
                                 status = 2;
                             }
@@ -649,7 +653,7 @@ int main () {
                             }
 
                             // reset rec_msg buffer for reading
-                            memset(rec_msg, 0, 8);
+                            memset(rec_msg, '\0', sizeof(rec_msg));
 
                         }
                     }
@@ -665,8 +669,6 @@ int main () {
                         for (i = (writeCounter * 7); i <= ((writeCounter * 7) + 6); i++) {
                             msg[j] = fgetc(fp);
                             if (msg[j] == '^'){
-                                printf("///////////////// REACHED END OF FILE /////////////////\n");
-                                printf("\n");
                                 end_file = 1;
                             }
                             j++;
@@ -732,6 +734,7 @@ int main () {
                             //fseek(fp, -7, SEEK_CUR);
                             end_file = 0;
                         }
+                        memset(rec_msg, '\0', sizeof(rec_msg));
                         //printf("Write Counter: %i\n",writeCounter);
                         //printf("FILE POINTER %i\n",ftell(fp));
                         //printf("WRITE COUNTER: %i\n",writeCounter++);
@@ -762,8 +765,10 @@ int main () {
                     //printf("status = %i\n", status);
                     if( end_file == 1)
                     {
-                    NewEvent = User_Exit_Event;
-                    NextState = UserExitHandler(NextState);
+                        printf("/////////////////////// END OF FILE RECIEVED ////////////////////////////\n");
+                        printf("\n");
+                        NewEvent = User_Exit_Event;
+                        NextState = UserExitHandler(NextState);
                     }
                     else if (status == 0) // status is timeout got to recovery
                     {
@@ -808,7 +813,7 @@ int main () {
 
 
                 case Recovery: {
-                    printf("/////////////////// RECOVERY: BEGIN ///////////////////\n");
+                    printf("/////////////////////// RECOVERY: BEGIN /////////////////////////////////\n");
                     //char recovery_msg[8] = "recovery";       // buffer for sending data
                     int status;
                     int testTransceiver = transceiver;
@@ -851,7 +856,7 @@ int main () {
                                 fseek(fp, -7, SEEK_CUR);
                                 break;
                             }
-                            memset(rec_msg, '\0', 8);
+                            memset(rec_msg, '\0', sizeof(rec_msg));
                         }
                         //Jeff
                         if (flag == 1) {
@@ -863,9 +868,10 @@ int main () {
 
                             if (status == 0) {
                                 //printf("RECOVERY COMMUNICATION TIMEOUT\n");
-                                NewEvent =Timeout_Event;
+                                NewEvent = Timeout_Event;
                             } else if (status == 1) {
                                 printf("RECOVERY COMMUNICATION SUCCESS\n");
+                                //printf("MSG REC: %s\n",rec_msg);
                                 //printf("MESSAGE: %s\n", rec_msg);
                                 // if checksum value rec == checksum value calculated
                                 int checksum = 0;
@@ -884,6 +890,7 @@ int main () {
 
                                     if ((result = strcmp(rec_msg, prev_msg)) != 0){
                                         if ((result = strcmp(rec_msg,disc_msg)) != 0){
+                                            //printf("DIFFERENT MSG REC: %s\n",rec_msg);
                                             for (int k = 0; k <= 6; k++){
                                                 prev_msg[k] = rec_msg[k];
                                             }
@@ -895,8 +902,6 @@ int main () {
                                     int c = 0;
                                     while (c <= 6) {
                                         if (rec_msg[c] == '^') {
-                                            printf("END OF FILE\n");
-                                            printf("\n");
                                             end_file = 1;
                                             status = 3;
                                         }
@@ -904,13 +909,13 @@ int main () {
                                     }
 
                                     // reset the rec_msg buffer in order to send response
-                                    memset(rec_msg, '\0', 8);
+                                    memset(rec_msg, '\0', sizeof(rec_msg));
 
                                     // if the checksums match, send a 0
                                     rec_msg[0] = '0';
                                     num_packet++;
                                 }else{
-                                    memset(rec_msg, '\0', 8);
+                                    memset(rec_msg, '\0', sizeof(rec_msg));
                                     rec_msg[0] = '1';
                                 }
 
@@ -929,7 +934,7 @@ int main () {
                                     //printf("STATUS IS NOT GOOD\n");
                                 }
                                 // reset rec_msg buffer for reading
-                                memset(rec_msg, '\0', 8);
+                                memset(rec_msg, '\0', sizeof(rec_msg));
                             }
                         }
                         recoveryCount++;
@@ -949,7 +954,8 @@ int main () {
                             testTransceiver = 7;
                         }
                         printf("RECOVERY: UNSUCCESSFUL, ATTEMPTING ON TRANSCEIVER %i\n",testTransceiver);
-                }
+                    }
+                    printf("/////////////////////// RECOVERY: COMPLETE //////////////////////////////\n");
                     printf("\n");
                     if (Bad_Data_Event == NewEvent) {
 
