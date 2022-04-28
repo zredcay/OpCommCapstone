@@ -315,7 +315,7 @@ int main () {
 
     char prev_msg[10] = "0000000";
     char disc_msg[10] = "DISCOVER";
-    float angle = 100;
+    float angle;
     float dist = .3;
     int transceiver = 0;
 
