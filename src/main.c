@@ -77,21 +77,25 @@ float convertAngle(float angle)
 	else if (angle >= 67.5 && angle < 112.5)
 	{
 		newangle = 1 - ((angle / 45.0) - 1.5);
-        newangle = (newangle + 1.5) * 45;
+        newangle = ((newangle + 1.5) * 45) - 90;
+        if (newangle < 0)
+        {
+            newangle += 360;
+        }
 
 	}
 	// if the angle is between 337.5 and 292.5
 	else if (angle >= 112.5 && angle < 157.5)
 	{
 		newangle = 1 - ((angle / 45.0) - 2.5);
-        newangle = (newangle + 2.5) * 45;
+        newangle = ((newangle + 2.5) * 45) + 180;
 
 	}
 	// if the angle is between 292.5 and 247.5
 	else if (angle >= 157.5 && angle < 202.5)
 	{
 		newangle = 1 - ((angle / 45.0) - 3.5);
-		newangle = (newangle + 3.5) * 45;
+		newangle = ((newangle + 3.5) * 45) + 90;
 	}
 	// if the angle is between 247.5 and 202.5
 	else if (angle >= 202.5 && angle < 247.5)
@@ -103,13 +107,13 @@ float convertAngle(float angle)
 	else if (angle >= 247.5 && angle < 292.5)
 	{
 		newangle = 1 - ((angle / 45.0) - 5.5);
-		newangle = (newangle + 5.5) * 45;
+		newangle = ((newangle + 5.5) * 45) - 90;
 	}
 	// if the angle is between 157.5 and 112.5
 	else if (angle >= 292.5 && angle < 337.5)
 	{
 		newangle = 1 - ((angle / 45.0) - 6.5);
-		newangle = (newangle + 6.5) * 45;
+		newangle = ((newangle + 6.5) * 45) - 180;
 	}
 
 	return newangle;
