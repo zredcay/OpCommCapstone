@@ -51,78 +51,101 @@ void sigfun(int sig)
 	exit(-1);
 }
 
-int convertTransceiver(int trans)
+int convertTransceiver(float angle)
 {
-	// coverts transeover from maintennce math function output to actual transiver on the car
+	// converts transeiver from the unit circle to the transceiver setup on the robot
 	int newtrans;
 
-	if( trans == 0)
-	{
-		newtrans = 1;
-	}
-	else if (trans == 1)
+    // if the angle is between 112.5 and 67.5
+	if(angle <= 112.5 && angle > 67.5)
 	{
 		newtrans = 0;
 	}
-	else if (trans == 2)
+	// if the angle is between 67.5 and 22.5
+	else if (angle <= 67.5 && angle > 22.5)
 	{
-		newtrans = 7;
+		newtrans = 1;
 	}
-	else if (trans == 3)
+	// if the angle is between 22.5 and 337.5
+	else if (angle <= 22.5 && angle > 337.5)
 	{
-		newtrans = 6;
+		newtrans = 2;
 	}
-	else if (trans == 4)
-	{
-		newtrans = 5;
-	}
-	else if (trans == 5)
-	{
-		newtrans = 4;
-	}
-	else if (trans == 6)
+	// if the angle is between 337.5 and 292.5
+	else if (angle <= 337.5 && angle > 292.5)
 	{
 		newtrans = 3;
 	}
-	else if (trans == 7)
+	// if the angle is between 292.5 and 247.5
+	else if (angle <= 292.5 && angle > 247.5)
 	{
-		newtrans = 2;
+		newtrans = 4;
+	}
+	// if the angle is between 247.5 and 202.5
+	else if (angle <= 247.5 && angle > 202.5)
+	{
+		newtrans = 5;
+	}
+	// if the angle is between 202.5 and 157.5
+	else if (angle <= 202.5 && angle > 157.5)
+	{
+		newtrans = 6;
+	}
+	// if the angle is between 157.5 and 112.5
+	else if (angle <= 157.5 && angle > 112.5)
+	{
+		newtrans = 7;
 	}
 
 	return newtrans;
 }
 
-struct mainData trans_select(float Ax, float Ay, float Az, float Mx, float My, float Mz, float timer, struct mainData ex)
+struct mainData trans_select(float Ax, float Ay, float Az, float Mx, float My, float Mz, float period, struct mainData data)
 { // uses imu and discovery data to calculate the new transicever
+    // Ax-Az are floats representing the acceleration vector, Mx-Mz are the floats reprenting the magentic strength of the magentometer,
+    // period is a float representing the period of time, data is a mainData struct containing int trans, float angle, float dist, float Vx, float Vy
 
-	struct mainData data = ex;
 	//printf(" angle %f distance %f transceiver %d Velocity %f %f\n", data.angle, data.dist, data.trans, data.Vx, data.Vy);
-	float PI  = 3.14159265;
-	 float val = PI / 180.0;
 
-	float Vfx = 0; //data.Vx + (Ax * timer);
-	float Vfy = 0; //data.Vy + (Ay * timer);
-	float Xo = data.dist*cos(data.angle*val);
-	float Yo = data.dist*sin(data.angle*val);
-	float Xf = Xo + .5*(Vfx + data.Vx)*timer;
-	float Yf = Yo + .5*(Vfy + data.Vy)*timer;
+	// initialize pi and radToDeg values for converting between radians and degrees
+	float PI  = 3.14159265;
+    float radToDeg = PI / 180.0;
+
+    // calculate final velocity in the x and y direction
+	float Vfx = data.Vx + (Ax * period);
+	float Vfy = data.Vy + (Ay * period);
+
+	// calculate current position
+	float Xo = data.dist * cos(data.angle * radToDeg);
+	float Yo = data.dist * sin(data.angle * radToDeg);
+
+	// calculate future position
+	float Xf = Xo + .5 * (Vfx + data.Vx) * period;
+	float Yf = Yo + .5 * (Vfy + data.Vy) * period;
 
 	//printf("Vfx %f Vfy %f Xo %f Yo %f Xf %f Yf %f \n", Vfx, Vfy, Xo, Yo, Xf, Yf);
 
+    // calculate the new positions angle and convert to degrees
+	data.angle = (atan(Yf/Xf))/radToDeg;
 
-	data.angle = (atan(Yf/Xf))/val;
+	// if x is negative add 180
 	if(Xf < 0 )
 	{
 		data.angle = data.angle + 180;
 	}
+	// if y is negative and x is postive add 360
 	if(Yf < 0 && Xf > 0)
 	{
 		data.angle = data.angle + 360;
 	}
+
+	// revert postion to a distance vector to be stored in the struct
 	data.dist = sqrt((Xf * Xf) + (Yf * Yf));
 
-	data.trans = convertTransceiver(data.angle/45);
+    // assign transceiver  based on angle
+	data.trans = convertTransceiver(data.angle);
 
+    // store final velocity as velocity in struct
 	data.Vx = Vfx;
 	data.Vy = Vfy;
 

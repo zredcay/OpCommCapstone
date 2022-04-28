@@ -11,7 +11,7 @@ typedef struct mainData{
 	float angle;
 	float dist;
 	float Vx;
-	float Vy
+	float Vy;
 };
 
 typedef enum
