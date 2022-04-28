@@ -57,7 +57,7 @@ float convertAngle(float angle)
 	float newangle;
 
     // if the angle is between 112.5 and 67.5
-	if(angle >= 337.5 && angle < 22.5)
+	if(angle >= 337.5 || angle < 22.5)
 	{
         if(angle < 22.5 && angle >= 0)
         {
@@ -176,7 +176,7 @@ struct mainData trans_select(float Ax, float Ay, float Az, float Mx, float My, f
 	float PI  = 3.14159265;
     float radToDeg = PI / 180.0;
 
-    // calculate final velocity in the x and y direction
+    // calculate final velocity in the x and y directiconvertTransceiver(data.angle);on
 	float Vfx = data.Vx + (Ax * period);
 	float Vfy = data.Vy + (Ay * period);
 
