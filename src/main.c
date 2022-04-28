@@ -51,6 +51,70 @@ void sigfun(int sig)
 	exit(-1);
 }
 
+float convertAngle(float angle)
+{
+// converts transeiver from the unit circle to the transceiver setup on the robot
+	float newangle;
+
+    // if the angle is between 112.5 and 67.5
+	if(angle >= 337.5 && angle < 22.5)
+	{
+        if(angle < 22.5 && angle >= 0)
+        {
+            angle += 360;
+        }
+
+		newangle = 1 - ((angle / 45.0) - 7.5);
+		newangle = ((newangle + 7.5) * 45) - 270;
+	}
+	// if the angle is between 67.5 and 22.5
+	else if (angle >= 22.5 && angle < 67.5)
+	{
+		newangle = 1 - ((angle / 45.0) - 0.5);
+		newangle = (newangle + 0.5) * 45;
+	}
+	// if the angle is between 22.5 and 337.5
+	else if (angle >= 67.5 && angle < 112.5)
+	{
+		newangle = 1 - ((angle / 45.0) - 1.5);
+        newangle = (newangle + 1.5) * 45;
+
+	}
+	// if the angle is between 337.5 and 292.5
+	else if (angle >= 112.5 && angle < 157.5)
+	{
+		newangle = 1 - ((angle / 45.0) - 2.5);
+        newangle = (newangle + 2.5) * 45;
+
+	}
+	// if the angle is between 292.5 and 247.5
+	else if (angle >= 157.5 && angle < 202.5)
+	{
+		newangle = 1 - ((angle / 45.0) - 3.5);
+		newangle = (newangle + 3.5) * 45;
+	}
+	// if the angle is between 247.5 and 202.5
+	else if (angle >= 202.5 && angle < 247.5)
+	{
+		newangle = 1 - ((angle / 45.0) - 4.5);
+		newangle = (newangle + 4.5) * 45;
+	}
+	// if the angle is between 202.5 and 157.5
+	else if (angle >= 247.5 && angle < 292.5)
+	{
+		newangle = 1 - ((angle / 45.0) - 5.5);
+		newangle = (newangle + 5.5) * 45;
+	}
+	// if the angle is between 157.5 and 112.5
+	else if (angle >= 292.5 && angle < 337.5)
+	{
+		newangle = 1 - ((angle / 45.0) - 6.5);
+		newangle = (newangle + 6.5) * 45;
+	}
+
+	return newangle;
+}
+
 int convertTransceiver(float angle)
 {
 	// converts transeiver from the unit circle to the transceiver setup on the robot
@@ -104,7 +168,7 @@ struct mainData trans_select(float Ax, float Ay, float Az, float Mx, float My, f
 { // uses imu and discovery data to calculate the new transicever
     // Ax-Az are floats representing the acceleration vector, Mx-Mz are the floats reprenting the magentic strength of the magentometer,
     // period is a float representing the period of time, data is a mainData struct containing int trans, float angle, float dist, float Vx, float Vy
-
+    data.angle = convertAngle(data.angle);
 	printf(" angle %f distance %f transceiver %d Velocity %f %f\n", data.angle, data.dist, data.trans, data.Vx, data.Vy);
 
 	// initialize pi and radToDeg values for converting between radians and degrees
@@ -254,8 +318,7 @@ int main () {
     float angle = 100;
     float dist = .3;
     int transceiver = 0;
-    //float Vx = 0;
-    //float Vy = 0;
+
     char msg[8];        // buffer for sending data
 
     //int transceiverLeft;
@@ -760,8 +823,8 @@ int main () {
                      maintananceData = trans_select(imuData.data[9], imuData.data[10], imuData.data[11], imuData.data[15], imuData.data[16], imuData.data[17], 0.01, maintananceData);
                 }
                 //Setting the calculated transiver to the transiver being used for maintenance
-                //transceiver = maintananceData.trans;
-                //printf("SELECTING TRANSCEIVER: %i\n",transceiver);
+                transceiver = maintananceData.trans;
+                printf("SELECTING TRANSCEIVER: %i\n",transceiver);
 
                 if (Code_Finished_Event == Code_Finished_Event) {
 
