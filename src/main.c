@@ -105,7 +105,7 @@ struct mainData trans_select(float Ax, float Ay, float Az, float Mx, float My, f
     // Ax-Az are floats representing the acceleration vector, Mx-Mz are the floats reprenting the magentic strength of the magentometer,
     // period is a float representing the period of time, data is a mainData struct containing int trans, float angle, float dist, float Vx, float Vy
 
-	//printf(" angle %f distance %f transceiver %d Velocity %f %f\n", data.angle, data.dist, data.trans, data.Vx, data.Vy);
+	printf(" angle %f distance %f transceiver %d Velocity %f %f\n", data.angle, data.dist, data.trans, data.Vx, data.Vy);
 
 	// initialize pi and radToDeg values for converting between radians and degrees
 	float PI  = 3.14159265;
@@ -123,7 +123,7 @@ struct mainData trans_select(float Ax, float Ay, float Az, float Mx, float My, f
 	float Xf = Xo + .5 * (Vfx + data.Vx) * period;
 	float Yf = Yo + .5 * (Vfy + data.Vy) * period;
 
-	//printf("Vfx %f Vfy %f Xo %f Yo %f Xf %f Yf %f \n", Vfx, Vfy, Xo, Yo, Xf, Yf);
+	printf("Vfx %f Vfy %f Xo %f Yo %f Xf %f Yf %f \n", Vfx, Vfy, Xo, Yo, Xf, Yf);
 
     // calculate the new positions angle and convert to degrees
 	data.angle = (atan(Yf/Xf))/radToDeg;
@@ -151,7 +151,7 @@ struct mainData trans_select(float Ax, float Ay, float Az, float Mx, float My, f
 
 
 
-	//printf(" angle %f distance %f transceiver %d Velocity %f %f\n",  data.angle, data.dist, data.trans, data.Vx, data.Vy);
+	printf(" angle %f distance %f transceiver %d Velocity %f %f\n",  data.angle, data.dist, data.trans, data.Vx, data.Vy);
 
 
     return data;
@@ -460,6 +460,9 @@ int main () {
                 transceiver = lidar.trans;
                 angle = lidar.angle;
                 dist = lidar.dist;
+                maintananceData.angle = angle;
+                maintananceData.dist = dist;
+                maintananceData.trans = transceiver;
                 //clock_t difference = clock() - start;
                 //elapsed_time = difference*1000/CLOCKS_PER_SEC;
                 //printf("TIME TO SET UP LIDAR %i\n",elapsed_time);
