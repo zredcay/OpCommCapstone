@@ -12,6 +12,7 @@ typedef struct mainData{
 	float dist;
 	float Vx;
 	float Vy;
+	int flag;
 };
 
 typedef enum

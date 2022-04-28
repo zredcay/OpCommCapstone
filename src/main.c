@@ -53,10 +53,10 @@ void sigfun(int sig)
 
 float convertAngle(float angle)
 {
-// converts transeiver from the unit circle to the transceiver setup on the robot
+// converts transeiver from the transceiver setup on the robot to the unit circle
 	float newangle;
 
-    // if the angle is between 112.5 and 67.5
+    // if the angle is between 337.5 and 22.5
 	if(angle >= 337.5 || angle < 22.5)
 	{
         if(angle < 22.5 && angle >= 0)
@@ -67,13 +67,13 @@ float convertAngle(float angle)
 		newangle = 1 - ((angle / 45.0) - 7.5);
 		newangle = ((newangle + 7.5) * 45) - 270;
 	}
-	// if the angle is between 67.5 and 22.5
+	// if the angle is between 22.5 and 67.5
 	else if (angle >= 22.5 && angle < 67.5)
 	{
 		newangle = 1 - ((angle / 45.0) - 0.5);
 		newangle = (newangle + 0.5) * 45;
 	}
-	// if the angle is between 22.5 and 337.5
+	// if the angle is between 67.5 and 112.5
 	else if (angle >= 67.5 && angle < 112.5)
 	{
 		newangle = 1 - ((angle / 45.0) - 1.5);
@@ -84,32 +84,32 @@ float convertAngle(float angle)
         }
 
 	}
-	// if the angle is between 337.5 and 292.5
+	// if the angle is between 112.5 and 157.5
 	else if (angle >= 112.5 && angle < 157.5)
 	{
 		newangle = 1 - ((angle / 45.0) - 2.5);
         newangle = ((newangle + 2.5) * 45) + 180;
 
 	}
-	// if the angle is between 292.5 and 247.5
+	// if the angle is between 157.5 and 202.5
 	else if (angle >= 157.5 && angle < 202.5)
 	{
 		newangle = 1 - ((angle / 45.0) - 3.5);
 		newangle = ((newangle + 3.5) * 45) + 90;
 	}
-	// if the angle is between 247.5 and 202.5
+	// if the angle is between 202.5 and 247.5
 	else if (angle >= 202.5 && angle < 247.5)
 	{
 		newangle = 1 - ((angle / 45.0) - 4.5);
 		newangle = (newangle + 4.5) * 45;
 	}
-	// if the angle is between 202.5 and 157.5
+	// if the angle is between 247.5 and 292.5
 	else if (angle >= 247.5 && angle < 292.5)
 	{
 		newangle = 1 - ((angle / 45.0) - 5.5);
 		newangle = ((newangle + 5.5) * 45) - 90;
 	}
-	// if the angle is between 157.5 and 112.5
+	// if the angle is between 292.5 and 337.5
 	else if (angle >= 292.5 && angle < 337.5)
 	{
 		newangle = 1 - ((angle / 45.0) - 6.5);
@@ -172,9 +172,16 @@ struct mainData trans_select(float Ax, float Ay, float Az, float Mx, float My, f
 { // uses imu and discovery data to calculate the new transicever
     // Ax-Az are floats representing the acceleration vector, Mx-Mz are the floats reprenting the magentic strength of the magentometer,
     // period is a float representing the period of time, data is a mainData struct containing int trans, float angle, float dist, float Vx, float Vy
-    printf("Before: angle %f distance %f transceiver %d Velocity %f %f\n", data.angle, data.dist, data.trans, data.Vx, data.Vy);
-    data.angle = convertAngle(data.angle);
-	printf("After: angle %f distance %f transceiver %d Velocity %f %f\n", data.angle, data.dist, data.trans, data.Vx, data.Vy);
+    printf("Before: angle %f distance %f transceiver %d Velocity %f %f Flag %i\n", data.angle, data.dist, data.trans, data.Vx, data.Vy, data.flag);
+    if (data.flag == 1)
+    {
+        data.angle = convertAngle(data.angle);
+    }
+
+    // set convert flag to zero to prevent incorrect conversion
+    data.flag = 0;
+
+	printf("After: angle %f distance %f transceiver %d Velocity %f %f Flag %i\n", data.angle, data.dist, data.trans, data.Vx, data.Vy, data.flag);
 
 	// initialize pi and radToDeg values for converting between radians and degrees
 	float PI  = 3.14159265;
@@ -217,8 +224,6 @@ struct mainData trans_select(float Ax, float Ay, float Az, float Mx, float My, f
     // store final velocity as velocity in struct
 	data.Vx = Vfx;
 	data.Vy = Vfy;
-
-
 
 	printf(" angle %f distance %f transceiver %d Velocity %f %f\n",  data.angle, data.dist, data.trans, data.Vx, data.Vy);
 
@@ -323,6 +328,7 @@ int main () {
     float angle;
     float dist = .3;
     int transceiver = 0;
+    int recoveryCount = 0;
 
     char msg[8];        // buffer for sending data
 
@@ -453,7 +459,7 @@ int main () {
 
                 sharMem = createMemory(); // creates shared memory
                 mutex = createNamedSem(); // creates named semaphore
-
+                maintananceData.flag = 1;
 		/*
                 Py_Initialize();
                 if(flag == 0)
@@ -600,6 +606,8 @@ int main () {
                 {
                     NewEvent = Code_Finished_Event;
                     NextState = CodeFinishedHandler(NextState);
+                    maintananceData.flag = 1;
+                    recoveryCount = 0;
                 }
                  else if (angle < 360 && angle > 0) // in a given transcieer 1 - 8
                 {
@@ -815,17 +823,19 @@ int main () {
 
                 imuData = sharedMemory(flag, sharMem, mutex); //recieves the float value from imu
 
-                if(flag == 0)
-                {
-                //Source 0-8
-                //This is to run a calculation using IMU and LIDAR data to find the right transicer after the car has moved
-                    maintananceData = trans_select(imuData.data[0], imuData.data[1], imuData.data[2], imuData.data[6], imuData.data[7], imuData.data[8], 0.01, maintananceData);
-                }
-                else if (flag == 1)
-                //jeff 9 - 18
-                {
-               //This is to run a calculation using IMU and LIDAR data to find the right transicer after the car has moved
-                     maintananceData = trans_select(imuData.data[9], imuData.data[10], imuData.data[11], imuData.data[15], imuData.data[16], imuData.data[17], 0.01, maintananceData);
+                if (recoveryCount <= 1){
+                    if(flag == 0)
+                    {
+                    //Source 0-8
+                    //This is to run a calculation using IMU and LIDAR data to find the right transicer after the car has moved
+                        maintananceData = trans_select(imuData.data[0], imuData.data[1], imuData.data[2], imuData.data[6], imuData.data[7], imuData.data[8], 0.01, maintananceData);
+                    }
+                    else if (flag == 1)
+                    //jeff 9 - 18
+                    {
+                   //This is to run a calculation using IMU and LIDAR data to find the right transicer after the car has moved
+                         maintananceData = trans_select(imuData.data[9], imuData.data[10], imuData.data[11], imuData.data[15], imuData.data[16], imuData.data[17], 0.01, maintananceData);
+                    }
                 }
                 //Setting the calculated transiver to the transiver being used for maintenance
                 transceiver = maintananceData.trans;
@@ -888,7 +898,7 @@ int main () {
                     //char recovery_msg[8] = "recovery";       // buffer for sending data
                     int status;
                     int testTransceiver = transceiver;
-                    int recoveryCount = 0; //makes the while loop run three time for each transiver
+                    recoveryCount = 0; //makes the while loop run three time for each transiver
 
 
                     // try original then direction its going then other direction
