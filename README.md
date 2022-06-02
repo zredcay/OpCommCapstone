@@ -9,3 +9,5 @@ cars will be equipped with these OWC modules. The students will also develop pro
 between these cars to establish communication links and transfer data. The multi-transceiver OWC module will
 not only help in maintaining LOS alignment but can also enable simultaneous communication with multiple robot
 cars.
+
+Added email sending
