@@ -309,7 +309,7 @@ int openFile(int flag)
 
 int main () {
     (void) signal(SIGINT, sigfun);
-    flag = 0;
+    flag = 1;
 
     if(flag == 0){
         printf("/////////////////////// DESIGNATION: SOURCE /////////////////////////////\n");
@@ -819,17 +819,17 @@ int main () {
                 {
                 //Source 0-8
                 //This is to run a calculation using IMU and LIDAR data to find the right transicer after the car has moved
-                    maintananceData = trans_select(imuData.data[0], imuData.data[1], imuData.data[2], imuData.data[6], imuData.data[7], imuData.data[8], 0.01, maintananceData);
+//                    maintananceData = trans_select(imuData.data[0], imuData.data[1], imuData.data[2], imuData.data[6], imuData.data[7], imuData.data[8], 0.01, maintananceData);
                 }
                 else if (flag == 1)
                 //jeff 9 - 18
                 {
                //This is to run a calculation using IMU and LIDAR data to find the right transicer after the car has moved
-                     maintananceData = trans_select(imuData.data[9], imuData.data[10], imuData.data[11], imuData.data[15], imuData.data[16], imuData.data[17], 0.01, maintananceData);
+//                     maintananceData = trans_select(imuData.data[9], imuData.data[10], imuData.data[11], imuData.data[15], imuData.data[16], imuData.data[17], 0.01, maintananceData);
                 }
                 //Setting the calculated transiver to the transiver being used for maintenance
-                transceiver = maintananceData.trans;
-                printf("SELECTING TRANSCEIVER: %i\n",transceiver);
+                //transceiver = maintananceData.trans;
+                //printf("SELECTING TRANSCEIVER: %i\n",transceiver);
 
                 if (Code_Finished_Event == Code_Finished_Event) {
 
